@@ -5,7 +5,7 @@
 .env.development
 .env.production
 !.env.example
-
+.N2-PMI/
 # Python
 __pycache__/
 *.py[cod]

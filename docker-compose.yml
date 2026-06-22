@@ -129,3 +129,24 @@ services:
       fastapi:
         condition: service_healthy
     restart: unless-stopped
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # 5. Frontend React (Vite)
+  # ──────────────────────────────────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: workmy_frontend
+    environment:
+      VITE_API_URL: "http://localhost:3000"
+    ports:
+      - "5173:5173"
+    networks:
+      - workmy_net
+    depends_on:
+      - bff
+    restart: unless-stopped
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
