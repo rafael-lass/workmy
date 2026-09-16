@@ -5,8 +5,6 @@ export type User = {
   telefone?: string | null
 }
 
-// TokenResponse removido — com cookie-only auth o BFF retorna apenas { user }
-
 export type Cliente = {
   id: number
   nome: string
@@ -17,16 +15,25 @@ export type Cliente = {
   criado_em: string
 }
 
+export type ServiceTag = { id: number; nome: string }
+export type RichNode = { type: string; text?: string; attrs?: Record<string, unknown>; marks?: { type: string; attrs?: Record<string, unknown> }[]; content?: RichNode[] }
+export type ServiceDocument = { version: 1; doc: RichNode }
 export type Servico = {
   id: number
   nome: string
-  descricao?: string | null
-  tags?: string | null
-  ferramentas?: string | null
-  github_repo?: string | null
+  descricao_documento?: ServiceDocument | null
+  descricao_resumo?: string
+  tags: ServiceTag[]
   imagem_base64?: string | null
   criado_em: string
 }
+
+export type ProjectStatus =
+  | 'DISCOVERY'
+  | 'IN_PROGRESS'
+  | 'REVIEW'
+  | 'COMPLETED'
+  | 'ARCHIVED'
 
 export type Projeto = {
   id: number
@@ -34,65 +41,72 @@ export type Projeto = {
   cliente_nome: string
   servico_id: number
   servico_nome: string
-  mensalista: boolean
   valor_mensal: string | null
   dia_vencimento: number
   recorrencia_inicio: string | null
   criado_em: string
-  status: 'DISCOVERY' | 'IN_PROGRESS' | 'REVIEW' | 'COMPLETED'
+  status: ProjectStatus
   progresso: number
   tipo_recorrencia: 'MENSAL' | 'AVULSO'
   valor: string | null
   ativo: boolean
   total_acumulado: string
+  possui_lancamentos: boolean
 }
 
-export type MensalistaResponse = {
-  mensalista: boolean
-  valor_mensal: string | null
-  dia_vencimento: number
-  recorrencia_inicio: string | null
-  geracao?: { criados: number; existentes: number; referencias: string[] } | null
-}
+export type PaymentStatus = 'PENDENTE' | 'PAGO' | 'CANCELADO' | 'ESTORNADO'
 
 export type Pagamento = {
   id: number
   projeto_id: number
+  cliente_id: number
   projeto_cliente_nome: string
   projeto_servico_nome: string
   valor: string
   tipo_pagamento: 'MENSAL' | 'AVULSO'
   tipo_pagamento_display: string
-  data: string
+  status: PaymentStatus
+  em_atraso: boolean
+  data_vencimento: string
+  data_pagamento?: string | null
+  referencia_mes?: string | null
+  gerado_automaticamente: boolean
   observacao?: string | null
   comprovante_base64?: string | null
+  motivo_ajuste?: string | null
+  status_alterado_em: string
+  criado_em: string
   atualizado_em: string
 }
 
-export type DashboardMensal = {
-  mes: number
-  ano: number
-  total_recebido: string
-  total_pagamentos: number
-  clientes_ativos: number
+export type PagamentoList = {
+  items: Pagamento[]
+  total: number
+  page: number
+  page_size: number
+}
+
+export type DashboardResumo = {
+  recebido_mes: string
+  pendente_total: string
+  atrasado_total: string
   previsto_proximo_mes: string
-  por_cliente: Array<{
-    cliente_id: number
-    cliente_nome: string
-    total: string
-    quantidade_pagamentos: number
+  projetos_ativos: number
+  clientes_total: number
+  serie_seis_meses: Array<{ mes: string; total: string }>
+  ultimos_recebimentos: Pagamento[]
+}
+
+export type BillingResult = {
+  pagamentos_gerados: number
+  valor_total: string
+  referencias: string[]
+  detalhes: Array<{
+    pagamento_id: number
+    projeto_id: number
+    valor: string
+    referencia_mes: string
+    data_vencimento: string
+    status: PaymentStatus
   }>
-}
-
-export type ClienteDetailResponse = {
-  cliente: Cliente
-  servicos: Servico[]
-  projetos: Projeto[]
-  pagamentos: Pagamento[]
-}
-
-export type ServicoDetailResponse = {
-  servico: Servico
-  projetos: Projeto[]
-  clientes: Cliente[]
 }

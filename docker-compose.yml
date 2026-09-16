@@ -4,11 +4,9 @@
 #
 # Serviços:
 #   postgres   — banco de dados relacional (PostgreSQL 15)
-#   rabbitmq   — broker de mensageria (RabbitMQ 3 + management UI)
 #   fastapi    — backend core (FastAPI + SQLAlchemy Async)
 #   bff        — proxy gateway Node.js (HTTP-Only cookies + JWT injection)
-
-version: '3.9'
+#   frontend   — build React servido pelo Nginx
 
 # ─── Rede interna ────────────────────────────────────────────────────────────
 networks:
@@ -18,7 +16,6 @@ networks:
 # ─── Volumes persistentes ─────────────────────────────────────────────────────
 volumes:
   postgres_data:
-  rabbitmq_data:
 
 services:
 
@@ -27,19 +24,18 @@ services:
   # ──────────────────────────────────────────────────────────────────────────
   postgres:
     image: postgres:15-alpine
-    container_name: workmy_postgres
     environment:
-      POSTGRES_USER: workmy_user
-      POSTGRES_PASSWORD: workmy_password
-      POSTGRES_DB: workmy_db
+      POSTGRES_USER: "${POSTGRES_USER:-workmy_user}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-workmy_password}"
+      POSTGRES_DB: "${POSTGRES_DB:-workmy_db}"
     ports:
-      - "5432:5432"
+      - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - workmy_net
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U workmy_user -d workmy_db"]
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -47,56 +43,25 @@ services:
     restart: unless-stopped
 
   # ──────────────────────────────────────────────────────────────────────────
-  # 2. Broker de mensageria
-  # ──────────────────────────────────────────────────────────────────────────
-  rabbitmq:
-    image: rabbitmq:3-management-alpine
-    container_name: workmy_rabbitmq
-    environment:
-      RABBITMQ_DEFAULT_USER: guest
-      RABBITMQ_DEFAULT_PASS: guest
-    ports:
-      - "5672:5672"       # AMQP (conexão do backend)
-      - "15672:15672"     # Management UI: http://localhost:15672
-    volumes:
-      - rabbitmq_data:/var/lib/rabbitmq
-    networks:
-      - workmy_net
-    healthcheck:
-      test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
-      interval: 15s
-      timeout: 10s
-      retries: 5
-      start_period: 20s
-    restart: unless-stopped
-
-  # ──────────────────────────────────────────────────────────────────────────
-  # 3. Backend FastAPI (Hexagonal Architecture)
+  # 2. Backend FastAPI
   # ──────────────────────────────────────────────────────────────────────────
   fastapi:
     build:
       context: ./backend-fastapi
       dockerfile: Dockerfile
-    container_name: workmy_fastapi
     environment:
       # Banco
-      DATABASE_URL: "postgresql+asyncpg://workmy_user:workmy_password@postgres:5432/workmy_db"
+      DATABASE_URL: "postgresql+asyncpg://${POSTGRES_USER:-workmy_user}:${POSTGRES_PASSWORD:-workmy_password}@postgres:5432/${POSTGRES_DB:-workmy_db}"
       # JWT — OBRIGATÓRIO em produção. Gere com: python -c "import secrets; print(secrets.token_urlsafe(64))"
       JWT_SECRET_KEY: "${JWT_SECRET_KEY:-dev_secret_change_me_in_production}"
-      # RabbitMQ
-      RABBITMQ_URL: "amqp://guest:guest@rabbitmq:5672/"
       # CORS — origens do BFF e do frontend (separados por vírgula)
       CORS_ORIGINS: "http://localhost:3000,http://bff:3000"
       # Logging — 'json' em produção, 'text' em desenvolvimento
       LOG_FORMAT: "${LOG_FORMAT:-text}"
-    ports:
-      - "8000:8000"
     networks:
       - workmy_net
     depends_on:
       postgres:
-        condition: service_healthy
-      rabbitmq:
         condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/health')\""]
@@ -107,13 +72,12 @@ services:
     restart: unless-stopped
 
   # ──────────────────────────────────────────────────────────────────────────
-  # 4. BFF — Backend For Frontend (Node.js proxy gateway)
+  # 3. BFF — Backend For Frontend (Node.js proxy gateway)
   # ──────────────────────────────────────────────────────────────────────────
   bff:
     build:
       context: ./frontend/bff
       dockerfile: Dockerfile
-    container_name: workmy_bff
     environment:
       # URL do FastAPI (nome do serviço Docker, não localhost)
       FASTAPI_URL: "http://fastapi:8000"
@@ -121,32 +85,31 @@ services:
       CORS_ORIGIN: "${CORS_ORIGIN:-http://localhost:5173}"
       PORT: "3000"
       NODE_ENV: "${NODE_ENV:-development}"
-    ports:
-      - "3000:3000"
     networks:
       - workmy_net
     depends_on:
       fastapi:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/health',r=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
     restart: unless-stopped
 
   # ──────────────────────────────────────────────────────────────────────────
-  # 5. Frontend React (Vite)
+  # 4. Frontend React (build estático servido por Nginx)
   # ──────────────────────────────────────────────────────────────────────────
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    container_name: workmy_frontend
-    environment:
-      VITE_API_URL: "http://localhost:3000"
     ports:
-      - "5173:5173"
+      - "5173:80"
     networks:
       - workmy_net
     depends_on:
-      - bff
+      bff:
+        condition: service_healthy
     restart: unless-stopped
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules

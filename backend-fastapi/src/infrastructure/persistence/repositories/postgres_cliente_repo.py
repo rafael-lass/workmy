@@ -105,7 +105,7 @@ class PostgresClienteRepository(IClienteRepository):
             ))
             .outerjoin(PagamentoModel, (
                 (PagamentoModel.projeto_id == ProjetoModel.id) &
-                PagamentoModel.deletado_em.is_(None)
+                (PagamentoModel.status == "PAGO")
             ))
             .where(
                 ClienteModel.usuario_id == usuario_id,

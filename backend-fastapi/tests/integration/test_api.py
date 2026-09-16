@@ -4,7 +4,7 @@ import httpx
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from decimal import Decimal
-from datetime import date
+from datetime import date, timedelta
 
 from src.presentation.main import app
 from src.infrastructure.persistence.session import get_db_session, Base
@@ -12,6 +12,48 @@ from src.infrastructure.persistence.models import UsuarioModel, ClienteModel, Se
 from src.infrastructure.security.jwt_service import create_access_token
 
 pytestmark = pytest.mark.asyncio
+
+
+async def test_services_documents_tags_and_pdf_contract():
+    async with AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://test") as client:
+        async def register(name):
+            result = await client.post('/api/auth/register', json={"username": name, "email": f"{name}@example.com", "password": "strongpassword123"})
+            return {"Authorization": f"Bearer {result.json()['access']}"}
+        owner = await register('service_owner')
+        other = await register('service_other')
+        tag = (await client.post('/api/servicos/tags', headers=owner, json={"nome": "  Web   Design  "})).json()
+        duplicate = (await client.post('/api/servicos/tags', headers=owner, json={"nome": "web design"})).json()
+        assert tag == duplicate
+        assert tag['nome'] == 'Web Design'
+        assert (await client.get('/api/servicos/tags', headers=other)).json() == []
+        document = {"version": 1, "doc": {"type": "doc", "content": [
+            {"type": "heading", "attrs": {"level": 2}, "content": [{"type": "text", "text": "Sobre o serviço"}]},
+            {"type": "paragraph", "content": [{"type": "text", "text": "Criação com atenção.", "marks": [{"type": "bold"}]}]},
+        ]}}
+        body = {"nome": "Apresentação profissional", "descricao_documento": document, "tag_ids": [tag['id']]}
+        created = await client.post('/api/servicos/', headers=owner, json=body)
+        assert created.status_code == 201, created.text
+        service = created.json()
+        assert service['descricao_documento'] == document
+        assert service['tags'] == [tag]
+        assert 'ferramentas' not in service and 'github_repo' not in service
+        path = f"/api/servicos/{service['id']}"
+        assert (await client.get(path, headers=owner)).json()['descricao_documento'] == document
+        assert (await client.get(path, headers=other)).status_code == 404
+        assert (await client.post('/api/servicos/', headers=other, json=body)).status_code == 400
+        invalid = await client.post('/api/servicos/', headers=owner, json={**body, "tag_ids": list(range(11))})
+        assert invalid.status_code == 422
+        contact = {"nome_profissional": "João & Ana", "email": "contato@example.com"}
+        assert (await client.post(path + '/pdf', headers=other, json=contact)).status_code == 404
+        assert (await client.post(path + '/pdf', json=contact)).status_code == 401
+        pdf = await client.post(path + '/pdf', headers=owner, json=contact)
+        assert pdf.status_code == 200, pdf.text if pdf.status_code != 200 else ''
+        assert pdf.content.startswith(b'%PDF-')
+        assert pdf.headers['content-type'] == 'application/pdf'
+        assert 'attachment;' in pdf.headers['content-disposition']
+        assert (await client.put(path, headers=owner, json={**body, 'tag_ids': []})).json()['tags'] == []
+        assert (await client.get('/api/servicos/tags', headers=owner)).json() == [tag]
+        assert (await client.post('/api/servicos/', headers=owner, json={**body, 'nome': 'Outro serviço'})).json()['tags'] == [tag]
 
 # Configura banco de dados SQLite assíncrono temporário para testes integrados
 TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
@@ -175,6 +217,10 @@ async def test_fastapi_auth_register_and_login_flow():
 
         # 7. Logout
         logout_headers = {"Authorization": f"Bearer {login_data['access']}"}
+        response_me = await client.get("/api/auth/me", headers=logout_headers)
+        assert response_me.status_code == 200
+        assert response_me.json()["username"] == "tester123"
+
         response_logout = await client.post("/api/auth/logout", headers=logout_headers)
         assert response_logout.status_code == 200
         assert "message" in response_logout.json()
@@ -243,4 +289,172 @@ async def test_fastapi_project_list_get_delete_flow():
         # 7. Detalhe pós-deleção suave deve retornar 404 pois está deletado logicamente
         resp_detail_post_delete = await client.get(f"/api/projetos/{projeto_id}", headers=headers)
         assert resp_detail_post_delete.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_payment_and_recurring_billing_contract():
+    async with session_maker_test() as session:
+        usuario = UsuarioModel(
+            username="billing_tester",
+            email="billing_tester@example.com",
+            password_hash="hash",
+        )
+        session.add(usuario)
+        await session.flush()
+        cliente = ClienteModel(usuario_id=usuario.id, nome="Cliente Financeiro")
+        servico = ServicoModel(usuario_id=usuario.id, nome="Suporte Mensal")
+        session.add_all([cliente, servico])
+        await session.commit()
+        usuario_id, cliente_id, servico_id = usuario.id, cliente.id, servico.id
+
+    token = create_access_token(usuario_id, usuario.username, usuario.email)
+    headers = {"Authorization": f"Bearer {token}"}
+    today = date.today()
+    start_index = today.year * 12 + today.month - 1 - 2
+    recurring_start = date(start_index // 12, start_index % 12 + 1, 1)
+
+    async with AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://test") as client:
+        projeto_response = await client.post(
+            "/api/projetos/",
+            headers=headers,
+            json={
+                "cliente_id": cliente_id,
+                "servico_id": servico_id,
+                "tipo_recorrencia": "MENSAL",
+                "ativo": True,
+                "valor_mensal": "300.00",
+                "dia_vencimento": 1,
+                "recorrencia_inicio": recurring_start.isoformat(),
+            },
+        )
+        assert projeto_response.status_code == 201
+        projeto_id = projeto_response.json()["id"]
+
+        invalid_manual = await client.post(
+            "/api/pagamentos/",
+            headers=headers,
+            json={
+                "projeto_id": projeto_id,
+                "valor": "50.00",
+                "data_pagamento": today.isoformat(),
+                "tipo_pagamento": "MENSAL",
+            },
+        )
+        assert invalid_manual.status_code == 422
+
+        manual = await client.post(
+            "/api/pagamentos/",
+            headers=headers,
+            json={
+                "projeto_id": projeto_id,
+                "valor": "50.00",
+                "data_pagamento": today.isoformat(),
+                "observacao": "Ajuste pontual",
+            },
+        )
+        assert manual.status_code == 201
+        assert manual.json()["cliente_id"] == cliente_id
+        assert manual.json()["tipo_pagamento"] == "AVULSO"
+        assert manual.json()["status"] == "PAGO"
+
+        removed_put = await client.put(
+            f"/api/pagamentos/{manual.json()['id']}",
+            headers=headers,
+            json={"valor": "75.00", "observacao": "Valor corrigido"},
+        )
+        assert removed_put.status_code in {404, 405}
+
+        immutable = await client.patch(
+            f"/api/pagamentos/{manual.json()['id']}/detalhes",
+            headers=headers,
+            json={"valor": "75.00"},
+        )
+        assert immutable.status_code == 422
+
+        updated = await client.patch(
+            f"/api/pagamentos/{manual.json()['id']}/detalhes",
+            headers=headers,
+            json={"observacao": "Detalhes corrigidos"},
+        )
+        assert updated.status_code == 200
+        assert updated.json()["valor"] == "50.00"
+        assert updated.json()["observacao"] == "Detalhes corrigidos"
+
+        first_billing = await client.post(
+            "/api/faturamento/recorrencias",
+            headers=headers,
+            json={"data_referencia": today.isoformat()},
+        )
+        assert first_billing.status_code == 200
+        assert first_billing.json()["pagamentos_gerados"] == 3
+        assert first_billing.json()["valor_total"] == "900.00"
+
+        repeated_billing = await client.post(
+            "/api/faturamento/recorrencias",
+            headers=headers,
+            json={"data_referencia": today.isoformat()},
+        )
+        assert repeated_billing.status_code == 200
+        assert repeated_billing.json()["pagamentos_gerados"] == 0
+
+        payments = await client.get("/api/pagamentos/", headers=headers)
+        assert payments.status_code == 200
+        assert payments.json()["total"] == 4
+        monthlies = [
+            payment
+            for payment in payments.json()["items"]
+            if payment["tipo_pagamento"] == "MENSAL"
+        ]
+        assert len(monthlies) == 3
+        assert all(payment["status"] == "PENDENTE" for payment in monthlies)
+
+        received = await client.patch(
+            f"/api/pagamentos/{monthlies[0]['id']}/receber",
+            headers=headers,
+            json={"data_pagamento": today.isoformat()},
+        )
+        assert received.status_code == 200
+        assert received.json()["status"] == "PAGO"
+
+        cancelled = await client.patch(
+            f"/api/pagamentos/{monthlies[1]['id']}/cancelar",
+            headers=headers,
+            json={"motivo": "Contrato suspenso"},
+        )
+        assert cancelled.status_code == 200
+        assert cancelled.json()["status"] == "CANCELADO"
+
+        reversed_payment = await client.patch(
+            f"/api/pagamentos/{monthlies[0]['id']}/estornar",
+            headers=headers,
+            json={"motivo": "Cobrança indevida"},
+        )
+        assert reversed_payment.status_code == 200
+        assert reversed_payment.json()["status"] == "ESTORNADO"
+
+        terminal_transition = await client.patch(
+            f"/api/pagamentos/{monthlies[1]['id']}/receber",
+            headers=headers,
+            json={"data_pagamento": today.isoformat()},
+        )
+        assert terminal_transition.status_code == 400
+
+        dashboard = await client.get("/api/dashboard/resumo", headers=headers)
+        assert dashboard.status_code == 200
+        assert dashboard.json()["recebido_mes"] == "50.00"
+        assert dashboard.json()["pendente_total"] == "300.00"
+
+        projeto = await client.get(f"/api/projetos/{projeto_id}", headers=headers)
+        assert projeto.json()["total_acumulado"] == "50.00"
+        assert projeto.json()["possui_lancamentos"] is True
+
+        protected_delete = await client.delete(f"/api/projetos/{projeto_id}", headers=headers)
+        assert protected_delete.status_code == 409
+
+        future = await client.post(
+            "/api/faturamento/recorrencias",
+            headers=headers,
+            json={"data_referencia": (today + timedelta(days=1)).isoformat()},
+        )
+        assert future.status_code == 400
 

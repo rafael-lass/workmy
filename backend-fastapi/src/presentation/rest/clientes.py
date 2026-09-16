@@ -4,27 +4,20 @@ from typing import List
 from src.presentation.dto.schemas import (
     ClienteInSchema,
     ClienteOutSchema,
-    ClienteDetailOutSchema,
     MessageSchema
 )
 from src.presentation.middleware.auth import get_current_user_id
 from src.application.usecases.crud_cliente import CrudClienteUseCase
-from src.application.ports.outbound.i_cliente_query import IClienteQuery
 from src.application.ports.outbound.i_cliente_repository import IClienteRepository
-from src.presentation.dependencies import get_crud_cliente_usecase, get_cliente_query, get_db_session
-from src.infrastructure.persistence.repositories.postgres_cliente_repo import PostgresClienteRepository
+from src.presentation.dependencies import get_cliente_repository, get_crud_cliente_usecase
 from src.domain.exceptions.business_exceptions import ValidaEntidadeException, NaoEncontradoException, ConflitoDeletarException
-from sqlalchemy.ext.asyncio import AsyncSession
 
 router = APIRouter(prefix="/clientes", tags=["Clientes"])
-
-def get_cliente_repo(session: AsyncSession = Depends(get_db_session)) -> IClienteRepository:
-    return PostgresClienteRepository(session)
 
 @router.get("/", response_model=List[ClienteOutSchema])
 async def list_clientes(
     usuario_id: int = Depends(get_current_user_id),
-    cliente_repo: IClienteRepository = Depends(get_cliente_repo)
+    cliente_repo: IClienteRepository = Depends(get_cliente_repository)
 ):
     """Lista clientes com total acumulado."""
     views = await cliente_repo.list_with_totals(usuario_id)
@@ -45,16 +38,14 @@ async def list_clientes(
 async def get_cliente(
     cliente_id: int,
     usuario_id: int = Depends(get_current_user_id),
-    cliente_repo: IClienteRepository = Depends(get_cliente_repo),
-    cliente_query: IClienteQuery = Depends(get_cliente_query)
+    cliente_repo: IClienteRepository = Depends(get_cliente_repository),
 ):
-    cliente = await cliente_repo.get_by_id(cliente_id, usuario_id)
-    if not cliente:
+    cliente = next(
+        (item for item in await cliente_repo.list_with_totals(usuario_id) if item.id == cliente_id),
+        None,
+    )
+    if cliente is None:
         raise HTTPException(status_code=404, detail="Cliente não encontrado.")
-
-    # Para evitar outra query, pega o detalhe pra ler o total
-    detalhes = await cliente_query.get_detalhes(cliente_id, usuario_id)
-    total_acumulado = detalhes["cliente"]["total_acumulado"] if detalhes else "0.00"
 
     return {
         "id": cliente.id,
@@ -62,20 +53,9 @@ async def get_cliente(
         "empresa": cliente.empresa or "Não informada",
         "email": cliente.email,
         "telefone": cliente.telefone,
-        "total_acumulado": total_acumulado,
+        "total_acumulado": str(cliente.total_acumulado),
         "criado_em": cliente.criado_em.isoformat() if cliente.criado_em else "",
     }
-
-@router.get("/{cliente_id}/detalhe", response_model=ClienteDetailOutSchema)
-async def get_cliente_detalhe(
-    cliente_id: int,
-    usuario_id: int = Depends(get_current_user_id),
-    cliente_query: IClienteQuery = Depends(get_cliente_query)
-):
-    detalhes = await cliente_query.get_detalhes(cliente_id, usuario_id)
-    if not detalhes:
-        raise HTTPException(status_code=404, detail="Cliente não encontrado.")
-    return detalhes
 
 @router.post("/", response_model=ClienteOutSchema, status_code=201)
 async def create_cliente(
@@ -109,7 +89,7 @@ async def update_cliente(
     payload: ClienteInSchema,
     usuario_id: int = Depends(get_current_user_id),
     crud_usecase: CrudClienteUseCase = Depends(get_crud_cliente_usecase),
-    cliente_query: IClienteQuery = Depends(get_cliente_query)
+    cliente_repo: IClienteRepository = Depends(get_cliente_repository),
 ):
     try:
         cliente_salvo = await crud_usecase.atualizar(
@@ -121,8 +101,10 @@ async def update_cliente(
             telefone=payload.telefone
         )
         
-        detalhes = await cliente_query.get_detalhes(cliente_id, usuario_id)
-        total_acumulado = detalhes["cliente"]["total_acumulado"] if detalhes else "0.00"
+        view = next(
+            (item for item in await cliente_repo.list_with_totals(usuario_id) if item.id == cliente_id),
+            None,
+        )
 
         return {
             "id": cliente_salvo.id,
@@ -130,7 +112,7 @@ async def update_cliente(
             "empresa": cliente_salvo.empresa,
             "email": cliente_salvo.email,
             "telefone": cliente_salvo.telefone,
-            "total_acumulado": total_acumulado,
+            "total_acumulado": str(view.total_acumulado) if view else "0.00",
             "criado_em": cliente_salvo.criado_em.isoformat() if cliente_salvo.criado_em else "",
         }
     except NaoEncontradoException as e:

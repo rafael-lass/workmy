@@ -20,6 +20,8 @@ class ProjetoView:
     data_entrega: date | None
     recorrencia_inicio: date | None
     criado_em: datetime
+    total_acumulado: Decimal = Decimal("0.00")
+    possui_lancamentos: bool = False
 
 @dataclass
 class ClienteView:
@@ -35,12 +37,20 @@ class ClienteView:
 class PagamentoView:
     id: int
     projeto_id: int
+    cliente_id: int
     cliente_nome: str
     servico_nome: str
     valor: Decimal
     tipo_pagamento: str
-    data: date
+    status: str
+    data_vencimento: date
+    data_pagamento: date | None
     referencia_mes: str | None
+    gerado_automaticamente: bool
     criado_em: datetime
+    atualizado_em: datetime
+    status_alterado_em: datetime | None = None
+    motivo_ajuste: str | None = None
+    observacao: str | None = None
     comprovante_bytes: bytes | None = None
     comprovante_mime: str | None = None

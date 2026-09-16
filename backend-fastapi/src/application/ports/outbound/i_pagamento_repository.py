@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
-from decimal import Decimal
-from datetime import date
-from src.domain.entities.pagamento import PagamentoEntity
+
 from src.application.dto.views import PagamentoView
+from src.domain.entities.pagamento import PagamentoEntity
+
 
 class IPagamentoRepository(ABC):
     @abstractmethod
@@ -14,17 +14,16 @@ class IPagamentoRepository(ABC):
         pass
 
     @abstractmethod
-    async def exists_by_referencia(self, projeto_id: int, referencia_mes: str) -> bool:
+    async def save_recorrencia(self, pagamento: PagamentoEntity) -> PagamentoEntity | None:
+        """Cria uma mensalidade uma única vez por projeto e referência."""
         pass
 
     @abstractmethod
-    async def sum_recebido_mes(self, usuario_id: int, ano: int, mes: int) -> Decimal:
-        pass
-
-    @abstractmethod
-    async def count_recebido_mes(self, usuario_id: int, ano: int, mes: int) -> int:
-        pass
-
-    @abstractmethod
-    async def list_with_names(self, usuario_id: int) -> list[PagamentoView]:
+    async def list_with_names(
+        self,
+        usuario_id: int,
+        filters: dict,
+        page: int,
+        page_size: int,
+    ) -> tuple[list[PagamentoView], int]:
         pass

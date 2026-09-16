@@ -1,178 +1,46 @@
-import { NavLink, Outlet, useLocation } from 'react-router-dom'
+import { NavLink, Outlet, useNavigate } from 'react-router-dom'
+import { useState } from 'react'
 import { useAuth } from '../hooks/useAuth'
-import { useEffect, useState } from 'react'
-import { API_BASE_URL } from '../config'
-import { useRealtime } from '../hooks/useRealtime'
+import { Button } from '../shared/ui/Button'
+import { Icon } from '../shared/ui/Icon'
+
+const nav = [
+  { to: '/dashboard', label: 'Dashboard', icon: 'dashboard' as const },
+  { to: '/projetos', label: 'Projetos', icon: 'projects' as const },
+  { to: '/clientes', label: 'Clientes', icon: 'clients' as const },
+  { to: '/servicos', label: 'Serviços', icon: 'services' as const },
+  { to: '/financeiro', label: 'Financeiro', icon: 'finance' as const },
+]
 
 export function AppLayout() {
   const { user, logout } = useAuth()
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
-  const location = useLocation()
-  useRealtime()
+  const [open, setOpen] = useState(false)
+  const navigate = useNavigate()
+  const initials = user?.username.slice(0, 2).toUpperCase() ?? 'WM'
 
-  useEffect(() => {
-    setIsSidebarOpen(false)
-  }, [location.pathname])
-
-  useEffect(() => {
-    if (!user) return
-    const ping = () => {
-      void fetch(`${API_BASE_URL}/health/ping`, { method: 'GET' })
-    }
-    ping()
-    const intervalId = window.setInterval(ping, 14 * 60 * 1000)
-    return () => window.clearInterval(intervalId)
-  }, [user])
-
-  // Get initials for profile placeholder
-  const getInitials = (name?: string) => {
-    if (!name) return 'WM'
-    return name.slice(0, 2).toUpperCase()
-  }
-
-  return (
-    <div className="min-h-screen bg-background text-on-surface font-body-md selection:bg-primary-fixed">
-      {/* Sidebar Mobile Backdrop BackdropScrim */}
-      {isSidebarOpen && (
-        <div
-          onClick={() => setIsSidebarOpen(false)}
-          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 lg:hidden"
-        />
-      )}
-
-      {/* SideNavBar Shell */}
-      <aside
-        className={`fixed left-0 top-0 h-screen w-64 bg-surface-container-low/80 backdrop-blur-xl border-r border-outline-variant/30 flex flex-col py-lg z-50 transition-transform duration-300 ${
-          isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
-        }`}
-      >
-        <div className="px-lg mb-xl flex justify-between items-center">
-          <div>
-            <h1 className="font-display-lg text-4xl text-primary tracking-tighter">WorkMy</h1>
-            <p className="text-label-sm text-secondary uppercase tracking-widest mt-xs opacity-70">Central de Comando</p>
-          </div>
-          <button
-            onClick={() => setIsSidebarOpen(false)}
-            className="lg:hidden p-2 rounded-xl text-primary hover:bg-primary-fixed/20 flex items-center justify-center shrink-0"
-            title="Fechar menu"
-          >
-            <span className="material-symbols-outlined">close</span>
-          </button>
-        </div>
-        
-        <nav className="flex-1 px-sm space-y-xs">
-          <NavLink
-            to="/dashboard"
-            className={({ isActive }) =>
-              `flex items-center gap-md px-md py-sm rounded-xl transition-all duration-200 ${
-                isActive
-                  ? 'text-on-primary-container font-bold bg-primary-fixed/70'
-                  : 'text-on-surface-variant hover:text-primary hover:bg-primary-fixed/40'
-              }`
-            }
-          >
-            <span className="material-symbols-outlined">dashboard</span>
-            <span className="font-body-md">Painel Geral</span>
-          </NavLink>
-
-          <NavLink
-            to="/projetos"
-            className={({ isActive }) =>
-              `flex items-center gap-md px-md py-sm rounded-xl transition-all duration-200 ${
-                isActive
-                  ? 'text-on-primary-container font-bold bg-primary-fixed/70'
-                  : 'text-on-surface-variant hover:text-primary hover:bg-primary-fixed/40'
-              }`
-            }
-          >
-            <span className="material-symbols-outlined">account_tree</span>
-            <span className="font-body-md">Projetos</span>
-          </NavLink>
-
-          <NavLink
-            to="/clientes"
-            className={({ isActive }) =>
-              `flex items-center gap-md px-md py-sm rounded-xl transition-all duration-200 ${
-                isActive
-                  ? 'text-on-primary-container font-bold bg-primary-fixed/70'
-                  : 'text-on-surface-variant hover:text-primary hover:bg-primary-fixed/40'
-              }`
-            }
-          >
-            <span className="material-symbols-outlined">group</span>
-            <span className="font-body-md">Clientes</span>
-          </NavLink>
-
-          <NavLink
-            to="/servicos"
-            className={({ isActive }) =>
-              `flex items-center gap-md px-md py-sm rounded-xl transition-all duration-200 ${
-                isActive
-                  ? 'text-on-primary-container font-bold bg-primary-fixed/70'
-                  : 'text-on-surface-variant hover:text-primary hover:bg-primary-fixed/40'
-              }`
-            }
-          >
-            <span className="material-symbols-outlined">description</span>
-            <span className="font-body-md">Serviços</span>
-          </NavLink>
-
-
-        </nav>
-
-        <div className="mt-auto px-sm pt-xl border-t border-outline-variant/30 space-y-xs">
-          <NavLink
-            to="/projetos?new=true"
-            className="w-full mb-lg bg-primary text-on-primary font-bold py-md px-lg rounded-xl flex items-center justify-center gap-sm hover:brightness-110 transition-all shadow-lg text-center"
-          >
-            <span className="material-symbols-outlined">add</span>
-            Novo Projeto
-          </NavLink>
-          
-          <button
-            onClick={logout}
-            className="w-full flex items-center gap-md px-md py-sm rounded-xl text-on-surface-variant hover:text-primary hover:bg-primary-fixed/20 transition-all duration-200 text-left"
-          >
-            <span className="material-symbols-outlined">logout</span>
-            <span className="font-body-md">Sair</span>
-          </button>
-        </div>
-      </aside>
-
-      {/* TopNavBar Shell */}
-      <header className="fixed top-0 right-0 w-full lg:w-[calc(100%-16rem)] h-16 bg-surface/70 backdrop-blur-xl border-b border-outline-variant/30 z-40 flex justify-between items-center px-4 lg:px-8">
-        <div className="flex items-center">
-          <button
-            onClick={() => setIsSidebarOpen(true)}
-            className="lg:hidden p-2 -ml-2 mr-2 rounded-xl text-primary hover:bg-primary-fixed/20 flex items-center justify-center shrink-0"
-            title="Abrir menu"
-          >
-            <span className="material-symbols-outlined text-headline-md">menu</span>
-          </button>
-        </div>
-        <div className="flex items-center gap-md lg:gap-lg">
-          <div className="flex items-center gap-sm">
-            <div className="text-right hidden sm:block leading-tight">
-              <p className="text-sm text-on-surface font-semibold m-0">{user?.username || 'Usuário'}</p>
-              {user?.email && (
-                <p className="text-xs text-on-surface-variant m-0 max-w-[180px] truncate">{user.email}</p>
-              )}
-            </div>
-            <div className="h-10 w-10 rounded-full bg-primary-container border border-primary/20 text-on-primary-container font-bold flex items-center justify-center select-none shrink-0">
-              {getInitials(user?.username)}
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content Area */}
-      <main className="ml-0 lg:ml-64 pt-24 pb-xl px-4 lg:px-8 min-h-screen bg-background transition-all duration-300">
-        <Outlet />
-      </main>
-    </div>
-  )
+  return <div className="min-h-screen bg-[#f5f7fb]">
+    {open && <button className="fixed inset-0 z-40 bg-slate-950/45 lg:hidden" aria-label="Fechar menu" onClick={() => setOpen(false)} />}
+    <aside className={`fixed inset-y-0 left-0 z-50 flex w-[252px] flex-col border-r border-white/10 bg-[#11182a] text-white transition-transform lg:translate-x-0 ${open ? 'translate-x-0' : '-translate-x-full'}`}>
+      <div className="flex h-[76px] items-center justify-between border-b border-white/10 px-6">
+        <div className="flex items-center gap-3"><span className="grid h-9 w-9 place-items-center rounded-xl bg-indigo-500 font-black">W</span><div><strong className="block text-lg leading-none">WorkMy</strong><span className="text-[11px] text-white/45">gestão sem ruído</span></div></div>
+        <button className="ui-icon-button text-white lg:hidden" onClick={() => setOpen(false)} aria-label="Fechar menu"><Icon name="close" /></button>
+      </div>
+      <nav className="flex-1 space-y-1 px-3 py-6" aria-label="Navegação principal">
+        {nav.map((item) => <NavLink key={item.to} to={item.to} onClick={() => setOpen(false)} className={({ isActive }) => `flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition ${isActive ? 'bg-white text-[#172033] shadow-lg' : 'text-white/65 hover:bg-white/8 hover:text-white'}`}><Icon name={item.icon} className="h-5 w-5" />{item.label}</NavLink>)}
+      </nav>
+      <div className="border-t border-white/10 p-3">
+        <button onClick={() => void logout()} className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-white/60 hover:bg-white/8 hover:text-white"><Icon name="logout" className="h-5 w-5" />Sair</button>
+      </div>
+    </aside>
+    <header className="fixed inset-x-0 top-0 z-30 flex h-[68px] items-center justify-between border-b border-slate-200/80 bg-white/90 px-4 backdrop-blur-lg lg:left-[252px] lg:px-8">
+      <button className="ui-icon-button lg:hidden" onClick={() => setOpen(true)} aria-label="Abrir menu"><Icon name="menu" /></button>
+      <div className="hidden lg:block"><span className="text-xs font-semibold uppercase tracking-[.12em] text-slate-400">Área de trabalho</span></div>
+      <div className="flex items-center gap-3">
+        <Button size="sm" onClick={() => navigate('/projetos?acao=novo')}><Icon name="plus" />Novo projeto</Button>
+        <div className="hidden text-right sm:block"><strong className="block text-sm leading-tight">{user?.username}</strong><span className="block max-w-44 truncate text-xs text-slate-500">{user?.email}</span></div>
+        <span className="grid h-9 w-9 place-items-center rounded-xl bg-indigo-50 text-xs font-black text-indigo-700">{initials}</span>
+      </div>
+    </header>
+    <main className="min-h-screen px-4 pb-10 pt-[92px] sm:px-6 lg:ml-[252px] lg:px-8"><Outlet /></main>
+  </div>
 }
-
-
-
-

@@ -1,7 +1,6 @@
 const express = require('express');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
-const { createProxyMiddleware, fixRequestBody } = require('http-proxy-middleware');
 const http = require('http');
 const https = require('https');
 
@@ -52,8 +51,12 @@ app.use(cors({
     credentials: true
 }));
 
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ limit: '50mb', extended: true }));
+// Uma imagem de 5 MB cresce ao virar base64; 8 MB cobre o payload sem aceitar
+// corpos desnecessariamente grandes.
+app.use(express.json({ limit: '8mb' }));
+app.use(express.urlencoded({ limit: '8mb', extended: true }));
+
+app.get('/health', (_req, res) => res.status(200).json({ status: 'healthy' }));
 
 // ---------------------------------------------------------------------------
 // FIX A8: Opções de cookie centralizadas — secure é dinâmico por ambiente.
@@ -62,7 +65,7 @@ const COOKIE_OPTS_ACCESS = {
     httpOnly: true,
     secure: IS_PRODUCTION,           // true em produção (HTTPS), false em dev
     sameSite: IS_PRODUCTION ? 'strict' : 'lax',
-    maxAge: 60 * 60 * 1000,         // 1 hora (alinhado com ACCESS_TOKEN_EXPIRE_MINUTES no backend)
+    maxAge: 14 * 60 * 1000,         // expira pouco antes do JWT de 15 minutos
     path: '/'
 };
 
@@ -79,12 +82,13 @@ function logBffAction(layer, action, detail) {
 }
 
 // ---------------------------------------------------------------------------
-// Helper: faz uma chamada HTTP/HTTPS ao FastAPI e retorna Promise<{status, body}>
+// Helper: faz uma chamada HTTP/HTTPS ao FastAPI sem transformar a resposta.
+// O corpo permanece como Buffer para suportar JSON, PDF e outros binários.
 // FIX C3: Usa FASTAPI_HOSTNAME e FASTAPI_PORT extraídos de FASTAPI_URL.
 // ---------------------------------------------------------------------------
 function callFastApi(path, method, data = null, extraHeaders = {}) {
     return new Promise((resolve, reject) => {
-        const hasBody = data && Object.keys(data).length > 0;
+        const hasBody = data !== null && data !== undefined && method !== 'GET' && method !== 'HEAD';
         const postData = hasBody ? JSON.stringify(data) : '';
         
         const options = {
@@ -101,23 +105,61 @@ function callFastApi(path, method, data = null, extraHeaders = {}) {
         }
 
         const req = FASTAPI_PROTOCOL.request(options, (apiRes) => {
-            let body = '';
-            apiRes.on('data', (chunk) => body += chunk);
+            const chunks = [];
+            apiRes.on('data', (chunk) => chunks.push(Buffer.from(chunk)));
             apiRes.on('end', () => {
-                try {
-                    resolve({ status: apiRes.statusCode, body: JSON.parse(body) });
-                } catch {
-                    resolve({ status: apiRes.statusCode, body });
-                }
+                resolve({
+                    status: apiRes.statusCode || 502,
+                    body: Buffer.concat(chunks),
+                    headers: apiRes.headers
+                });
             });
         });
 
         req.on('error', reject);
+        req.setTimeout(15000, () => req.destroy(new Error('FastAPI não respondeu em 15 segundos.')));
         if (hasBody) {
             req.write(postData);
         }
         req.end();
     });
+}
+
+function parseJsonResponse(body) {
+    if (!body.length) return null;
+
+    const text = body.toString('utf8');
+    try {
+        return JSON.parse(text);
+    } catch {
+        return text;
+    }
+}
+
+const HOP_BY_HOP_HEADERS = new Set([
+    'connection',
+    'keep-alive',
+    'proxy-authenticate',
+    'proxy-authorization',
+    'te',
+    'trailer',
+    'transfer-encoding',
+    'upgrade'
+]);
+
+function forwardResponseHeaders(res, headers) {
+    for (const [name, value] of Object.entries(headers)) {
+        const normalizedName = name.toLowerCase();
+        if (
+            value === undefined ||
+            HOP_BY_HOP_HEADERS.has(normalizedName) ||
+            normalizedName === 'set-cookie' ||
+            normalizedName.startsWith('access-control-')
+        ) {
+            continue;
+        }
+        res.setHeader(name, value);
+    }
 }
 
 // Helper para gravar par de cookies de sessão
@@ -128,8 +170,25 @@ function setSessionCookies(res, accessToken, refreshToken) {
 
 // Helper para limpar cookies de sessão
 function clearSessionCookies(res) {
-    res.clearCookie('workmy_access');
-    res.clearCookie('workmy_refresh');
+    const clearOptions = {
+        path: '/',
+        secure: IS_PRODUCTION,
+        sameSite: IS_PRODUCTION ? 'strict' : 'lax'
+    };
+    res.clearCookie('workmy_access', clearOptions);
+    res.clearCookie('workmy_refresh', clearOptions);
+}
+
+async function refreshAccessToken(refreshToken) {
+    if (!refreshToken) return null;
+    const { status, body: responseBody } = await callFastApi(
+        '/api/auth/refresh',
+        'POST',
+        { refresh: refreshToken }
+    );
+    if (status !== 200) return null;
+    const body = parseJsonResponse(responseBody);
+    return body && typeof body.access === 'string' ? body.access : null;
 }
 
 // ============================================================
@@ -139,10 +198,11 @@ app.post('/api/auth/login', async (req, res) => {
     logBffAction('Auth Gateway', 'POST /api/auth/login', 'Iniciando autenticação...');
 
     try {
-        const { status, body } = await callFastApi('/api/auth/login', 'POST', {
+        const { status, body: responseBody } = await callFastApi('/api/auth/login', 'POST', {
             email: req.body.username || req.body.email,
             password: req.body.password
         });
+        const body = parseJsonResponse(responseBody);
 
         if (status === 200) {
             const { access, refresh, user } = body;
@@ -166,7 +226,8 @@ app.post('/api/auth/register', async (req, res) => {
     logBffAction('Auth Gateway', 'POST /api/auth/register', 'Iniciando registro...');
 
     try {
-        const { status, body } = await callFastApi('/api/auth/register', 'POST', req.body);
+        const { status, body: responseBody } = await callFastApi('/api/auth/register', 'POST', req.body);
+        const body = parseJsonResponse(responseBody);
 
         if (status === 200) {
             const { access, refresh, user } = body;
@@ -243,10 +304,9 @@ app.use(async (req, res, next) => {
         logBffAction('Proxy Security', 'Silent Refresh', 'Access Token expirou. Renovando...');
 
         try {
-            const { status, body } = await callFastApi('/api/auth/refresh', 'POST', { refresh: refreshToken });
+            const newAccess = await refreshAccessToken(refreshToken);
 
-            if (status === 200) {
-                const newAccess = body.access;
+            if (newAccess) {
                 res.cookie('workmy_access', newAccess, COOKIE_OPTS_ACCESS);
                 req.headers['authorization'] = `Bearer ${newAccess}`;
                 logBffAction('Proxy Security', 'Silent Refresh OK', 'Novo Access Token gerado.');
@@ -254,7 +314,7 @@ app.use(async (req, res, next) => {
             }
 
             // Refresh inválido — limpa cookies e força re-login
-            logBffAction('Proxy Security', 'Refresh Failed', `FastAPI retornou ${status}`);
+            logBffAction('Proxy Security', 'Refresh Failed', 'Refresh token inválido ou expirado.');
             clearSessionCookies(res);
             return res.status(401).json({ detail: 'Sessão expirada. Por favor, logue novamente.' });
         } catch (err) {
@@ -271,50 +331,50 @@ app.use(async (req, res, next) => {
 });
 
 // ============================================================
-// 5. PROXY PARA SSE (SERVER-SENT EVENTS)
-// Usa http-proxy-middleware pois precisa manter o stream aberto
+// 5. PROXY GENÉRICO MANUAL (Para todas as rotas /api/*)
+// Implementação direta para evitar conflitos com body-parser.
 // ============================================================
-const sseProxy = createProxyMiddleware('/api/events/stream', {
-    target: FASTAPI_URL,
-    changeOrigin: true,
-    logger: console
-});
-
-app.use(sseProxy);
-
-// ============================================================
-// 6. PROXY GENÉRICO MANUAL (Para todas as outras rotas /api/*)
-// Substitui o http-proxy-middleware para evitar travamentos com body-parser
-// ============================================================
-app.all('/api/*', async (req, res) => {
-    console.log(`==> BFF MANUAL PROXY RECEBEU: ${req.method} ${req.originalUrl}`);
-    // Rotas já tratadas antes (login, register, logout, sse)
-    if (
-        req.path.startsWith('/api/auth/login') ||
-        req.path.startsWith('/api/auth/register') ||
-        req.path.startsWith('/api/auth/logout') ||
-        req.path.startsWith('/api/events/stream')
-    ) {
-        console.log(`==> BFF MANUAL PROXY IGNORANDO: ${req.originalUrl}`);
-        return; // Já respondido pelos handlers acima
-    }
-
+app.all(/^\/api\/.*$/, async (req, res) => {
     try {
         const urlPath = req.originalUrl;
         const method = req.method;
         const body = (method !== 'GET' && method !== 'HEAD') ? req.body : null;
-
-        console.log(`==> BFF MANUAL PROXY ENVIANDO AO FASTAPI: ${method} ${urlPath} bodyKeys=${body ? Object.keys(body) : 'none'}`);
 
         // Limpa headers conflitantes
         const headersToForward = { ...req.headers };
         delete headersToForward.host;
         delete headersToForward['content-length'];
 
-        const { status, body: responseBody } = await callFastApi(urlPath, method, body, headersToForward);
+        let upstream = await callFastApi(
+            urlPath,
+            method,
+            body,
+            headersToForward
+        );
+
+        // O cookie pode existir enquanto o JWT já expirou. Renova e repete a
+        // requisição uma única vez para não surpreender o usuário após 15 min.
+        if (upstream.status === 401 && req.cookies.workmy_refresh) {
+            const newAccess = await refreshAccessToken(req.cookies.workmy_refresh);
+            if (newAccess) {
+                res.cookie('workmy_access', newAccess, COOKIE_OPTS_ACCESS);
+                headersToForward.authorization = `Bearer ${newAccess}`;
+                upstream = await callFastApi(urlPath, method, body, headersToForward);
+            } else {
+                clearSessionCookies(res);
+            }
+        }
+
+        const { status, body: responseBody, headers: responseHeaders } = upstream;
         
-        console.log(`<== BFF MANUAL PROXY RECEBEU DO FASTAPI: ${status}`);
-        return res.status(status).json(responseBody);
+        logBffAction('Proxy', `${method} ${urlPath}`, `FastAPI respondeu ${status}`);
+        forwardResponseHeaders(res, responseHeaders);
+
+        if (method === 'HEAD' || status === 204 || status === 304) {
+            return res.status(status).end();
+        }
+
+        return res.status(status).send(responseBody);
     } catch (err) {
         logBffAction('Manual Proxy', 'Error', err.message);
         return res.status(502).json({ detail: 'Erro de proxy interno.' });

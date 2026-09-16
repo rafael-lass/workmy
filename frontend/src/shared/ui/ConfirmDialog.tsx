@@ -1,0 +1,3 @@
+import { Button } from './Button'
+import { Dialog } from './Dialog'
+export function ConfirmDialog({ open, title, description, confirmLabel = 'Confirmar', danger, busy, onConfirm, onClose }: { open: boolean; title: string; description: string; confirmLabel?: string; danger?: boolean; busy?: boolean; onConfirm: () => void; onClose: () => void }) { return <Dialog open={open} title={title} description={description} busy={busy} size="sm" onClose={onClose} footer={<><Button variant="secondary" onClick={onClose} disabled={busy}>Voltar</Button><Button variant={danger ? 'danger' : 'primary'} onClick={onConfirm} loading={busy}>{confirmLabel}</Button></>}><p className="text-sm text-slate-600">Essa ação será aplicada imediatamente.</p></Dialog> }

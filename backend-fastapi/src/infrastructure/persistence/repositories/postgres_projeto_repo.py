@@ -1,8 +1,12 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, and_
+from decimal import Decimal
+
+from sqlalchemy import and_, case, func, select
+from sqlalchemy.exc import IntegrityError
 from src.domain.entities.projeto import ProjetoEntity
 from src.application.ports.outbound.i_projeto_repository import IProjetoRepository
 from src.infrastructure.persistence.models import ProjetoModel
+from src.domain.exceptions.business_exceptions import ColisaoContratoException
 
 class PostgresProjetoRepository(IProjetoRepository):
     def __init__(self, session: AsyncSession):
@@ -18,7 +22,6 @@ class PostgresProjetoRepository(IProjetoRepository):
             progresso=model.progresso,
             data_entrega=model.data_entrega,
             valor=model.valor,
-            mensalista=model.mensalista,
             valor_mensal=model.valor_mensal,
             dia_vencimento=model.dia_vencimento,
             recorrencia_inicio=model.recorrencia_inicio,
@@ -63,7 +66,6 @@ class PostgresProjetoRepository(IProjetoRepository):
                 progresso=projeto.progresso,
                 data_entrega=projeto.data_entrega,
                 valor=projeto.valor,
-                mensalista=projeto.mensalista,
                 valor_mensal=projeto.valor_mensal,
                 dia_vencimento=projeto.dia_vencimento,
                 recorrencia_inicio=projeto.recorrencia_inicio,
@@ -71,7 +73,14 @@ class PostgresProjetoRepository(IProjetoRepository):
                 recorrencia_ativa=projeto.recorrencia_ativa,
                 deletado_em=projeto.deletado_em
             )
-            self.session.add(model)
+            try:
+                async with self.session.begin_nested():
+                    self.session.add(model)
+                    await self.session.flush()
+            except IntegrityError as exc:
+                raise ColisaoContratoException(
+                    "Este cliente já possui este serviço contratado de forma ativa."
+                ) from exc
         else:
             result = await self.session.execute(
                 select(ProjetoModel).where(
@@ -84,7 +93,6 @@ class PostgresProjetoRepository(IProjetoRepository):
             model.progresso = projeto.progresso
             model.data_entrega = projeto.data_entrega
             model.valor = projeto.valor
-            model.mensalista = projeto.mensalista
             model.valor_mensal = projeto.valor_mensal
             model.dia_vencimento = projeto.dia_vencimento
             model.recorrencia_inicio = projeto.recorrencia_inicio
@@ -92,7 +100,7 @@ class PostgresProjetoRepository(IProjetoRepository):
             model.recorrencia_ativa = projeto.recorrencia_ativa
             model.deletado_em = projeto.deletado_em
 
-        await self.session.flush()
+            await self.session.flush()
         projeto.id = model.id
         projeto.criado_em = model.criado_em
         return projeto
@@ -117,6 +125,7 @@ class PostgresProjetoRepository(IProjetoRepository):
                 ProjetoModel.usuario_id == usuario_id,
                 ProjetoModel.tipo_recorrencia == 'MENSAL',
                 ProjetoModel.recorrencia_ativa == True,
+                ProjetoModel.status.notin_(("COMPLETED", "ARCHIVED")),
                 ProjetoModel.deletado_em.is_(None)
             )
         )
@@ -124,7 +133,7 @@ class PostgresProjetoRepository(IProjetoRepository):
         return [self._to_entity(m) for m in models]
 
     def _base_join_query(self, usuario_id: int, cliente_id: int | None = None):
-        from src.infrastructure.persistence.models import ClienteModel, ServicoModel
+        from src.infrastructure.persistence.models import ClienteModel, PagamentoModel, ServicoModel
         stmt = (
             select(
                 ProjetoModel.id,
@@ -143,13 +152,29 @@ class PostgresProjetoRepository(IProjetoRepository):
                 ProjetoModel.data_entrega,
                 ProjetoModel.recorrencia_inicio,
                 ProjetoModel.criado_em,
+                func.coalesce(
+                    func.sum(
+                        case(
+                            (PagamentoModel.status == "PAGO", PagamentoModel.valor),
+                            else_=Decimal("0.00"),
+                        )
+                    ),
+                    Decimal("0.00"),
+                ).label("total_acumulado"),
+                (func.count(PagamentoModel.id) > 0).label("possui_lancamentos"),
             )
             .select_from(ProjetoModel)
             .join(ClienteModel, ProjetoModel.cliente_id == ClienteModel.id)
             .join(ServicoModel, ProjetoModel.servico_id == ServicoModel.id)
+            .outerjoin(PagamentoModel, PagamentoModel.projeto_id == ProjetoModel.id)
             .where(
                 ProjetoModel.usuario_id == usuario_id,
                 ProjetoModel.deletado_em.is_(None)
+            )
+            .group_by(
+                ProjetoModel.id,
+                ClienteModel.nome,
+                ServicoModel.nome,
             )
         )
         if cliente_id is not None:
@@ -168,19 +193,10 @@ class PostgresProjetoRepository(IProjetoRepository):
         row = (await self.session.execute(stmt)).first()
         return ProjetoView(**row._mapping) if row else None
 
-    async def soft_delete_pagamentos(self, projeto_id: int) -> int:
-        import datetime as dt
-        from sqlalchemy import update
+    async def count_lancamentos(self, projeto_id: int) -> int:
         from src.infrastructure.persistence.models import PagamentoModel
-        
-        stmt = (
-            update(PagamentoModel)
-            .where(
-                PagamentoModel.projeto_id == projeto_id,
-                PagamentoModel.deletado_em.is_(None)
-            )
-            .values(deletado_em=dt.datetime.now(dt.timezone.utc).replace(tzinfo=None))
+
+        result = await self.session.execute(
+            select(func.count(PagamentoModel.id)).where(PagamentoModel.projeto_id == projeto_id)
         )
-        result = await self.session.execute(stmt)
-        await self.session.flush()
-        return result.rowcount
+        return result.scalar() or 0

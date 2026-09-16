@@ -1,10 +1,24 @@
-from decimal import Decimal
-from datetime import date
-from src.domain.entities.projeto import ProjetoEntity
-from src.domain.exceptions.business_exceptions import ValidaEntidadeException, NaoEncontradoException
 from src.application.ports.outbound.i_projeto_repository import IProjetoRepository
+from src.domain.entities.projeto import ProjetoEntity
+from src.domain.exceptions.business_exceptions import (
+    NaoEncontradoException,
+    ValidaEntidadeException,
+)
+
 
 class AtualizarProjetoUseCase:
+    EDITABLE_FIELDS = {
+        "status",
+        "progresso",
+        "data_entrega",
+        "valor",
+        "tipo_recorrencia",
+        "recorrencia_ativa",
+        "valor_mensal",
+        "dia_vencimento",
+        "recorrencia_inicio",
+    }
+
     def __init__(self, projeto_repo: IProjetoRepository):
         self.projeto_repo = projeto_repo
 
@@ -12,47 +26,45 @@ class AtualizarProjetoUseCase:
         self,
         projeto_id: int,
         usuario_id: int,
-        status: str | None = None,
-        progresso: int | None = None,
-        data_entrega: date | None = None,
-        valor: Decimal | None = None,
-        tipo_recorrencia: str | None = None,
-        recorrencia_ativa: bool | None = None,
-        valor_mensal: Decimal | None = None,
-        dia_vencimento: int | None = None,
-        recorrencia_inicio: date | None = None
+        changes: dict,
     ) -> ProjetoEntity:
-        # 1. Recupera o projeto
         projeto = await self.projeto_repo.get_by_id(projeto_id, usuario_id)
         if not projeto:
             raise NaoEncontradoException("Projeto não encontrado ou não pertence a você.")
 
-        # 2. Atualização e Validação de Transição de Status
-        if status is not None and status != projeto.status:
-            projeto.validate_transition(status)
-            projeto.status = status
+        unknown_fields = set(changes) - self.EDITABLE_FIELDS
+        if unknown_fields:
+            raise ValidaEntidadeException("Há campos não permitidos na atualização do projeto.")
 
-        # 3. Atualiza demais campos
-        if progresso is not None:
-            projeto.progresso = progresso
-        if data_entrega is not None:
-            projeto.data_entrega = data_entrega
-        if valor is not None:
-            projeto.valor = valor
-        if tipo_recorrencia is not None:
-            projeto.tipo_recorrencia = tipo_recorrencia
-        if recorrencia_ativa is not None:
-            projeto.recorrencia_ativa = recorrencia_ativa
-        if valor_mensal is not None:
-            projeto.valor_mensal = valor_mensal
-        if dia_vencimento is not None:
-            projeto.dia_vencimento = dia_vencimento
-        if recorrencia_inicio is not None:
-            projeto.recorrencia_inicio = recorrencia_inicio
+        values = dict(changes)
+        new_status = values.pop("status", None)
 
-        # 4. Re-valida a entidade inteira após atualizações
-        projeto.sync_recorrencia()
+        for required_field in (
+            "progresso",
+            "tipo_recorrencia",
+            "recorrencia_ativa",
+            "dia_vencimento",
+        ):
+            if required_field in values and values[required_field] is None:
+                raise ValidaEntidadeException(f"O campo {required_field} não pode ser nulo.")
+
+        for field, value in values.items():
+            if field == "tipo_recorrencia":
+                value = value.strip().upper()
+            setattr(projeto, field, value)
+
+        if projeto.tipo_recorrencia == "AVULSO":
+            projeto.recorrencia_ativa = False
+            projeto.valor_mensal = None
+            projeto.recorrencia_inicio = None
+
+        if new_status is not None:
+            projeto.change_status(new_status)
+
+        if projeto.status == "COMPLETED":
+            projeto.progresso = 100
+        if projeto.status in {"COMPLETED", "ARCHIVED"}:
+            projeto.recorrencia_ativa = False
+
         projeto.validate()
-
-        # 5. Salva alterações
         return await self.projeto_repo.save(projeto)

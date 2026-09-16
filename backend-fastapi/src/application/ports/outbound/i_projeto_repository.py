@@ -32,5 +32,5 @@ class IProjetoRepository(ABC):
         pass
 
     @abstractmethod
-    async def soft_delete_pagamentos(self, projeto_id: int) -> int:
+    async def count_lancamentos(self, projeto_id: int) -> int:
         pass

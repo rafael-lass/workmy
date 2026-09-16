@@ -10,10 +10,6 @@ class ValidaEntidadeException(BusinessException):
     """Exceção levantada quando regras de validação síncronas de entidades são violadas."""
     pass
 
-class RecorrenciaInvalidaException(BusinessException):
-    """Exceção levantada quando configurações de faturamento recorrente são inválidas."""
-    pass
-
 class NaoEncontradoException(BusinessException):
     """Exceção genérica para entidades não encontradas ou acesso negado (404/403)."""
     pass

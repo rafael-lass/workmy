@@ -19,7 +19,9 @@ class CrudServicoUseCase:
         ferramentas: Optional[str] = None,
         github_repo: Optional[str] = None,
         imagem_bytes: Optional[bytes] = None,
-        imagem_mime: Optional[str] = None
+        imagem_mime: Optional[str] = None,
+        descricao_documento: dict | None = None,
+        tag_ids: list[int] | None = None,
     ) -> ServicoEntity:
         # 1. Verifica nome único
         if await self.servico_repo.exists_by_name(nome, usuario_id):
@@ -36,6 +38,9 @@ class CrudServicoUseCase:
             imagem_bytes=imagem_bytes,
             imagem_mime=imagem_mime
         )
+        from src.domain.service_document import validate_document
+        servico.descricao_documento = validate_document(descricao_documento)
+        servico.etiquetas = [{"id": id} for id in dict.fromkeys(tag_ids or [])]
         servico.validate()
 
         # 3. Salva
@@ -51,7 +56,9 @@ class CrudServicoUseCase:
         ferramentas: Optional[str] = None,
         github_repo: Optional[str] = None,
         imagem_bytes: Optional[bytes] = None,
-        imagem_mime: Optional[str] = None
+        imagem_mime: Optional[str] = None,
+        descricao_documento: dict | None = None,
+        tag_ids: list[int] | None = None,
     ) -> ServicoEntity:
         # 1. Recupera
         servico = await self.servico_repo.get_by_id(servico_id, usuario_id)
@@ -64,10 +71,10 @@ class CrudServicoUseCase:
 
         # 3. Atualiza
         servico.nome = nome
-        servico.descricao = descricao
-        servico.tags = tags
-        servico.ferramentas = ferramentas
-        servico.github_repo = github_repo
+        # Legacy columns are retained without overwriting previously saved data.
+        from src.domain.service_document import validate_document
+        servico.descricao_documento = validate_document(descricao_documento)
+        servico.etiquetas = [{"id": id} for id in dict.fromkeys(tag_ids or [])]
         
         # Só atualiza a imagem se uma nova for enviada
         if imagem_bytes is not None:

@@ -5,20 +5,17 @@ from src.domain.exceptions.business_exceptions import ColisaoContratoException, 
 from src.application.ports.outbound.i_projeto_repository import IProjetoRepository
 from src.application.ports.outbound.i_cliente_repository import IClienteRepository
 from src.application.ports.outbound.i_servico_repository import IServicoRepository
-from src.application.ports.outbound.i_event_publisher import IEventPublisher
 
 class CriarProjetoUseCase:
     def __init__(
         self,
         projeto_repo: IProjetoRepository,
         cliente_repo: IClienteRepository,
-        servico_repo: IServicoRepository,
-        event_publisher: IEventPublisher
+        servico_repo: IServicoRepository
     ):
         self.projeto_repo = projeto_repo
         self.cliente_repo = cliente_repo
         self.servico_repo = servico_repo
-        self.event_publisher = event_publisher
 
     async def execute(
         self,
@@ -30,7 +27,7 @@ class CriarProjetoUseCase:
         data_entrega: date | None = None,
         valor: Decimal | None = None,
         tipo_recorrencia: str = 'AVULSO',
-        recorrencia_ativa: bool = True,
+        recorrencia_ativa: bool = False,
         valor_mensal: Decimal | None = None,
         dia_vencimento: int = 5,
         recorrencia_inicio: date | None = None
@@ -51,6 +48,7 @@ class CriarProjetoUseCase:
             raise ColisaoContratoException("Este cliente já possui este serviço contratado de forma ativa.")
 
         # 4. Instancia e valida a entidade
+        tipo_recorrencia = tipo_recorrencia.strip().upper()
         projeto = ProjetoEntity(
             usuario_id=usuario_id,
             cliente_id=cliente_id,
@@ -65,18 +63,9 @@ class CriarProjetoUseCase:
             dia_vencimento=dia_vencimento,
             recorrencia_inicio=recorrencia_inicio
         )
-        projeto.sync_recorrencia()
         projeto.validate()
 
         # 5. Salva na persistência
         projeto_salvo = await self.projeto_repo.save(projeto)
-
-        # 6. Dispara o evento assíncrono para o RabbitMQ
-        await self.event_publisher.publish(
-            usuario_id=usuario_id,
-            routing_key='projetos',
-            action='created',
-            meta={'projeto_id': projeto_salvo.id}
-        )
 
         return projeto_salvo

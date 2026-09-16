@@ -48,23 +48,25 @@ def test_projeto_entity_validation_invalid_dia_vencimento():
         servico_id=1,
         valor=Decimal("100.00"),
         progresso=50,
-        dia_vencimento=30
+        tipo_recorrencia="MENSAL",
+        valor_mensal=Decimal("100.00"),
+        dia_vencimento=30,
     )
     with pytest.raises(ValidaEntidadeException) as exc:
         projeto.validate()
     assert "O dia de vencimento para recorrências deve estar entre 1 e 28" in str(exc.value)
 
-def test_projeto_sync_recorrencia():
+def test_completed_project_cannot_keep_active_recurrence():
     projeto = ProjetoEntity(
         usuario_id=1,
         cliente_id=1,
         servico_id=1,
-        tipo_recorrencia='MENSAL',
-        recorrencia_ativa=True
+        status="COMPLETED",
+        progresso=100,
+        tipo_recorrencia="MENSAL",
+        recorrencia_ativa=True,
+        valor_mensal=Decimal("100.00"),
     )
-    projeto.sync_recorrencia()
-    assert projeto.mensalista is True
 
-    projeto.recorrencia_ativa = False
-    projeto.sync_recorrencia()
-    assert projeto.mensalista is False
+    with pytest.raises(ValidaEntidadeException):
+        projeto.validate()

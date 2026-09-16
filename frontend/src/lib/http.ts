@@ -58,6 +58,7 @@ export async function http<T>(
   path: string,
   options?: {
     method?: HttpMethod
+    responseType?: 'json' | 'blob'
     body?: unknown
     query?: Record<string, string | number | undefined | null>
   },
@@ -92,6 +93,7 @@ export async function http<T>(
     credentials: 'include', // Envia cookies HTTP-Only automaticamente (gerenciados pelo BFF)
   })
 
+  if (res.ok && options?.responseType === 'blob') return await res.blob() as T
   let data: unknown = null
   try {
     data = await res.json()

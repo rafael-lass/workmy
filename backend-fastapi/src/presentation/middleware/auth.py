@@ -1,6 +1,7 @@
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from src.infrastructure.security.jwt_service import decode_token
+from src.application.ports.outbound.i_token_service import ITokenService
+from src.presentation.dependencies import get_token_service
 
 # ---------------------------------------------------------------------------
 # Token Blacklist em memória.
@@ -24,14 +25,17 @@ def is_token_revoked(jti: str) -> bool:
 security = HTTPBearer()
 
 
-async def get_current_user_id(credentials: HTTPAuthorizationCredentials = Depends(security)) -> int:
+async def get_current_user_id(
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+    token_service: ITokenService = Depends(get_token_service),
+) -> int:
     """
     Middleware/Dependency do FastAPI que extrai, decodifica e valida o JWT
     recebido no cabeçalho 'Authorization: Bearer <token>'.
     Verifica tipo de token, JTI na blacklist e retorna o ID do usuário autenticado.
     """
     token = credentials.credentials
-    payload = decode_token(token)
+    payload = token_service.decode_token(token)
 
     if payload is None:
         raise HTTPException(

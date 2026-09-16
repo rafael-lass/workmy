@@ -8,18 +8,37 @@ from src.presentation.dto.schemas import (
     MessageSchema,
     AuthResponseSchema,
     RefreshTokenInSchema,
-    AccessTokenOutSchema
+    AccessTokenOutSchema,
+    UserProfileSchema,
 )
 from src.application.usecases.auth_usecases import AuthUseCases
-from src.presentation.dependencies import get_auth_usecases
+from src.presentation.dependencies import get_auth_usecases, get_token_service, get_usuario_repository
+from src.application.ports.outbound.i_usuario_repository import IUsuarioRepository
+from src.application.ports.outbound.i_token_service import ITokenService
 from src.domain.exceptions.business_exceptions import ValidaEntidadeException, NaoEncontradoException
 from src.presentation.middleware.auth import (
+    get_current_user_id,
     revoke_token,
     security as bearer_security,
 )
-from src.infrastructure.security.jwt_service import decode_token
 
 router = APIRouter(prefix="/auth", tags=["Autenticação"])
+
+
+@router.get("/me", response_model=UserProfileSchema)
+async def me(
+    usuario_id: int = Depends(get_current_user_id),
+    usuario_repo: IUsuarioRepository = Depends(get_usuario_repository),
+):
+    usuario = await usuario_repo.get_by_id(usuario_id)
+    if usuario is None:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado.")
+    return {
+        "id": usuario.id,
+        "username": usuario.username,
+        "email": usuario.email,
+        "telefone": usuario.telefone,
+    }
 
 @router.post("/register", response_model=AuthResponseSchema, responses={400: {"model": ErrorSchema}})
 async def register(
@@ -88,13 +107,14 @@ async def refresh_token(
 @router.post("/logout", response_model=MessageSchema)
 async def logout(
     credentials: HTTPAuthorizationCredentials = Depends(bearer_security),
+    token_service: ITokenService = Depends(get_token_service),
 ):
     """
     Desloga o usuário invalidando o access token atual via JTI blacklist.
     O BFF é responsável por limpar os cookies HTTP-Only no cliente.
     """
     token = credentials.credentials
-    payload = decode_token(token)
+    payload = token_service.decode_token(token)
 
     if payload:
         jti = payload.get("jti")

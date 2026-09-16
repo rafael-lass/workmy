@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 from src.domain.exceptions.business_exceptions import ValidaEntidadeException
 
@@ -15,6 +15,8 @@ class ServicoEntity:
     imagem_mime: str | None = None
     criado_em: datetime | None = None
     deletado_em: datetime | None = None
+    descricao_documento: dict | None = None
+    etiquetas: list[dict] = field(default_factory=list)
 
     def validate(self) -> None:
         if not self.nome or not self.nome.strip():

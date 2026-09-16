@@ -2,6 +2,12 @@ from abc import ABC, abstractmethod
 from src.domain.entities.servico import ServicoEntity
 
 class IServicoRepository(ABC):
+    async def list_tags(self, usuario_id: int) -> list[dict]:
+        raise NotImplementedError
+
+    async def create_tag(self, usuario_id: int, nome: str) -> dict:
+        raise NotImplementedError
+
     @abstractmethod
     async def get_by_id(self, id: int, usuario_id: int) -> ServicoEntity | None:
         pass

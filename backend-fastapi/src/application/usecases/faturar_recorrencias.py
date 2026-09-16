@@ -1,66 +1,58 @@
 from datetime import date
-from decimal import Decimal
-from src.domain.entities.pagamento import PagamentoEntity
-from src.application.ports.outbound.i_projeto_repository import IProjetoRepository
+
 from src.application.ports.outbound.i_pagamento_repository import IPagamentoRepository
-from src.application.ports.outbound.i_event_publisher import IEventPublisher
+from src.application.ports.outbound.i_projeto_repository import IProjetoRepository
+from src.domain.entities.pagamento import PagamentoEntity
+
+
+def _next_month(value: date, due_day: int) -> date:
+    if value.month == 12:
+        return date(value.year + 1, 1, due_day)
+    return date(value.year, value.month + 1, due_day)
+
+
+def _first_due_date(start: date, due_day: int) -> date:
+    candidate = date(start.year, start.month, due_day)
+    return candidate if candidate >= start else _next_month(candidate, due_day)
+
 
 class FaturarRecorrenciasUseCase:
     def __init__(
         self,
         projeto_repo: IProjetoRepository,
         pagamento_repo: IPagamentoRepository,
-        event_publisher: IEventPublisher
     ):
         self.projeto_repo = projeto_repo
         self.pagamento_repo = pagamento_repo
-        self.event_publisher = event_publisher
 
-    async def execute(self, usuario_id: int, hoje: date | None = None) -> list[PagamentoEntity]:
-        if hoje is None:
-            hoje = date.today()
-
-        # 1. Recupera projetos recorrentes ativos do usuário
+    async def execute(self, usuario_id: int, hoje: date) -> list[PagamentoEntity]:
+        pagamentos_gerados: list[PagamentoEntity] = []
         projetos = await self.projeto_repo.list_recorrentes_ativos(usuario_id)
-        pagamentos_gerados = []
-
-        referencia_mes = hoje.strftime("%Y-%m")
 
         for projeto in projetos:
-            # 2. Verifica se hoje é igual ou posterior ao dia de vencimento programado
-            if hoje.day >= projeto.dia_vencimento:
-                # 3. Verifica se a recorrência de início já chegou
-                if projeto.recorrencia_inicio and hoje < projeto.recorrencia_inicio:
-                    continue
+            if projeto.id is None or projeto.valor_mensal is None:
+                continue
+            start = projeto.recorrencia_inicio
+            if start is None:
+                start = projeto.criado_em.date() if projeto.criado_em else hoje
 
-                # 4. Verifica se a mensalidade para a referência já existe
-                ja_faturado = await self.pagamento_repo.exists_by_referencia(projeto.id, referencia_mes)
-                if not ja_faturado:
-                    # Determina o valor
-                    valor = projeto.valor_mensal if projeto.valor_mensal is not None else projeto.valor
-                    if valor is None or valor <= 0:
-                        continue # Pula se o valor for inválido ou não configurado
-
-                    # 5. Instancia, valida e persiste
-                    pagamento = PagamentoEntity(
-                        projeto_id=projeto.id,
-                        valor=valor,
-                        data=hoje,
-                        tipo_pagamento='MENSAL',
-                        referencia_mes=referencia_mes,
-                        gerado_automaticamente=True,
-                        observacao="Gerado automaticamente (Recorrência Mensal)"
-                    )
-                    pagamento.validate()
-                    pagamento_salvo = await self.pagamento_repo.save(pagamento)
-                    pagamentos_gerados.append(pagamento_salvo)
-
-                    # 6. Publica evento assíncrono
-                    await self.event_publisher.publish(
-                        usuario_id=usuario_id,
-                        routing_key='pagamentos',
-                        action='created',
-                        meta={'pagamento_id': pagamento_salvo.id, 'projeto_id': projeto.id}
-                    )
+            vencimento = _first_due_date(start, projeto.dia_vencimento)
+            while vencimento <= hoje:
+                pagamento = PagamentoEntity(
+                    projeto_id=projeto.id,
+                    valor=projeto.valor_mensal,
+                    tipo_pagamento="MENSAL",
+                    status="PENDENTE",
+                    data_vencimento=vencimento,
+                    data_pagamento=None,
+                    referencia_mes=vencimento.strftime("%Y-%m"),
+                    gerado_automaticamente=True,
+                    observacao="Gerado pela recorrência mensal",
+                )
+                pagamento.validate()
+                salvo = await self.pagamento_repo.save_recorrencia(pagamento)
+                if salvo is not None:
+                    pagamentos_gerados.append(salvo)
+                vencimento = _next_month(vencimento, projeto.dia_vencimento)
 
         return pagamentos_gerados

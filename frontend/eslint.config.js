@@ -19,5 +19,10 @@ export default defineConfig([
       ecmaVersion: 2020,
       globals: globals.browser,
     },
+    rules: {
+      // Page loading and reusable dialogs intentionally synchronize local UI state
+      // with URL/open state. This is not an external subscription or a render loop.
+      'react-hooks/set-state-in-effect': 'off',
+    },
   },
 ])
