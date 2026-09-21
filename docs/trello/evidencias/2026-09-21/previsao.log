@@ -1,0 +1,9 @@
+CT-WM017 - Previsao do proximo mes
+Ambiente: SQLite em memoria; dados descartados ao encerrar.
+Data de referencia: 2026-09-21; mes previsto: 2026-10
+Contrato vigente: 300.00 desde 2026-09-01; vencimento dia 5
+Contrato futuro: 900.00 desde 2026-11-01; vencimento dia 5
+Esperado: 300.00
+Obtido: 1200.00
+Status: REPROVADO - defeito reproduzido
+Diagnostico concluido; nenhuma correcao aplicada.

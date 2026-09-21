@@ -4,6 +4,8 @@ from decimal import Decimal
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.domain.recorrencia import first_due_date
+
 from src.application.ports.outbound.i_dashboard_query import IDashboardQuery
 from src.infrastructure.persistence.models import ClienteModel, PagamentoModel, ProjetoModel
 
@@ -46,17 +48,26 @@ class PostgresDashboardQuery(IDashboardQuery):
             PagamentoModel.data_vencimento < hoje,
         )
 
-        previsto = (
-            await self.session.execute(
-                select(func.coalesce(func.sum(ProjetoModel.valor_mensal), Decimal("0.00"))).where(
-                    ProjetoModel.usuario_id == usuario_id,
-                    ProjetoModel.tipo_recorrencia == "MENSAL",
-                    ProjetoModel.recorrencia_ativa.is_(True),
-                    ProjetoModel.status.notin_(("COMPLETED", "ARCHIVED")),
-                    ProjetoModel.deletado_em.is_(None),
-                )
+        # Select only forecast fields; do not load entities or binary attachments.
+        contracts = (await self.session.execute(
+            select(
+                ProjetoModel.valor_mensal, ProjetoModel.recorrencia_inicio,
+                ProjetoModel.dia_vencimento, ProjetoModel.criado_em,
+            ).where(
+                ProjetoModel.usuario_id == usuario_id,
+                ProjetoModel.tipo_recorrencia == "MENSAL",
+                ProjetoModel.recorrencia_ativa.is_(True),
+                ProjetoModel.status.notin_(("COMPLETED", "ARCHIVED")),
+                ProjetoModel.deletado_em.is_(None),
             )
-        ).scalar() or Decimal("0.00")
+        )).all()
+        forecast_end = _shift_month(next_start, 1)
+        previsto = sum(
+            (amount for amount, start, due_day, created in contracts
+             if amount is not None
+             and first_due_date(start, due_day, created, hoje) < forecast_end),
+            Decimal("0.00"),
+        )
         projetos_ativos = (
             await self.session.execute(
                 select(func.count(ProjetoModel.id)).where(

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="4" skipped="0" tests="14" time="1.260" timestamp="2026-09-21T16:55:53.551925-03:00" hostname="Lass-Note"><testcase classname="tests.integration.test_dashboard_forecast" name="test_forecast_first_eligible_due_date[future-start]" time="0.076"><failure message="AssertionError: assert Decimal('1200.00') == Decimal('300.00')&#10; +  where Decimal('1200.00') = Decimal('1200.00')&#10; +  and   Decimal('300.00') = Decimal('300.00')">session = &lt;sqlalchemy.ext.asyncio.session.AsyncSession object at 0x0000022E9889C830&gt;
+start = datetime.date(2026, 11, 1), expected = '300.00'
+
+    @pytest.mark.parametrize('start,expected', [
+        (date(2026, 11, 1), '300.00'),
+        (date(2026, 10, 1), '1200.00'),
+        (date(2026, 10, 5), '1200.00'),
+        (date(2026, 10, 6), '300.00'),
+    ], ids=['future-start', 'before-due', 'on-due', 'after-due'])
+    async def test_forecast_first_eligible_due_date(session, start, expected):
+        await add_project(session, valor_mensal=Decimal('300.00'))
+        await add_project(session, recorrencia_inicio=start)
+        result = await PostgresDashboardQuery(session).get_resumo(1, date(2026, 9, 21))
+        assert isinstance(result['previsto_proximo_mes'], str)
+&gt;       assert Decimal(result['previsto_proximo_mes']) == Decimal(expected)
+E       AssertionError: assert Decimal('1200.00') == Decimal('300.00')
+E        +  where Decimal('1200.00') = Decimal('1200.00')
+E        +  and   Decimal('300.00') = Decimal('300.00')
+
+tests\integration\test_dashboard_forecast.py:52: AssertionError</failure></testcase><testcase classname="tests.integration.test_dashboard_forecast" name="test_forecast_first_eligible_due_date[before-due]" time="0.049" /><testcase classname="tests.integration.test_dashboard_forecast" name="test_forecast_first_eligible_due_date[on-due]" time="0.044" /><testcase classname="tests.integration.test_dashboard_forecast" name="test_forecast_first_eligible_due_date[after-due]" time="0.044"><failure message="AssertionError: assert Decimal('1200.00') == Decimal('300.00')&#10; +  where Decimal('1200.00') = Decimal('1200.00')&#10; +  and   Decimal('300.00') = Decimal('300.00')">session = &lt;sqlalchemy.ext.asyncio.session.AsyncSession object at 0x0000022E99952D70&gt;
+start = datetime.date(2026, 10, 6), expected = '300.00'
+
+    @pytest.mark.parametrize('start,expected', [
+        (date(2026, 11, 1), '300.00'),
+        (date(2026, 10, 1), '1200.00'),
+        (date(2026, 10, 5), '1200.00'),
+        (date(2026, 10, 6), '300.00'),
+    ], ids=['future-start', 'before-due', 'on-due', 'after-due'])
+    async def test_forecast_first_eligible_due_date(session, start, expected):
+        await add_project(session, valor_mensal=Decimal('300.00'))
+        await add_project(session, recorrencia_inicio=start)
+        result = await PostgresDashboardQuery(session).get_resumo(1, date(2026, 9, 21))
+        assert isinstance(result['previsto_proximo_mes'], str)
+&gt;       assert Decimal(result['previsto_proximo_mes']) == Decimal(expected)
+E       AssertionError: assert Decimal('1200.00') == Decimal('300.00')
+E        +  where Decimal('1200.00') = Decimal('1200.00')
+E        +  and   Decimal('300.00') = Decimal('300.00')
+
+tests\integration\test_dashboard_forecast.py:52: AssertionError</failure></testcase><testcase classname="tests.integration.test_dashboard_forecast" name="test_forecast_excludes_ineligible_contracts[paused]" time="0.040" /><testcase classname="tests.integration.test_dashboard_forecast" name="test_forecast_excludes_ineligible_contracts[completed]" time="0.045" /><testcase classname="tests.integration.test_dashboard_forecast" name="test_forecast_excludes_ineligible_contracts[archived]" time="0.058" /><testcase classname="tests.integration.test_dashboard_forecast" name="test_forecast_excludes_ineligible_contracts[deleted]" time="0.058" /><testcase classname="tests.integration.test_dashboard_forecast" name="test_forecast_excludes_ineligible_contracts[other-user]" time="0.051" /><testcase classname="tests.integration.test_dashboard_forecast" name="test_forecast_excludes_ineligible_contracts[one-off]" time="0.043" /><testcase classname="tests.integration.test_dashboard_forecast" name="test_forecast_falls_back_to_creation[creation-on-due]" time="0.041" /><testcase classname="tests.integration.test_dashboard_forecast" name="test_forecast_falls_back_to_creation[creation-after-due]" time="0.048"><failure message="AssertionError: assert Decimal('900.00') == Decimal('0.00')&#10; +  where Decimal('900.00') = Decimal('900.00')&#10; +  and   Decimal('0.00') = Decimal('0.00')">session = &lt;sqlalchemy.ext.asyncio.session.AsyncSession object at 0x0000022E99B40D70&gt;
+created = datetime.datetime(2026, 10, 6, 0, 0), expected = '0.00'
+
+    @pytest.mark.parametrize('created,expected', [
+        (datetime(2026, 10, 5), '900.00'), (datetime(2026, 10, 6), '0.00'),
+    ], ids=['creation-on-due', 'creation-after-due'])
+    async def test_forecast_falls_back_to_creation(session, created, expected):
+        await add_project(session, recorrencia_inicio=None, criado_em=created)
+        result = await PostgresDashboardQuery(session).get_resumo(1, date(2026, 9, 21))
+&gt;       assert Decimal(result['previsto_proximo_mes']) == Decimal(expected)
+E       AssertionError: assert Decimal('900.00') == Decimal('0.00')
+E        +  where Decimal('900.00') = Decimal('900.00')
+E        +  and   Decimal('0.00') = Decimal('0.00')
+
+tests\integration\test_dashboard_forecast.py:73: AssertionError</failure></testcase><testcase classname="tests.integration.test_dashboard_forecast" name="test_forecast_year_boundary" time="0.062"><failure message="AssertionError: assert Decimal('1800.00') == Decimal('900.00')&#10; +  where Decimal('1800.00') = Decimal('1800.00')&#10; +  and   Decimal('900.00') = Decimal('900.00')">session = &lt;sqlalchemy.ext.asyncio.session.AsyncSession object at 0x0000022E99BFF690&gt;
+
+    async def test_forecast_year_boundary(session):
+        await add_project(session, recorrencia_inicio=date(2027, 1, 5))
+        await add_project(session, recorrencia_inicio=date(2027, 1, 6))
+        result = await PostgresDashboardQuery(session).get_resumo(1, date(2026, 12, 21))
+&gt;       assert Decimal(result['previsto_proximo_mes']) == Decimal('900.00')
+E       AssertionError: assert Decimal('1800.00') == Decimal('900.00')
+E        +  where Decimal('1800.00') = Decimal('1800.00')
+E        +  and   Decimal('900.00') = Decimal('900.00')
+
+tests\integration\test_dashboard_forecast.py:80: AssertionError</failure></testcase><testcase classname="tests.integration.test_dashboard_forecast" name="test_forecast_empty" time="0.048" /></testsuite></testsuites>

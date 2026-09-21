@@ -1,0 +1,1813 @@
+{
+  "schema_version": 1,
+  "name": "WorkMy — Desenvolvimento",
+  "purpose": "Backlog técnico do produto WorkMy. Implementações existentes em Concluído e próximas entregas em A fazer; não inclui organização da apresentação acadêmica.",
+  "baseline_commit": "21274ca1e45875375ff3e4bd4afb512b6de8daee",
+  "review_date": "2026-09-21",
+  "repository": "https://github.com/rafael-lass/workmy",
+  "remote": {
+    "url": "https://trello.com/b/7Xv1gpIY/workmy-desenvolvimento",
+    "id": "ari:cloud:trello::board/workspace/6ab176544341eb7ee2019a51/6ab17900b518047343cfeb2a"
+  },
+  "lists": [
+    "A fazer",
+    "Em desenvolvimento",
+    "Em teste",
+    "Concluído",
+    "Bloqueado"
+  ],
+  "state_rules": [
+    "Concluído identifica implementação existente revisada no código; o cartão delimita a evidência disponível. Não equivale a validação completa em navegador/PostgreSQL.",
+    "A fazer contém trabalho planejado, sem implementação realizada nesta preparação do backlog. WM-017 corrigido localmente e movido para Em teste, aguardando revisão funcional de Tais.",
+    "Os 12 cartões concluídos são uma classificação retrospectiva, não um histórico de movimentações. Não foram presumidos autores nem datas de entrega.",
+    "A base de testes foi executada novamente em 21/09/2026: 39 testes backend e 15 frontend aprovados. Não foram executados Docker, E2E, lint/build ou CI remoto nesta preparação.",
+    "Reteste WM-017: 55 backend e 15 frontend aprovados; evidências separadas em 2026-09-21-reteste-WM017. A execução anterior permanece histórica."
+  ],
+  "definition_of_done": [
+    "Implementação vinculada a commit ou PR, sem inventar publicação inexistente.",
+    "Critérios de aceite atendidos e verificados.",
+    "Testes relevantes aprovados com comando, ambiente, versão, data e resultado.",
+    "Revisão funcional de Tais registrada quando houver interface/regra; não marcar revisão humana sem confirmação.",
+    "Documentação do comportamento atualizada."
+  ],
+  "cards": [
+    {
+      "id": "WM-001",
+      "title": "Implementar autenticação JWT e sessão web pelo BFF",
+      "list": "Concluído",
+      "priority": null,
+      "labels": [
+        "Implementado",
+        "Produto"
+      ],
+      "owners": [],
+      "reviewers": [],
+      "dependencies": [],
+      "objective": "Autenticar usuários e manter a sessão do navegador sem expor access e refresh tokens ao JavaScript da interface.",
+      "implementation": [
+        "Cadastrar usuário com username/e-mail únicos e hash bcrypt; autenticar por username ou e-mail.",
+        "Emitir access token HS256 de 15 minutos e refresh token de sete dias com sub, exp, jti e type.",
+        "Armazenar tokens em cookies HTTP-only no BFF; encaminhar Bearer ao FastAPI e renovar access token.",
+        "Recuperar perfil por GET /api/auth/me; limpar cookies no logout e revogar o access token no processo atual."
+      ],
+      "acceptance": [
+        "Cadastro duplicado e senha incorreta são rejeitados; o perfil corresponde ao token autenticado.",
+        "Frontend consulta /auth/me sem depender de dados de sessão em localStorage.",
+        "O escopo de evidência não inclui os ramos de proxy/renovação do BFF, tratados no WM-020."
+      ],
+      "references": [
+        {
+          "path": "backend-fastapi/src/application/usecases/auth_usecases.py",
+          "detail": "AuthUseCases.registrar, login e refresh"
+        },
+        {
+          "path": "backend-fastapi/src/infrastructure/security/jwt_service.py",
+          "detail": "hash_password, create_access_token e create_refresh_token"
+        },
+        {
+          "path": "backend-fastapi/src/presentation/middleware/auth.py",
+          "detail": "get_current_user_id e revogação em memória"
+        },
+        {
+          "path": "frontend/bff/server.js",
+          "detail": "Cookies, renovação silenciosa, proxy e logout"
+        },
+        {
+          "path": "frontend/src/state/AuthContext.tsx",
+          "detail": "AuthProvider e carregamento pelo servidor"
+        }
+      ],
+      "tests": [
+        {
+          "id": "CT-WM001",
+          "title": "Cadastro, login, refresh e perfil na API",
+          "kind": "Integração FastAPI/SQLite e componente React",
+          "preconditions": [
+            "Banco isolado recriado pelo teste de API; frontend usa respostas simuladas."
+          ],
+          "steps": [
+            "Executar test_fastapi_auth_register_and_login_flow.",
+            "Verificar registro, duplicidade de username/e-mail, login correto/incorreto, refresh, /me e resposta de logout.",
+            "Executar teste do AuthContext que obtém a sessão pelo servidor."
+          ],
+          "expected": [
+            "Fluxos válidos retornam perfil/tokens e respostas esperadas; duplicidades e credenciais inválidas são rejeitadas.",
+            "AuthContext obtém usuário por /auth/me; não exige sessão em localStorage.",
+            "O teste existente verifica resposta de logout; não comprova revogação entre processos ou teste integrado do BFF."
+          ],
+          "automated_refs": [
+            {
+              "path": "backend-fastapi/tests/integration/test_api.py",
+              "name": "test_fastapi_auth_register_and_login_flow"
+            },
+            {
+              "path": "frontend/src/state/AuthContext.test.tsx",
+              "name": "valida a sessão pelo servidor e não depende de localStorage"
+            }
+          ],
+          "evidence": [
+            "docs/trello/evidencias/2026-09-21/backend.log",
+            "docs/trello/evidencias/2026-09-21/backend.xml",
+            "docs/trello/evidencias/2026-09-21/frontend.log",
+            "docs/trello/evidencias/2026-09-21/frontend.xml"
+          ],
+          "actual": "Testes associados aprovados na execução de 21/09/2026. Ver relatórios JUnit para a identificação de cada caso.",
+          "status": "Aprovado"
+        }
+      ],
+      "limitations": [
+        "A blacklist de access tokens existe somente na memória do processo. Não há revogação persistente de refresh tokens.",
+        "Testes de sessão/proxy no BFF ainda pendentes em WM-020."
+      ],
+      "trello_url": "https://trello.com/c/nB68opj3"
+    },
+    {
+      "id": "WM-002",
+      "title": "Implementar CRUD de clientes com exclusão lógica",
+      "list": "Concluído",
+      "priority": null,
+      "labels": [
+        "Implementado",
+        "Produto"
+      ],
+      "owners": [],
+      "reviewers": [],
+      "dependencies": [],
+      "objective": "Manter clientes do usuário e preservar vínculos e histórico financeiro.",
+      "implementation": [
+        "Criar, listar, consultar e editar clientes filtrados por usuario_id.",
+        "Validar nome e consultar duplicidade no caso de uso antes de gravar.",
+        "Bloquear exclusão quando existem projetos não excluídos associados; aplicar soft delete em deletado_em.",
+        "Agregar total_acumulado apenas de pagamentos PAGO."
+      ],
+      "acceptance": [
+        "Nome obrigatório; e-mail inválido é sinalizado no formulário antes de chamar a API.",
+        "Falha da API mantém o diálogo aberto; CRUD respeita usuario_id.",
+        "Exclusão lógica não remove fisicamente registros e não rompe projetos existentes."
+      ],
+      "references": [
+        {
+          "path": "backend-fastapi/src/application/usecases/crud_cliente.py",
+          "detail": "CrudClienteUseCase"
+        },
+        {
+          "path": "backend-fastapi/src/infrastructure/persistence/repositories/postgres_cliente_repo.py",
+          "detail": "Filtro de proprietário, exists_by_name, count_projetos_ativos e list_with_totals"
+        },
+        {
+          "path": "frontend/src/features/clientes/ClienteFormDialog.tsx",
+          "detail": "Formulário compartilhado"
+        },
+        {
+          "path": "frontend/src/pages/ClienteDetailPage.tsx",
+          "detail": "Projetos e recebimentos do cliente"
+        }
+      ],
+      "tests": [
+        {
+          "id": "CT-WM002",
+          "title": "Validar formulário e preservar diálogo após erro",
+          "kind": "Componente React com API simulada",
+          "preconditions": [
+            "ClienteFormDialog renderizado; useApi substituído pelo mock do teste."
+          ],
+          "steps": [
+            "Enviar formulário com nome vazio e e-mail inválido.",
+            "Conferir as mensagens e que request não foi chamado.",
+            "Em cenário separado, preencher nome e simular rejeição da API no envio."
+          ],
+          "expected": [
+            "Exibe 'Informe o nome do cliente.' e 'Informe um e-mail válido.' sem enviar.",
+            "No erro de servidor exibe 'Não foi possível salvar o cliente.' e mantém o diálogo aberto."
+          ],
+          "automated_refs": [
+            {
+              "path": "frontend/src/features/clientes/ClienteFormDialog.test.tsx",
+              "name": "mostra erros próximos aos campos inválidos sem chamar a API"
+            },
+            {
+              "path": "frontend/src/features/clientes/ClienteFormDialog.test.tsx",
+              "name": "mantém o diálogo aberto quando a API falha"
+            }
+          ],
+          "evidence": [
+            "docs/trello/evidencias/2026-09-21/frontend.log",
+            "docs/trello/evidencias/2026-09-21/frontend.xml"
+          ],
+          "actual": "Os dois testes de componente passaram. Regras de repositório/exclusão foram inspecionadas no código; este caso não valida o CRUD inteiro no PostgreSQL.",
+          "status": "Aprovado"
+        }
+      ],
+      "limitations": [
+        "A duplicidade de nome é consultada na aplicação. Não há índice único equivalente para clientes, portanto não afirmar garantia contra criação concorrente."
+      ],
+      "trello_url": "https://trello.com/c/TNUA7Gay"
+    },
+    {
+      "id": "WM-003",
+      "title": "Implementar catálogo de serviços com descrição formatada e tags",
+      "list": "Concluído",
+      "priority": null,
+      "labels": [
+        "Implementado",
+        "Produto"
+      ],
+      "owners": [],
+      "reviewers": [],
+      "dependencies": [],
+      "objective": "Editar o catálogo do profissional com conteúdo estruturado, capa e classificação reutilizável.",
+      "implementation": [
+        "CRUD por usuário com nome único entre serviços não excluídos.",
+        "Editor Tiptap com documento JSON versionado, validação no backend e limite de 20 mil caracteres.",
+        "Upload de PNG/JPEG/WebP até 5 MiB; tags limitadas a dez por serviço.",
+        "Catálogo privado de tags com normalização de espaços e caixa, e associação N:N em servico_tags.",
+        "Preservar conteúdo do formulário ao falhar uma operação remota."
+      ],
+      "acceptance": [
+        "Descrição e formatação salvas reaparecem ao editar; nós ou links não suportados são rejeitados.",
+        "Tags não se duplicam por caixa/espaços e não são compartilhadas entre usuários.",
+        "Remover seleção de tag não apaga a tag do catálogo."
+      ],
+      "references": [
+        {
+          "path": "backend-fastapi/src/domain/service_document.py",
+          "detail": "validate_document e plain_text"
+        },
+        {
+          "path": "backend-fastapi/src/application/usecases/crud_servico.py",
+          "detail": "CrudServicoUseCase"
+        },
+        {
+          "path": "frontend/src/features/servicos/ServicoFormDialog.tsx",
+          "detail": "Formulário, validação e bloqueio de envio"
+        },
+        {
+          "path": "frontend/src/features/servicos/TagSelector.tsx",
+          "detail": "Busca/criação e seleção por teclado"
+        }
+      ],
+      "tests": [
+        {
+          "id": "CT-WM003",
+          "title": "Documentos e tags por proprietário",
+          "kind": "Domínio, API SQLite e componentes",
+          "preconditions": [
+            "Usuários service_owner/service_other criados pelo teste; formulário de serviços usa API simulada."
+          ],
+          "steps": [
+            "Criar '  Web   Design  ' e 'web design' na API e comparar o resultado.",
+            "Salvar serviço com título e trecho em negrito; consultar como proprietário e como outro usuário.",
+            "Enviar onze IDs de tags; remover as seleções e conferir catálogo.",
+            "Executar parametrização de documentos malformados e testes de formatação no editor."
+          ],
+          "expected": [
+            "As variações da tag correspondem ao mesmo ID; outro usuário vê catálogo separado.",
+            "Consulta alheia retorna 404 e onze tags retornam 422.",
+            "Formatação é preservada; seleção removida não exclui a tag; documentos inválidos são rejeitados."
+          ],
+          "automated_refs": [
+            {
+              "path": "backend-fastapi/tests/integration/test_api.py",
+              "name": "test_services_documents_tags_and_pdf_contract"
+            },
+            {
+              "path": "backend-fastapi/tests/domain/test_service_document.py",
+              "name": "test_rejects_unsupported_or_malformed_documents"
+            },
+            {
+              "path": "frontend/src/features/servicos/Services.test.tsx",
+              "name": "reabre formatação salva, valida nome e preserva formulário após falha"
+            }
+          ],
+          "evidence": [
+            "docs/trello/evidencias/2026-09-21/backend.log",
+            "docs/trello/evidencias/2026-09-21/backend.xml",
+            "docs/trello/evidencias/2026-09-21/frontend.log",
+            "docs/trello/evidencias/2026-09-21/frontend.xml"
+          ],
+          "actual": "Testes associados aprovados. Arquivos/imagens e textos usados são dados de teste.",
+          "status": "Aprovado"
+        }
+      ],
+      "limitations": [],
+      "trello_url": "https://trello.com/c/KwPq71jB"
+    },
+    {
+      "id": "WM-004",
+      "title": "Gerar apresentação comercial do serviço em PDF",
+      "list": "Concluído",
+      "priority": null,
+      "labels": [
+        "Implementado",
+        "Produto"
+      ],
+      "owners": [],
+      "reviewers": [],
+      "dependencies": [],
+      "objective": "Exportar o serviço salvo e os contatos revisados como documento comercial.",
+      "implementation": [
+        "POST /api/servicos/{servico_id}/pdf exige autenticação e propriedade.",
+        "Preparar dados com ExportarServicoUseCase e renderizar via ReportLab em run_in_threadpool.",
+        "Gerar PDF com capa opcional, descrição formatada, links e contatos sem alterar o perfil.",
+        "Encaminhar resposta binária application/pdf com Content-Disposition; interface bloqueia download duplicado."
+      ],
+      "acceptance": [
+        "Somente proprietário exporta; sem autenticação retorna 401 e outro proprietário recebe 404.",
+        "Conteúdo começa com %PDF-, usa fontes incorporadas e suporta textos longos/múltiplas páginas.",
+        "Falha no download mantém contatos digitados para nova tentativa."
+      ],
+      "references": [
+        {
+          "path": "backend-fastapi/src/application/usecases/exportar_servico.py",
+          "detail": "ExportarServicoUseCase.preparar"
+        },
+        {
+          "path": "backend-fastapi/src/infrastructure/documents/service_pdf.py",
+          "detail": "ServicePdfRenderer"
+        },
+        {
+          "path": "backend-fastapi/src/presentation/rest/servicos.py",
+          "detail": "export_pdf"
+        },
+        {
+          "path": "frontend/src/features/servicos/ServicePresentationDialogs.tsx",
+          "detail": "ServicePdfDialog"
+        }
+      ],
+      "tests": [
+        {
+          "id": "CT-WM004",
+          "title": "Contrato binário e conteúdo estrutural do PDF",
+          "kind": "Integração e componente",
+          "preconditions": [
+            "Serviço com descrição salvo; amostras com e sem capa e descrição longa."
+          ],
+          "steps": [
+            "Exportar como proprietário, como outro usuário e sem token.",
+            "Gerar as quatro amostras de PDF e inspecionar assinatura, fonte, links e páginas.",
+            "Simular duas submissões do formulário e falha da API."
+          ],
+          "expected": [
+            "Proprietário recebe 200/application/pdf; acessos indevidos são bloqueados.",
+            "Amostra longa possui mais de uma página e capas estão presentes somente nos casos previstos.",
+            "O componente envia uma única requisição e preserva contatos após falha."
+          ],
+          "automated_refs": [
+            {
+              "path": "backend-fastapi/tests/integration/test_api.py",
+              "name": "test_services_documents_tags_and_pdf_contract"
+            },
+            {
+              "path": "backend-fastapi/tests/integration/test_service_pdf.py",
+              "name": "test_pdf_covers_unicode_links_lists_and_long_descriptions"
+            },
+            {
+              "path": "frontend/src/features/servicos/Services.test.tsx",
+              "name": "bloqueia exportação duplicada e preserva contatos se a API falha"
+            }
+          ],
+          "evidence": [
+            "docs/trello/evidencias/2026-09-21/backend.log",
+            "docs/trello/evidencias/2026-09-21/backend.xml",
+            "docs/trello/evidencias/2026-09-21/frontend.log",
+            "docs/trello/evidencias/2026-09-21/frontend.xml"
+          ],
+          "actual": "Testes associados aprovados. A inspeção estrutural automatizada não substitui revisão visual de todo PDF exportado.",
+          "status": "Aprovado"
+        }
+      ],
+      "limitations": [],
+      "trello_url": "https://trello.com/c/o7JdNvi9"
+    },
+    {
+      "id": "WM-005",
+      "title": "Implementar projetos vinculados a cliente e serviço",
+      "list": "Concluído",
+      "priority": null,
+      "labels": [
+        "Implementado",
+        "Produto"
+      ],
+      "owners": [],
+      "reviewers": [],
+      "dependencies": [],
+      "objective": "Gerenciar contratos avulsos/mensais com dados do proprietário e preservação do histórico.",
+      "implementation": [
+        "Criar, listar, consultar, atualizar e excluir logicamente projetos.",
+        "Validar cliente e serviço pertencentes ao usuário.",
+        "Bloquear combinação repetida por usuário/cliente/serviço enquanto o projeto não estiver excluído.",
+        "Índice único protege a combinação; save traduz colisão para regra de negócio.",
+        "Bloquear exclusão de projetos com quaisquer lançamentos financeiros."
+      ],
+      "acceptance": [
+        "Projeto válido recebe ID e aparece na consulta; contrato repetido é rejeitado.",
+        "Projetos com histórico não podem ser excluídos; consulta de registro inexistente retorna 404.",
+        "Etapas e percentuais atuais serão reformulados no WM-013."
+      ],
+      "references": [
+        {
+          "path": "backend-fastapi/src/application/usecases/criar_projeto.py",
+          "detail": "CriarProjetoUseCase"
+        },
+        {
+          "path": "backend-fastapi/src/application/usecases/deletar_projeto.py",
+          "detail": "DeletarProjetoUseCase"
+        },
+        {
+          "path": "backend-fastapi/src/infrastructure/persistence/repositories/postgres_projeto_repo.py",
+          "detail": "save e uniq_projeto_ativo_usuario_cliente_servico"
+        },
+        {
+          "path": "frontend/src/features/projetos/ProjetoFormDialog.tsx",
+          "detail": "Criação/edição e campos de recorrência"
+        }
+      ],
+      "tests": [
+        {
+          "id": "CT-WM005",
+          "title": "Criar, consultar e proteger exclusão de projeto",
+          "kind": "Casos de uso e API SQLite",
+          "preconditions": [
+            "Cliente e serviço criados nos repositórios de teste."
+          ],
+          "steps": [
+            "Criar projeto avulso e mensal nos cenários existentes.",
+            "Tentar repetir o contrato, consultar lista/detalhe e excluir projeto sem lançamentos.",
+            "Executar cenário de exclusão de projeto com histórico financeiro."
+          ],
+          "expected": [
+            "Criação e consulta válidas; duplicidade rejeitada; registro excluído deixa de aparecer.",
+            "Projeto com histórico provoca ConflitoDeletarException e, no contrato HTTP, resposta 409."
+          ],
+          "automated_refs": [
+            {
+              "path": "backend-fastapi/tests/integration/test_use_cases.py",
+              "name": "test_criar_projeto_use_case_success"
+            },
+            {
+              "path": "backend-fastapi/tests/integration/test_use_cases.py",
+              "name": "test_criar_projeto_use_case_colisao"
+            },
+            {
+              "path": "backend-fastapi/tests/integration/test_use_cases.py",
+              "name": "test_nao_exclui_projeto_com_historico_financeiro"
+            },
+            {
+              "path": "backend-fastapi/tests/integration/test_api.py",
+              "name": "test_fastapi_project_list_get_delete_flow"
+            }
+          ],
+          "evidence": [
+            "docs/trello/evidencias/2026-09-21/backend.log",
+            "docs/trello/evidencias/2026-09-21/backend.xml"
+          ],
+          "actual": "Testes de criação, colisão, consulta e proteção do histórico aprovados.",
+          "status": "Aprovado"
+        }
+      ],
+      "limitations": [
+        "O produto atual ainda exibe Descoberta, percentual e Arquivado no seletor de etapas."
+      ],
+      "trello_url": "https://trello.com/c/kTXSR0GJ"
+    },
+    {
+      "id": "WM-006",
+      "title": "Implementar faturamento mensal idempotente",
+      "list": "Concluído",
+      "priority": null,
+      "labels": [
+        "Implementado",
+        "Produto"
+      ],
+      "owners": [],
+      "reviewers": [],
+      "dependencies": [],
+      "objective": "Gerar cobranças vencidas uma vez por projeto/referência e respeitar pausas de contrato.",
+      "implementation": [
+        "POST /api/faturamento/recorrencias executa geração manual síncrona.",
+        "Calcular primeiro vencimento com início da recorrência e dia contratado.",
+        "Criar mensalidades PENDENTE com referencia_mes AAAA-MM.",
+        "Repositório verifica existência e trata colisão da restrição única projeto/referência.",
+        "Filtrar contratos ativos não concluídos/arquivados e respeitar nova data de retomada."
+      ],
+      "acceptance": [
+        "Repetir a geração não cria lançamentos duplicados.",
+        "Início futuro não gera cobrança antecipada.",
+        "Pausar mantém pendências; retomar não gera referências de meses pausados."
+      ],
+      "references": [
+        {
+          "path": "backend-fastapi/src/application/usecases/faturar_recorrencias.py",
+          "detail": "FaturarRecorrenciasUseCase, _first_due_date e _next_month"
+        },
+        {
+          "path": "backend-fastapi/src/infrastructure/persistence/repositories/postgres_pagamento_repo.py",
+          "detail": "save_recorrencia"
+        },
+        {
+          "path": "backend-fastapi/src/infrastructure/persistence/models.py",
+          "detail": "uniq_pagamento_projeto_referencia_mes"
+        },
+        {
+          "path": "frontend/src/features/projetos/RecurrenceDialog.tsx",
+          "detail": "Pausa e retomada"
+        }
+      ],
+      "tests": [
+        {
+          "id": "CT-WM006",
+          "title": "Pausa e retomada sem cobrar mês pausado",
+          "kind": "Caso de uso com datas controladas",
+          "preconditions": [
+            "Projeto mensal de R$ 300, início 01/01/2026, vencimento dia 5."
+          ],
+          "steps": [
+            "Gerar até 15/02/2026.",
+            "Pausar e executar geração em 15/03/2026.",
+            "Retomar com início 01/04/2026 e mensalidade R$ 350.",
+            "Gerar até 15/04/2026 e conferir referências."
+          ],
+          "expected": [
+            "Primeira geração: janeiro e fevereiro.",
+            "Durante pausa: zero novas cobranças.",
+            "Retomada: apenas abril por R$ 350; conjunto final janeiro, fevereiro e abril."
+          ],
+          "automated_refs": [
+            {
+              "path": "backend-fastapi/tests/integration/test_use_cases.py",
+              "name": "test_pausa_e_retomada_nao_geram_meses_pausados"
+            },
+            {
+              "path": "backend-fastapi/tests/integration/test_use_cases.py",
+              "name": "test_faturar_recorrencias_ignora_inicio_futuro_e_projeto_encerrado"
+            },
+            {
+              "path": "backend-fastapi/tests/integration/test_api.py",
+              "name": "test_payment_and_recurring_billing_contract"
+            }
+          ],
+          "evidence": [
+            "docs/trello/evidencias/2026-09-21/backend.log",
+            "docs/trello/evidencias/2026-09-21/backend.xml"
+          ],
+          "actual": "Cenários aprovados. O contrato HTTP também verifica três cobranças de R$ 300 e zero novas cobranças na repetição.",
+          "status": "Aprovado"
+        }
+      ],
+      "limitations": [
+        "A restrição existe no banco; corrida real entre sessões PostgreSQL será validada no WM-019."
+      ],
+      "trello_url": "https://trello.com/c/ORb823iu"
+    },
+    {
+      "id": "WM-007",
+      "title": "Implementar estados e regras dos lançamentos financeiros",
+      "list": "Concluído",
+      "priority": null,
+      "labels": [
+        "Implementado",
+        "Produto"
+      ],
+      "owners": [],
+      "reviewers": [],
+      "dependencies": [],
+      "objective": "Controlar entradas avulsas, mensalidades e ajustes mantendo rastreabilidade dos valores.",
+      "implementation": [
+        "Avulso manual nasce AVULSO/PAGO; mensalidade gerada nasce MENSAL/PENDENTE.",
+        "Permitir PENDENTE → PAGO/CANCELADO e PAGO → ESTORNADO.",
+        "Exigir motivo para cancelar/estornar e rejeitar valores não positivos e recebimento futuro.",
+        "Preservar valor original; permitir apenas observação/comprovante na edição de detalhes.",
+        "Listar com paginação e filtros por status, tipo, cliente, projeto, vencimento e busca."
+      ],
+      "acceptance": [
+        "Cancelado/estornado são terminais; recebimento avulso não pode ser criado como mensalidade.",
+        "Somente PAGO contribui para totais; não há atualização genérica de valores.",
+        "Interface oferece Receber/Cancelar para pendências e Estornar para pagos."
+      ],
+      "references": [
+        {
+          "path": "backend-fastapi/src/domain/entities/pagamento.py",
+          "detail": "PagamentoEntity e máquina de estados"
+        },
+        {
+          "path": "backend-fastapi/src/application/usecases/crud_pagamento.py",
+          "detail": "CrudPagamentoUseCase"
+        },
+        {
+          "path": "backend-fastapi/src/presentation/rest/pagamentos.py",
+          "detail": "Rotas list/create/receber/cancelar/estornar/detalhes"
+        },
+        {
+          "path": "frontend/src/pages/FinanceiroPage.tsx",
+          "detail": "Filtros, paginação e PaymentActions"
+        }
+      ],
+      "tests": [
+        {
+          "id": "CT-WM007",
+          "title": "Receber, cancelar e estornar mantendo totais",
+          "kind": "API SQLite, domínio e componente",
+          "preconditions": [
+            "Projeto mensal R$ 300 iniciado dois meses antes da data do teste; avulso R$ 50."
+          ],
+          "steps": [
+            "Gerar três mensalidades e repetir faturamento.",
+            "Receber uma mensalidade, cancelar outra e estornar a recebida.",
+            "Tentar receber a cancelada e alterar o valor de um lançamento.",
+            "Consultar dashboard e total_acumulado do projeto."
+          ],
+          "expected": [
+            "Primeiro faturamento cria R$ 900; repetição cria zero.",
+            "Resultado: R$ 50 recebidos e R$ 300 pendentes.",
+            "Transição terminal inválida retorna 400; alteração de valor por detalhes retorna 422.",
+            "Projeto com histórico não pode ser excluído (409)."
+          ],
+          "automated_refs": [
+            {
+              "path": "backend-fastapi/tests/integration/test_api.py",
+              "name": "test_payment_and_recurring_billing_contract"
+            },
+            {
+              "path": "backend-fastapi/tests/domain/test_pagamento.py",
+              "name": "test_fluxo_pendente_pago_estornado_e_terminal"
+            },
+            {
+              "path": "frontend/src/pages/FinanceiroPage.test.tsx",
+              "name": "oferece receber/cancelar somente para pendências"
+            }
+          ],
+          "evidence": [
+            "docs/trello/evidencias/2026-09-21/backend.log",
+            "docs/trello/evidencias/2026-09-21/backend.xml",
+            "docs/trello/evidencias/2026-09-21/frontend.log",
+            "docs/trello/evidencias/2026-09-21/frontend.xml"
+          ],
+          "actual": "Contrato financeiro e testes de domínio/componentes associados passaram.",
+          "status": "Aprovado"
+        }
+      ],
+      "limitations": [],
+      "trello_url": "https://trello.com/c/cyiuZDzG"
+    },
+    {
+      "id": "WM-008",
+      "title": "Implementar dashboard e agregações financeiras",
+      "list": "Concluído",
+      "priority": null,
+      "labels": [
+        "Implementado",
+        "Produto"
+      ],
+      "owners": [],
+      "reviewers": [],
+      "dependencies": [],
+      "objective": "Apresentar indicadores financeiros e operacionais filtrados pelo proprietário.",
+      "implementation": [
+        "GET /api/dashboard/resumo retorna recebido_mes, pendente_total, atrasado_total, previsto_proximo_mes, projetos_ativos e clientes_total.",
+        "Agregar série de seis meses e consultar últimos recebimentos.",
+        "Somar apenas PAGO no realizado e excluir estornos.",
+        "Usar data de negócio America/Sao_Paulo para atraso e contexto dos indicadores."
+      ],
+      "acceptance": [
+        "Realizado e pendências acompanham recebimento/cancelamento/estorno.",
+        "Consultas filtram usuario_id.",
+        "Defeito conhecido da previsão futura é tratado em cartão separado WM-017."
+      ],
+      "references": [
+        {
+          "path": "backend-fastapi/src/infrastructure/persistence/repositories/postgres_dashboard_query.py",
+          "detail": "PostgresDashboardQuery.get_resumo e _sum"
+        },
+        {
+          "path": "backend-fastapi/src/presentation/rest/dashboard.py",
+          "detail": "Endpoint de resumo e últimos recebimentos"
+        },
+        {
+          "path": "backend-fastapi/src/domain/time.py",
+          "detail": "business_today"
+        },
+        {
+          "path": "frontend/src/pages/DashboardPage.tsx",
+          "detail": "Indicadores, gráfico e últimos recebimentos"
+        }
+      ],
+      "tests": [
+        {
+          "id": "CT-WM008",
+          "title": "Agregar realizado após ajustes financeiros",
+          "kind": "Integração FastAPI/SQLite",
+          "preconditions": [
+            "Cenário financeiro integrado com avulso R$ 50, mensalidades recebida/estornada, cancelada e pendente."
+          ],
+          "steps": [
+            "Executar test_payment_and_recurring_billing_contract.",
+            "Consultar GET /api/dashboard/resumo após os ajustes.",
+            "Comparar recebido_mes e pendente_total com os valores dos lançamentos."
+          ],
+          "expected": [
+            "recebido_mes = 50.00; pendente_total = 300.00.",
+            "Estorno não contribui para realizado e cancelamento não permanece nas pendências."
+          ],
+          "automated_refs": [
+            {
+              "path": "backend-fastapi/tests/integration/test_api.py",
+              "name": "test_payment_and_recurring_billing_contract"
+            }
+          ],
+          "evidence": [
+            "docs/trello/evidencias/2026-09-21/backend.log",
+            "docs/trello/evidencias/2026-09-21/backend.xml"
+          ],
+          "actual": "Agregações verificadas no teste de API passaram.",
+          "status": "Aprovado"
+        }
+      ],
+      "limitations": [
+        "A previsão do mês seguinte soma contratos ativos sem restringir corretamente seu início. Reproduzido: R$ 1.200 em vez de R$ 300; ver WM-017.",
+        "Não há comprovação de desempenho em escala nem teste automatizado completo de todos os indicadores."
+      ],
+      "trello_url": "https://trello.com/c/Mk0DkHb4"
+    },
+    {
+      "id": "WM-009",
+      "title": "Versionar banco e migrar serviços preservando dados existentes",
+      "list": "Concluído",
+      "priority": null,
+      "labels": [
+        "Implementado",
+        "Produto"
+      ],
+      "owners": [],
+      "reviewers": [],
+      "dependencies": [],
+      "objective": "Evoluir o modelo de serviços e tags sem perder conteúdo legado.",
+      "implementation": [
+        "Baseline 20260905_0001 cria modelo relacional.",
+        "Migration 20260916_0002 inclui descricao_documento, tags e servico_tags.",
+        "Converter descrição antiga em parágrafos do documento versionado.",
+        "Normalizar e deduplicar tags por usuário; manter colunas antigas e dados de capa.",
+        "Usar Alembic como fonte de evolução de schema."
+      ],
+      "acceptance": [
+        "Migrations aplicam desde baseline; alembic check confirma modelo sem divergência no cenário testado.",
+        "Conversão preserva descrição original, conteúdo JSON, ferramentas, repositório e bytes da imagem.",
+        "Dois serviços legados do cenário produzem duas tags e três associações."
+      ],
+      "references": [
+        {
+          "path": "backend-fastapi/migrations/versions/20260905_0001_baseline.py",
+          "detail": "Baseline relacional"
+        },
+        {
+          "path": "backend-fastapi/migrations/versions/20260916_0002_service_documents.py",
+          "detail": "upgrade de descrições e tags"
+        },
+        {
+          "path": "backend-fastapi/src/infrastructure/persistence/models.py",
+          "detail": "PKs, FKs, índices e relacionamentos"
+        }
+      ],
+      "tests": [
+        {
+          "id": "CT-WM009",
+          "title": "Preservar serviços legados e normalizar tags",
+          "kind": "Migration sobre SQLite temporário",
+          "preconditions": [
+            "Banco temporário vazio e revisões Alembic do repositório."
+          ],
+          "steps": [
+            "Aplicar baseline 20260905_0001.",
+            "Inserir dois serviços com descrição em duas linhas, imagem e tags 'Web, web, Design' / 'DESIGN'.",
+            "Aplicar upgrade head e consultar serviços/tags/associações.",
+            "Executar alembic check."
+          ],
+          "expected": [
+            "Textos e bytes originais preservados; segunda linha existe no JSON.",
+            "Exatamente duas tags e três associações.",
+            "alembic check termina sem detectar novas operações."
+          ],
+          "automated_refs": [
+            {
+              "path": "backend-fastapi/tests/integration/test_service_migration.py",
+              "name": "test_migration_preserves_legacy_services_and_deduplicates_tags"
+            }
+          ],
+          "evidence": [
+            "docs/trello/evidencias/2026-09-21/backend.log",
+            "docs/trello/evidencias/2026-09-21/backend.xml"
+          ],
+          "actual": "Teste de migração aprovado. Execução foi em SQLite temporário, não PostgreSQL.",
+          "status": "Aprovado"
+        }
+      ],
+      "limitations": [
+        "Validar migrations e concorrência no PostgreSQL em WM-019."
+      ],
+      "trello_url": "https://trello.com/c/BwUJpJqA"
+    },
+    {
+      "id": "WM-010",
+      "title": "Containerizar frontend, BFF, API e PostgreSQL",
+      "list": "Concluído",
+      "priority": null,
+      "labels": [
+        "Implementado",
+        "Infraestrutura"
+      ],
+      "owners": [],
+      "reviewers": [],
+      "dependencies": [],
+      "objective": "Disponibilizar definição reproduzível do ambiente local com persistência.",
+      "implementation": [
+        "Compose define postgres, fastapi, bff e frontend em rede interna.",
+        "PostgreSQL 15 utiliza volume postgres_data; frontend publica porta 5173.",
+        "Backend Python 3.12 usa uv.lock e aplica alembic upgrade head antes do Uvicorn.",
+        "Build de frontend Node 20 gera artefatos servidos pelo Nginx.",
+        "Healthchecks e depends_on ordenam prontidão dos serviços."
+      ],
+      "acceptance": [
+        "Arquivos de configuração definem os quatro serviços e volume persistente.",
+        "A inicialização da API inclui migrations.",
+        "Comprovação da jornada real depende dos cartões WM-018/WM-019; não inferir resultado de CI remoto."
+      ],
+      "references": [
+        {
+          "path": "docker-compose.yml",
+          "detail": "Serviços, rede, volumes, healthchecks e dependências"
+        },
+        {
+          "path": "backend-fastapi/Dockerfile",
+          "detail": "Build em estágios, uv e Alembic"
+        },
+        {
+          "path": "frontend/Dockerfile",
+          "detail": "Build Vite e runtime Nginx"
+        },
+        {
+          "path": "frontend/bff/Dockerfile",
+          "detail": "Runtime BFF"
+        }
+      ],
+      "tests": [
+        {
+          "id": "CT-WM010",
+          "title": "Revisar definição do ambiente Docker",
+          "kind": "Revisão estática de configuração",
+          "preconditions": [
+            "Arquivos do commit-base disponíveis."
+          ],
+          "steps": [
+            "Conferir serviços, rede e volume no Compose.",
+            "Conferir comandos de build/start nos Dockerfiles e healthchecks.",
+            "Localizar o smoke test configurado no CI."
+          ],
+          "expected": [
+            "Quatro serviços definidos, banco com volume e migrations no start do backend."
+          ],
+          "automated_refs": [],
+          "evidence": [
+            "docker-compose.yml",
+            "backend-fastapi/Dockerfile",
+            "frontend/Dockerfile",
+            ".github/workflows/ci.yml"
+          ],
+          "actual": "Configuração localizada e revisada. Docker não foi iniciado nesta preparação do backlog; não há resultado de execução integrado associado a este cartão.",
+          "status": "Revisado no código; execução integrada pendente"
+        }
+      ],
+      "limitations": [
+        "Não executar docker compose down -v no ambiente pessoal para validar este cartão.",
+        "WM-018 e WM-019 utilizam ambientes descartáveis separados."
+      ],
+      "trello_url": "https://trello.com/c/KgnsA9TF"
+    },
+    {
+      "id": "WM-011",
+      "title": "Configurar testes automatizados e integração contínua",
+      "list": "Concluído",
+      "priority": null,
+      "labels": [
+        "Implementado",
+        "Testes"
+      ],
+      "owners": [],
+      "reviewers": [],
+      "dependencies": [],
+      "objective": "Executar verificações reproduzíveis de regras, contratos, componentes e build.",
+      "implementation": [
+        "pytest cobre domínio, casos de uso, API, PDF e migrations.",
+        "Vitest/Testing Library cobrem formulários, sessão, diálogos, downloads e ações por estado.",
+        "CI configura jobs backend, bff, frontend e images.",
+        "Jobs incluem Alembic, pytest, npm test, lint, build e node --check.",
+        "Smoke test consulta HTML/CSS servido pelo Nginx."
+      ],
+      "acceptance": [
+        "Suítes locais encerram com código zero e evidências identificam versão/ambiente.",
+        "Separar aprovação de testes locais, configuração do CI e execução efetiva do pipeline remoto.",
+        "Não chamar teste de componente com mocks de E2E."
+      ],
+      "references": [
+        {
+          "path": ".github/workflows/ci.yml",
+          "detail": "Jobs e comandos do pipeline"
+        },
+        {
+          "path": "backend-fastapi/pyproject.toml",
+          "detail": "Configuração pytest e dependências dev"
+        },
+        {
+          "path": "frontend/vitest.config.ts",
+          "detail": "jsdom e setup dos testes"
+        },
+        {
+          "path": "frontend/package.json",
+          "detail": "Scripts test/lint/build"
+        }
+      ],
+      "tests": [
+        {
+          "id": "CT-WM011",
+          "title": "Executar suites existentes e salvar relatórios",
+          "kind": "pytest e Vitest locais",
+          "preconditions": [
+            "Python 3.13.13 na .venv do backend; Node 22.18.0; dependências já instaladas; código funcional sem alterações."
+          ],
+          "steps": [
+            "Executar pytest -q -p no:cacheprovider com saída JUnit.",
+            "Executar vitest run com reporters default/junit.",
+            "Conferir exit code, totais e ausência de falhas nos relatórios."
+          ],
+          "expected": [
+            "Backend: 39 testes aprovados.",
+            "Frontend: 15 testes aprovados em nove arquivos.",
+            "Logs/JUnit salvos sem inferir cobertura percentual."
+          ],
+          "automated_refs": [],
+          "evidence": [
+            "docs/trello/evidencias/2026-09-21/backend.log",
+            "docs/trello/evidencias/2026-09-21/backend.xml",
+            "docs/trello/evidencias/2026-09-21/frontend.log",
+            "docs/trello/evidencias/2026-09-21/frontend.xml"
+          ],
+          "actual": "Execução de 21/09/2026: backend 39 passed em 9,24 s; frontend 15 passed em nove arquivos em 9,65 s; ambos exit code 0.",
+          "status": "Aprovado"
+        }
+      ],
+      "limitations": [
+        "Não foram executados nesta preparação lint, build, pipeline remoto, Docker ou E2E.",
+        "BFF atualmente só tem verificação sintática no CI; ampliar em WM-020."
+      ],
+      "trello_url": "https://trello.com/c/6PtQSOha"
+    },
+    {
+      "id": "WM-012",
+      "title": "Documentar instalação, arquitetura e operação do sistema",
+      "list": "Concluído",
+      "priority": null,
+      "labels": [
+        "Implementado",
+        "Documentação"
+      ],
+      "owners": [],
+      "reviewers": [],
+      "dependencies": [],
+      "objective": "Manter referências do software ao lado do código para instalação e continuidade.",
+      "implementation": [
+        "README descreve configuração, execução, atualização e diagnóstico.",
+        "Documentar responsabilidades React/Nginx → Express BFF → FastAPI → PostgreSQL.",
+        "Descrever requisitos funcionais, regras financeiras, editor, PDF e migrations.",
+        "Orientar backup e preservação do volume."
+      ],
+      "acceptance": [
+        "Documentos existentes refletem a arquitetura de quatro serviços.",
+        "Comandos e pré-requisitos são encontráveis no README e guia do desenvolvedor.",
+        "Alterações de etapas/CSV não são documentadas como já entregues antes da implementação."
+      ],
+      "references": [
+        {
+          "path": "README.md",
+          "detail": "Instalação, execução, backup e diagnóstico"
+        },
+        {
+          "path": "docs/ARQUITETURA.md",
+          "detail": "Camadas e consistência financeira"
+        },
+        {
+          "path": "docs/REQUISITOS_FUNCIONAIS.md",
+          "detail": "Comportamento atual e fora de escopo"
+        },
+        {
+          "path": "docs/DEVELOPER_GUIDE.md",
+          "detail": "Desenvolvimento e testes"
+        },
+        {
+          "path": "docs/SERVICOS.md",
+          "detail": "Editor, tags, PDF e migração"
+        }
+      ],
+      "tests": [
+        {
+          "id": "CT-WM012",
+          "title": "Localizar referências de operação e arquitetura",
+          "kind": "Revisão documental",
+          "preconditions": [
+            "README e documentos técnicos versionados."
+          ],
+          "steps": [
+            "Conferir instruções de execução, arquitetura, regras e backup.",
+            "Comparar fluxos documentados com componentes existentes.",
+            "Registrar evolução necessária em WM-021."
+          ],
+          "expected": [
+            "Fontes localizáveis e arquitetura atual descrita; itens futuros mantidos como pendentes."
+          ],
+          "automated_refs": [],
+          "evidence": [
+            "README.md",
+            "docs/ARQUITETURA.md",
+            "docs/REQUISITOS_FUNCIONAIS.md",
+            "docs/DEVELOPER_GUIDE.md",
+            "docs/SERVICOS.md"
+          ],
+          "actual": "Documentação existente revisada por leitura. Comandos operacionais completos não foram executados nesta revisão.",
+          "status": "Revisado; documentação da próxima versão pendente"
+        }
+      ],
+      "limitations": [
+        "Requisitos não funcionais mensuráveis e matriz RF/RN/RNF → teste → evidência ficam em WM-021."
+      ],
+      "trello_url": "https://trello.com/c/ZzsAt6eF"
+    },
+    {
+      "id": "WM-013",
+      "title": "Reformular ciclo de vida dos projetos e remover progresso percentual",
+      "list": "A fazer",
+      "priority": "Alta",
+      "labels": [
+        "Melhoria",
+        "Próxima versão"
+      ],
+      "owners": [
+        "Rafael",
+        "Gabriel"
+      ],
+      "reviewers": [
+        "Tais"
+      ],
+      "dependencies": [],
+      "objective": "Substituir o acompanhamento percentual por etapas e corrigir ações inconsistentes em projetos finalizados/mobile.",
+      "implementation": [
+        "Exibir Planejamento, Andamento, Revisão e Finalizado preservando códigos DISCOVERY, IN_PROGRESS, REVIEW e COMPLETED.",
+        "Manter Planejamento → Andamento → Revisão → Finalizado e retorno Revisão → Andamento; usar domínio como autoridade.",
+        "Remover progresso de entidade, casos de uso, DTOs, serialização, tipos e componentes; eliminar ajustes automáticos para 100%.",
+        "Manter coluna legada com valores existentes e default para novos registros, sem leitura/escrita funcional; não reescrever migrations antigas.",
+        "Separar Arquivar do seletor de etapas, com confirmação, pausa da recorrência e preservação do histórico.",
+        "Oferecer Pausar/Retomar apenas para projetos mensais que não estejam finalizados/arquivados.",
+        "Disponibilizar Excluir em desktop/mobile com bloqueio por possui_lancamentos.",
+        "Atualizar fixtures e testes que hoje exigem progresso."
+      ],
+      "acceptance": [
+        "Novo projeto aparece em Planejamento; formulário/lista/detalhe do cliente não exibem percentuais.",
+        "Respostas de projeto não incluem progresso; coluna antiga permanece intacta em edição de registros existentes.",
+        "Finalizar/arquivar pausa recorrência; API rejeita retomada inválida; pendências permanecem.",
+        "Mesmo conjunto de ações permitido em 390 e 1440 pixels."
+      ],
+      "references": [
+        {
+          "path": "backend-fastapi/src/domain/entities/projeto.py",
+          "detail": "VALID_STATUSES, STATUS_TRANSITIONS, change_status e progresso"
+        },
+        {
+          "path": "backend-fastapi/src/application/usecases/atualizar_projeto.py",
+          "detail": "EDITABLE_FIELDS e regras de finalização"
+        },
+        {
+          "path": "backend-fastapi/src/presentation/dto/schemas.py",
+          "detail": "Schemas de projeto"
+        },
+        {
+          "path": "backend-fastapi/src/infrastructure/persistence/repositories/postgres_projeto_repo.py",
+          "detail": "Leitura, gravação e projeções de progresso"
+        },
+        {
+          "path": "frontend/src/features/projetos/projectMeta.ts",
+          "detail": "Rótulos e transições"
+        },
+        {
+          "path": "frontend/src/pages/ProjetosPage.tsx",
+          "detail": "Tabela/card e ações condicionais"
+        },
+        {
+          "path": "frontend/src/features/projetos/ProjetoFormDialog.tsx",
+          "detail": "Campo e payload de progresso"
+        },
+        {
+          "path": "frontend/src/pages/ClienteDetailPage.tsx",
+          "detail": "Percentuais em cards de projeto"
+        }
+      ],
+      "tests": [
+        {
+          "id": "CT-WM013",
+          "title": "Ciclo de vida sem percentuais",
+          "kind": "Regressão de domínio/API, componentes e interface",
+          "preconditions": [
+            "Projeto mensal em Planejamento com recorrência ativa; outro projeto sem histórico e outro com lançamento.",
+            "Registro legado com progresso não zero para verificar preservação da coluna."
+          ],
+          "steps": [
+            "Criar projeto e conferir resposta/etapa inicial.",
+            "Percorrer Andamento → Revisão → Andamento → Revisão → Finalizado.",
+            "Consultar API, listagem, formulário e detalhe do cliente após atualização.",
+            "Tentar reativar recorrência finalizada pela API.",
+            "Arquivar outro projeto com confirmação e conferir pendências.",
+            "Conferir Excluir e Pausar/Retomar em 390/1440 pixels; tentar excluir projeto com histórico."
+          ],
+          "expected": [
+            "Rótulos corretos e nenhuma propriedade de progresso nos contratos da API/telas.",
+            "Percentual legado não alterado no banco.",
+            "Recorrência interrompida e retomada inválida rejeitada.",
+            "Exclusão protegida e ações equivalentes entre mobile/desktop."
+          ],
+          "automated_refs": [],
+          "evidence": [],
+          "actual": "Ainda não implementado. O código atual oferece Retomar em COMPLETED e oculta Excluir de projetos mensais no mobile.",
+          "status": "Não executado"
+        }
+      ],
+      "limitations": [],
+      "trello_url": "https://trello.com/c/YN4Ddzp3"
+    },
+    {
+      "id": "WM-014",
+      "title": "Criar exportação CSV autenticada no backend financeiro",
+      "list": "A fazer",
+      "priority": "Alta",
+      "labels": [
+        "Melhoria",
+        "Próxima versão"
+      ],
+      "owners": [
+        "Rafael"
+      ],
+      "reviewers": [
+        "Tais"
+      ],
+      "dependencies": [],
+      "objective": "Exportar todos os lançamentos correspondentes aos filtros sem expor dados de outros usuários ou anexos binários.",
+      "implementation": [
+        "Criar GET /api/pagamentos/exportar.csv com a dependência de autenticação existente.",
+        "Compartilhar filtros e ordenação com a listagem: status, tipo_pagamento, cliente_id, projeto_id, data_inicio, data_fim e q.",
+        "Exportação não aplica page/page_size; validar período invertido e parâmetros como na consulta atual.",
+        "Consultar apenas projeção necessária, sem comprovante_bytes/Base64.",
+        "Serializar UTF-8 com BOM, separador ;, aspas/quebras corretas e neutralização de fórmulas em textos.",
+        "Colunas: ID do lançamento, ID do projeto, Cliente, Serviço, Tipo, Status, Em atraso, Referência mensal, Vencimento, Pagamento, Valor, Observação e Motivo do ajuste.",
+        "Usar datas dd/mm/aaaa, valores com duas casas/vírgula e campo vazio para opcionais ausentes.",
+        "Retornar text/csv com Content-Disposition e nome workmy-financeiro-AAAA-MM-DD.csv; arquivo vazio contém cabeçalhos."
+      ],
+      "acceptance": [
+        "Todos os resultados dos filtros são exportados, mesmo além da página atual.",
+        "CSV respeita usuario_id e autorização; sem token não exporta.",
+        "Não carrega comprovantes; valores e IDs correspondem à consulta.",
+        "Acentos, separadores, aspas, multilinhas e textos de fórmula não quebram o arquivo."
+      ],
+      "references": [
+        {
+          "path": "backend-fastapi/src/presentation/rest/pagamentos.py",
+          "detail": "list_pagamentos e validação de filtros"
+        },
+        {
+          "path": "backend-fastapi/src/application/ports/outbound/i_pagamento_repository.py",
+          "detail": "Contrato do repositório financeiro"
+        },
+        {
+          "path": "backend-fastapi/src/infrastructure/persistence/repositories/postgres_pagamento_repo.py",
+          "detail": "list_with_names e construção de condições"
+        },
+        {
+          "path": "backend-fastapi/src/application/dto/views.py",
+          "detail": "PagamentoView e definição de projeções"
+        }
+      ],
+      "tests": [
+        {
+          "id": "CT-WM014",
+          "title": "Exportação completa, filtrada e isolada",
+          "kind": "Integração HTTP e serialização CSV",
+          "preconditions": [
+            "Usuário A com 12 registros compatíveis e outros incompatíveis; usuário B com registros próprios.",
+            "Dados textuais incluem acentos, aspas, ponto e vírgula, nova linha e =,+,-,@ no início.",
+            "Usuários e valores exclusivamente de teste."
+          ],
+          "steps": [
+            "Exportar autenticado como A com filtros combinados; parsear com csv.reader(delimiter=';').",
+            "Comparar conjunto de IDs com todos os resultados da consulta paginada, não só a primeira página.",
+            "Repetir com filtro sem resultados, sem autenticação e período invertido.",
+            "Conferir bytes de BOM, MIME, nome do download e estrutura dos campos textuais."
+          ],
+          "expected": [
+            "Exatamente 12 registros mais cabeçalho no cenário principal, sem dados de B.",
+            "Resultado vazio contém apenas cabeçalho; acesso anônimo é rejeitado; intervalo inválido não exporta.",
+            "Texto e campos permanecem íntegros e entradas potencialmente interpretáveis como fórmulas são tratadas como texto."
+          ],
+          "automated_refs": [],
+          "evidence": [],
+          "actual": "Endpoint CSV ainda não existe na versão-base.",
+          "status": "Não executado"
+        }
+      ],
+      "limitations": [],
+      "trello_url": "https://trello.com/c/5vXMBWbW"
+    },
+    {
+      "id": "WM-015",
+      "title": "Integrar download CSV aos filtros do Financeiro",
+      "list": "A fazer",
+      "priority": "Alta",
+      "labels": [
+        "Melhoria",
+        "Próxima versão"
+      ],
+      "owners": [
+        "Gabriel"
+      ],
+      "reviewers": [
+        "Tais"
+      ],
+      "dependencies": [
+        "WM-014"
+      ],
+      "objective": "Permitir baixar os resultados filtrados sem perder contexto e sem downloads duplicados.",
+      "implementation": [
+        "Adicionar Exportar CSV junto aos filtros do Financeiro.",
+        "Compartilhar objeto de filtros da tela entre listagem e exportação; excluir page/page_size do download.",
+        "Reutilizar responseType: 'blob' do cliente HTTP e sessão pelo BFF.",
+        "Baixar como workmy-financeiro-AAAA-MM-DD.csv e revogar URL temporária após uso.",
+        "Bloquear cliques repetidos durante processamento com estado e trava de envio.",
+        "Falha exibe mensagem, preserva filtros e reabilita tentativa."
+      ],
+      "acceptance": [
+        "Exportar a partir da segunda página baixa todos os resultados filtrados.",
+        "Durante download somente uma requisição fica ativa.",
+        "Erros de autenticação/rede não geram arquivo inválido nem limpam filtros."
+      ],
+      "references": [
+        {
+          "path": "frontend/src/pages/FinanceiroPage.tsx",
+          "detail": "Filtros, load e paginação"
+        },
+        {
+          "path": "frontend/src/lib/http.ts",
+          "detail": "Suporte a blob e erros JSON"
+        },
+        {
+          "path": "frontend/src/features/servicos/ServicePresentationDialogs.tsx",
+          "detail": "Padrão existente de download"
+        }
+      ],
+      "tests": [
+        {
+          "id": "CT-WM015",
+          "title": "Download CSV da segunda página e recuperação após falha",
+          "kind": "Componente React e navegação",
+          "preconditions": [
+            "Financeiro com ao menos duas páginas; mock do download controlado e dados reais no smoke manual."
+          ],
+          "steps": [
+            "Aplicar status, cliente, tipo, período e busca; navegar à segunda página.",
+            "Clicar Exportar CSV duas vezes antes da resposta.",
+            "Conferir query da requisição e nome do arquivo.",
+            "Simular falha de rede/401 e depois nova resposta válida."
+          ],
+          "expected": [
+            "Query inclui filtros atuais sem page/page_size; apenas uma requisição durante processamento.",
+            "Arquivo usa nome esperado; URL temporária é liberada.",
+            "Falha apresenta mensagem, mantém filtros e permite repetir."
+          ],
+          "automated_refs": [],
+          "evidence": [],
+          "actual": "Interface de exportação ainda não implementada.",
+          "status": "Não executado"
+        }
+      ],
+      "limitations": [],
+      "trello_url": "https://trello.com/c/yRd6B5Ky"
+    },
+    {
+      "id": "WM-016",
+      "title": "Centralizar ações rápidas e remover botões duplicados",
+      "list": "A fazer",
+      "priority": "Alta",
+      "labels": [
+        "Melhoria",
+        "Próxima versão"
+      ],
+      "owners": [
+        "Gabriel"
+      ],
+      "reviewers": [
+        "Tais"
+      ],
+      "dependencies": [],
+      "objective": "Concentrar os atalhos no dashboard e retirar duplicações na mesma tela.",
+      "implementation": [
+        "Remover Novo projeto da barra superior em AppLayout e imports que ficarem sem uso.",
+        "Mover Ações rápidas para depois do título e antes dos indicadores do dashboard.",
+        "Incluir Cadastrar cliente, Cadastrar serviço, Novo projeto e Registrar recebimento no bloco.",
+        "Remover botões equivalentes do PageHeader do dashboard e bloco antigo inferior.",
+        "Retirar botões de criação repetidos nos estados vazios de clientes/serviços/projetos e recebimento repetido no financeiro.",
+        "Preservar um botão principal por listagem, query params acao e ações vinculadas ao detalhe do cliente."
+      ],
+      "acceptance": [
+        "Os quatro atalhos abrem o formulário canônico na rota correta.",
+        "Navbar não contém Novo projeto.",
+        "Uma única entrada de criação por listagem, inclusive vazia.",
+        "Ações rápidas ficam antes dos indicadores no DOM e na tela desktop/mobile."
+      ],
+      "references": [
+        {
+          "path": "frontend/src/components/AppLayout.tsx",
+          "detail": "Botão global Novo projeto"
+        },
+        {
+          "path": "frontend/src/pages/DashboardPage.tsx",
+          "detail": "PageHeader e bloco Ações rápidas"
+        },
+        {
+          "path": "frontend/src/pages/ClientesPage.tsx",
+          "detail": "Botões do cabeçalho e EmptyState"
+        },
+        {
+          "path": "frontend/src/pages/ServicosPage.tsx",
+          "detail": "Botões do cabeçalho e EmptyState"
+        },
+        {
+          "path": "frontend/src/pages/ProjetosPage.tsx",
+          "detail": "Botões do cabeçalho e EmptyState"
+        },
+        {
+          "path": "frontend/src/pages/FinanceiroPage.tsx",
+          "detail": "Registrar recebimento no cabeçalho e EmptyState"
+        }
+      ],
+      "tests": [
+        {
+          "id": "CT-WM016",
+          "title": "Atalhos e ausência de duplicações",
+          "kind": "Regressão de navegação e inspeção visual",
+          "preconditions": [
+            "Usuário autenticado; fixtures com listas vazias e preenchidas."
+          ],
+          "steps": [
+            "Abrir dashboard e conferir ordem título/ações/indicadores.",
+            "Acionar cada atalho e conferir /clientes?acao=novo, /servicos?acao=novo, /projetos?acao=novo e /financeiro?acao=recebimento.",
+            "Verificar quantidade de botões de criação por tela e ausência na navbar.",
+            "Repetir inspeção em 390 e 1440 pixels e abrir ação pelo detalhe de um cliente."
+          ],
+          "expected": [
+            "Formulários corretos, sem perda do cliente no fluxo contextual.",
+            "Botões principais únicos por listagem e ações rápidas no topo.",
+            "Layout não encobre conteúdo em mobile."
+          ],
+          "automated_refs": [],
+          "evidence": [],
+          "actual": "Alterações ainda pendentes. Teste atual do dashboard cobre apenas o atalho de projeto.",
+          "status": "Não executado"
+        }
+      ],
+      "limitations": [],
+      "trello_url": "https://trello.com/c/pFi025ok"
+    },
+    {
+      "id": "WM-017",
+      "title": "Corrigir previsão financeira para respeitar o início da recorrência",
+      "list": "Em teste",
+      "priority": "Alta",
+      "labels": [
+        "Bug corrigido localmente",
+        "QA pendente"
+      ],
+      "owners": [
+        "Rafael"
+      ],
+      "reviewers": [
+        "Tais"
+      ],
+      "dependencies": [],
+      "objective": "Ajustar previsto_proximo_mes para representar vencimentos elegíveis no mês seguinte.",
+      "implementation": [
+        "Considerar somente contratos com ao menos um vencimento elegível dentro do mês seguinte.",
+        "Compartilhar cálculo de primeiro vencimento entre faturamento e previsão.",
+        "Respeitar recorrencia_inicio, dia_vencimento e fallback de criado_em usado no faturamento quando início não estiver preenchido.",
+        "Excluir pausados, COMPLETED, ARCHIVED e deletados.",
+        "Preservar campos/resposta do endpoint de dashboard.",
+        "Adicionar regressão com datas fixas e início antes/depois do vencimento."
+      ],
+      "acceptance": [
+        "Em 21/09/2026, R$ 300 vigente + R$ 900 iniciando 01/11/2026 produz previsão de outubro R$ 300.",
+        "Se o contrato de R$ 900 começar em 01/10 e vencer dia 5, previsão de outubro é R$ 1.200.",
+        "Se começar em 06/10 com vencimento dia 5, primeiro vencimento é novembro e previsão de outubro volta a R$ 300."
+      ],
+      "references": [
+        {
+          "path": "backend-fastapi/src/infrastructure/persistence/repositories/postgres_dashboard_query.py",
+          "detail": "get_resumo considera primeiro vencimento elegível (patch local WM-017)"
+        },
+        {
+          "path": "backend-fastapi/src/application/usecases/faturar_recorrencias.py",
+          "detail": "_first_due_date e fallback de início"
+        },
+        {
+          "path": "backend-fastapi/src/domain/time.py",
+          "detail": "Data de negócio"
+        },
+        {
+          "path": "backend-fastapi/src/domain/recorrencia.py",
+          "detail": "first_due_date compartilhado por dashboard e faturamento"
+        }
+      ],
+      "tests": [
+        {
+          "id": "CT-WM017",
+          "title": "Previsão com contrato iniciado no futuro",
+          "kind": "Integração SQLite e regressão de domínio",
+          "preconditions": [
+            "Data fixa 21/09/2026; usuário com dois serviços/projetos mensais ativos.",
+            "Contrato A: R$ 300 desde 01/09/2026; contrato B: R$ 900 desde 01/11/2026; ambos vencem dia 5."
+          ],
+          "steps": [
+            "Executar PostgresDashboardQuery.get_resumo com SQLite em memória.",
+            "Conferir previsto_proximo_mes para outubro.",
+            "Após a correção, repetir com início B em 01/10/2026 e em 06/10/2026."
+          ],
+          "expected": [
+            "Cenário original retorna R$ 300.",
+            "Início em 01/10 retorna R$ 1.200; início em 06/10 retorna R$ 300.",
+            "Não altera a geração efetiva de mensalidades."
+          ],
+          "automated_refs": [
+            {
+              "path": "backend-fastapi/tests/integration/test_dashboard_forecast.py",
+              "name": "test_forecast_first_eligible_due_date"
+            },
+            {
+              "path": "backend-fastapi/tests/domain/test_recorrencia.py",
+              "name": "test_first_due_date_falls_back_to_today"
+            }
+          ],
+          "evidence": [
+            "docs/trello/evidencias/2026-09-21-reteste-WM017/RELATORIO.md",
+            "docs/trello/evidencias/2026-09-21-reteste-WM017/backend.xml",
+            "docs/trello/evidencias/2026-09-21-reteste-WM017/frontend.xml",
+            "docs/trello/evidencias/2026-09-21-reteste-WM017/previsao.log",
+            "docs/trello/evidencias/2026-09-21-reteste-WM017/antes.xml"
+          ],
+          "actual": "Reteste: esperado e obtido R$ 300; antes/no vencimento R$ 1.200; após vencimento R$ 300. 55 backend + 15 frontend aprovados. Ver relatório do reteste.",
+          "status": "Aprovado — automatizado; revisão funcional pendente"
+        }
+      ],
+      "limitations": [
+        "Revisão funcional de Tais pendente. Alterações locais sem commit/push. Integração validada com SQLite, não PostgreSQL."
+      ],
+      "trello_url": "https://trello.com/c/Y1FXVJVZ",
+      "implementation_complete": true
+    },
+    {
+      "id": "WM-018",
+      "title": "Automatizar jornada completa no navegador contra o Docker",
+      "list": "A fazer",
+      "priority": "Média",
+      "labels": [
+        "Testes",
+        "Evolução técnica"
+      ],
+      "owners": [
+        "Gabriel"
+      ],
+      "reviewers": [
+        "Tais"
+      ],
+      "dependencies": [
+        "WM-013",
+        "WM-014",
+        "WM-015",
+        "WM-016"
+      ],
+      "objective": "Verificar interface, sessão, regras e banco reais em uma jornada autenticada, além dos mocks de componentes.",
+      "implementation": [
+        "Adicionar Playwright e configuração E2E contra Compose de teste isolado.",
+        "Subir frontend, BFF, FastAPI e PostgreSQL sem compartilhar o volume/banco pessoal.",
+        "Criar usuário e dados únicos em cada execução.",
+        "Percorrer cadastro/login → cliente → serviço → projeto → cobrança → recebimento → dashboard → CSV → logout.",
+        "Atualizar a página após gravações para provar persistência pelo servidor.",
+        "Gerar relatório, screenshots/trace de falhas e adicionar etapa ao CI."
+      ],
+      "acceptance": [
+        "Jornada executada sem interceptar APIs de negócio por mocks.",
+        "Dados criados persistem, totais estão corretos e CSV contém o lançamento.",
+        "Logout impede acesso privado; relatório da execução é preservado.",
+        "Limpeza afeta somente recursos do Compose de teste."
+      ],
+      "references": [
+        {
+          "path": ".github/workflows/ci.yml",
+          "detail": "Smoke atual verifica HTML/CSS, não jornada autenticada"
+        },
+        {
+          "path": "docker-compose.yml",
+          "detail": "Base dos quatro serviços; isolar projeto/volume/portas nos testes"
+        },
+        {
+          "path": "frontend/vitest.config.ts",
+          "detail": "Testes atuais são de componentes jsdom"
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "detail": "Rotas e proteção de navegação"
+        }
+      ],
+      "tests": [
+        {
+          "id": "CT-WM018",
+          "title": "Jornada integrada com dados reais no ambiente de teste",
+          "kind": "Automatização futura",
+          "preconditions": [
+            "Compose de teste recém-criado, serviços saudáveis e PostgreSQL isolado.",
+            "Data de referência controlada nos dados da recorrência; nenhum registro pessoal."
+          ],
+          "steps": [
+            "Cadastrar usuário e entrar pela interface.",
+            "Criar cliente, serviço e projeto; recarregar a página.",
+            "Gerar mensalidade elegível e confirmá-la como recebida.",
+            "Conferir dashboard, exportar CSV e ler arquivo baixado.",
+            "Sair e tentar abrir área privada."
+          ],
+          "expected": [
+            "Todos os fluxos concluem usando requisições reais através do BFF.",
+            "Projeto/recebimento persistem e valores conferem no CSV/dashboard.",
+            "Acesso privado após logout é bloqueado; relatório e evidências estão disponíveis."
+          ],
+          "actual": "Não implementado/não executado na versão-base.",
+          "status": "Não executado",
+          "automated_refs": [],
+          "evidence": []
+        }
+      ],
+      "limitations": [],
+      "trello_url": "https://trello.com/c/F8OakQJb"
+    },
+    {
+      "id": "WM-019",
+      "title": "Validar migrations e concorrência usando PostgreSQL",
+      "list": "A fazer",
+      "priority": "Média",
+      "labels": [
+        "Testes",
+        "Evolução técnica"
+      ],
+      "owners": [
+        "Rafael"
+      ],
+      "reviewers": [
+        "Tais"
+      ],
+      "dependencies": [],
+      "objective": "Verificar o banco utilizado no Docker e as restrições sob operações concorrentes reais.",
+      "implementation": [
+        "Adicionar suíte de integração com PostgreSQL 15 descartável e sessões independentes.",
+        "Aplicar baseline, inserir amostras legadas e atualizar até head; executar alembic check.",
+        "Verificar preservação de descrições, imagens e deduplicação de tags.",
+        "Disparar duas gerações simultâneas da mesma referência mensal.",
+        "Disparar criação simultânea da mesma combinação usuário/cliente/serviço.",
+        "Verificar unicidade e tradução de conflitos sem erro genérico 500.",
+        "Executar em serviço isolado no CI e preservar logs."
+      ],
+      "acceptance": [
+        "Schema atualizado coincide com modelos; migration preserva os dados da amostra.",
+        "Há exatamente uma mensalidade por projeto/referência sob concorrência.",
+        "Há somente um projeto não excluído por combinação, com conflito tratado.",
+        "Testes não apontam para DATABASE_URL de desenvolvimento."
+      ],
+      "references": [
+        {
+          "path": "backend-fastapi/tests/integration/test_api.py",
+          "detail": "Testes atuais utilizam SQLite em memória"
+        },
+        {
+          "path": "backend-fastapi/tests/integration/test_service_migration.py",
+          "detail": "Migração atual testada em SQLite temporário"
+        },
+        {
+          "path": "backend-fastapi/src/infrastructure/persistence/repositories/postgres_pagamento_repo.py",
+          "detail": "save_recorrencia e savepoints"
+        },
+        {
+          "path": "backend-fastapi/src/infrastructure/persistence/repositories/postgres_projeto_repo.py",
+          "detail": "Tradução de IntegrityError"
+        },
+        {
+          "path": ".github/workflows/ci.yml",
+          "detail": "Adicionar integração PostgreSQL isolada"
+        }
+      ],
+      "tests": [
+        {
+          "id": "CT-WM019",
+          "title": "Unicidade sob concorrência e preservação de dados",
+          "kind": "Automatização futura",
+          "preconditions": [
+            "PostgreSQL 15 descartável com migrations aplicadas e proprietário/cliente/serviço de teste.",
+            "Referência mensal ainda não criada; duas sessões/conexões independentes."
+          ],
+          "steps": [
+            "Executar duas solicitações simultâneas de geração para a mesma referência.",
+            "Consultar contagem e somatório dos registros persistidos.",
+            "Executar criação simultânea da mesma combinação de projeto e conferir respostas.",
+            "Em banco separado, aplicar baseline + dados legados + upgrade e alembic check."
+          ],
+          "expected": [
+            "Exatamente um lançamento por referência e um projeto por combinação.",
+            "Conflitos não resultam em duplicação nem HTTP 500.",
+            "Dados legados preservados e schema sem diferenças."
+          ],
+          "actual": "Não implementado/não executado na versão-base.",
+          "status": "Não executado",
+          "automated_refs": [],
+          "evidence": []
+        }
+      ],
+      "limitations": [],
+      "trello_url": "https://trello.com/c/8OFBbXrF"
+    },
+    {
+      "id": "WM-020",
+      "title": "Cobrir renovação de sessão e proxy binário do BFF",
+      "list": "A fazer",
+      "priority": "Média",
+      "labels": [
+        "Testes",
+        "Evolução técnica"
+      ],
+      "owners": [
+        "Gabriel",
+        "Rafael"
+      ],
+      "reviewers": [
+        "Tais"
+      ],
+      "dependencies": [],
+      "objective": "Cobrir os caminhos do BFF que hoje possuem somente verificação sintática no CI.",
+      "implementation": [
+        "Separar construção da aplicação Express do listen para permitir teste em porta efêmera.",
+        "Usar node:test e upstream HTTP controlado, sem serviços de terceiros.",
+        "Verificar login, atributos HTTP-only dos cookies e ausência de tokens no JSON do navegador.",
+        "Testar access ausente/refresh válido e refresh inválido.",
+        "Para 401 do upstream, renovar e repetir no máximo uma vez.",
+        "Verificar logout e encaminhamento de PDF/CSV com bytes e cabeçalhos corretos.",
+        "Incluir npm test do BFF no CI."
+      ],
+      "acceptance": [
+        "Login/renovação não expõem tokens no JSON ao frontend.",
+        "Requisição original é repetida apenas uma vez e refresh inválido encerra sessão.",
+        "Proxy preserva status, MIME, Content-Disposition e corpo binário.",
+        "Testes iniciam/encerram seus servidores sem portas fixas ou processos órfãos."
+      ],
+      "references": [
+        {
+          "path": "frontend/bff/server.js",
+          "detail": "Rotas auth, cookies, renovação e proxy manual"
+        },
+        {
+          "path": "frontend/bff/package.json",
+          "detail": "Adicionar script de testes"
+        },
+        {
+          "path": ".github/workflows/ci.yml",
+          "detail": "Job bff atualmente usa node --check"
+        }
+      ],
+      "tests": [
+        {
+          "id": "CT-WM020",
+          "title": "Renovar uma vez e preservar download binário",
+          "kind": "Automatização futura",
+          "preconditions": [
+            "BFF em porta efêmera; upstream de teste com respostas programadas e contadores."
+          ],
+          "steps": [
+            "Enviar requisição com access expirado e refresh válido.",
+            "Responder 401 na chamada original, fornecer novo access no refresh e sucesso na repetição.",
+            "Repetir com refresh inválido e depois com upstream que permanece em 401.",
+            "Solicitar amostras binárias PDF/CSV e executar logout."
+          ],
+          "expected": [
+            "Uma renovação e no máximo uma repetição, sem loop.",
+            "Refresh inválido limpa cookies; corpo de autenticação não expõe tokens.",
+            "Buffers e cabeçalhos dos downloads coincidem com o upstream.",
+            "Logout limpa sessão e servidores de teste são encerrados."
+          ],
+          "actual": "Não implementado/não executado na versão-base.",
+          "status": "Não executado",
+          "automated_refs": [],
+          "evidence": []
+        }
+      ],
+      "limitations": [],
+      "trello_url": "https://trello.com/c/bQ2euiWU"
+    },
+    {
+      "id": "WM-021",
+      "title": "Atualizar especificação técnica e rastrear requisitos até os testes",
+      "list": "A fazer",
+      "priority": "Alta",
+      "labels": [
+        "Documentação",
+        "Próxima versão"
+      ],
+      "owners": [
+        "Tais"
+      ],
+      "reviewers": [
+        "Rafael",
+        "Gabriel"
+      ],
+      "dependencies": [
+        "WM-013",
+        "WM-014",
+        "WM-015",
+        "WM-016",
+        "WM-017"
+      ],
+      "objective": "Documentar o comportamento efetivamente entregue e permitir localizar código e evidência de cada requisito.",
+      "implementation": [
+        "Atualizar RF de etapas, arquivamento, CSV e ações rápidas após implementação.",
+        "Documentar RN de transições, propriedade, recorrência, estados financeiros e histórico.",
+        "Definir RNF verificáveis para isolamento, persistência, responsividade, falhas e reprodução Docker; marcar metas ainda não medidas.",
+        "Registrar stack declarada e versões utilizadas, distinguindo intervalos de dependências de versões resolvidas.",
+        "Documentar usuarios, clientes, servicos, projetos, pagamentos, tags e servico_tags com PK/FK/índices, exclusão lógica e progresso legado.",
+        "Construir matriz RF/RN/RNF → WM → teste → evidência.",
+        "Diferenciar SQLite, mocks de componentes, testes BFF e E2E/PostgreSQL.",
+        "Retirar CSV do fora de escopo somente depois de entregue; manter pendências explícitas."
+      ],
+      "acceptance": [
+        "Cada requisito possui comportamento/qualidade verificável, situação e referência de implementação.",
+        "Cada resultado de teste indica ambiente, versão e limite de interpretação.",
+        "Outra pessoa encontra comandos de execução, modelos, endpoints e testes.",
+        "A documentação acompanha a versão sem afirmar que os cartões futuros já foram implementados."
+      ],
+      "references": [
+        {
+          "path": "docs/REQUISITOS_FUNCIONAIS.md",
+          "detail": "Requisitos atuais e fora de escopo"
+        },
+        {
+          "path": "docs/ARQUITETURA.md",
+          "detail": "Camadas e responsabilidades"
+        },
+        {
+          "path": "docs/DEVELOPER_GUIDE.md",
+          "detail": "Execução e verificações"
+        },
+        {
+          "path": "backend-fastapi/src/infrastructure/persistence/models.py",
+          "detail": "Fonte do modelo relacional"
+        },
+        {
+          "path": "backend-fastapi/pyproject.toml",
+          "detail": "Stack Python declarada"
+        },
+        {
+          "path": "frontend/package.json",
+          "detail": "Stack frontend declarada"
+        }
+      ],
+      "tests": [
+        {
+          "id": "CT-WM021",
+          "title": "Revisar rastreabilidade requisito, código e teste",
+          "kind": "Revisão técnica/documental",
+          "preconditions": [
+            "WM-013 a WM-017 implementados e validados; relatórios disponíveis."
+          ],
+          "steps": [
+            "Selecionar cada RF/RN/RNF e localizar o cartão WM correspondente.",
+            "Seguir referência até símbolo/endpoint e teste.",
+            "Comparar resultado declarado ao relatório e ao ambiente da execução.",
+            "Conferir etapas, ausência de percentual e CSV na documentação final."
+          ],
+          "expected": [
+            "Não há requisito concluído sem implementação ou evidência correspondente.",
+            "Metas não medidas e testes ainda não executados permanecem explícitos.",
+            "Referências e comandos funcionam e descrevem a versão identificada."
+          ],
+          "actual": "Não implementado/não executado na versão-base.",
+          "status": "Não executado",
+          "automated_refs": [],
+          "evidence": []
+        }
+      ],
+      "limitations": [],
+      "trello_url": "https://trello.com/c/wqRyQMu8"
+    }
+  ]
+}

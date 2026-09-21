@@ -1,0 +1,28 @@
+
+ RUN  v4.1.11 C:/Faculdade/2026/PMI/workmy/frontend
+
+ ✓ src/lib/http.test.ts (2 tests) 36ms
+ ✓ src/shared/ui/Dialog.test.tsx (2 tests) 1106ms
+     ✓ abre com título acessível, fecha por Esc e devolve o foco  955ms
+ ✓ src/state/AuthContext.test.tsx (1 test) 822ms
+     ✓ valida a sessão pelo servidor e não depende de localStorage  812ms
+ ✓ src/features/financeiro/FinanceDialogs.test.tsx (1 test) 1211ms
+     ✓ desabilita o envio e impede duplicação por clique repetido  1205ms
+ ✓ src/pages/FinanceiroPage.test.tsx (2 tests) 804ms
+     ✓ oferece receber/cancelar somente para pendências  749ms
+ ✓ src/pages/DashboardPage.test.tsx (1 test) 894ms
+     ✓ leva ao formulário canônico de projeto pela URL  886ms
+ ✓ src/features/projetos/ProjetoFormDialog.test.tsx (1 test) 1816ms
+     ✓ exige os campos de recorrência apenas no modelo mensal  1810ms
+ ✓ src/features/clientes/ClienteFormDialog.test.tsx (2 tests) 1795ms
+     ✓ mostra erros próximos aos campos inválidos sem chamar a API  1612ms
+ ✓ src/features/servicos/Services.test.tsx (3 tests) 1614ms
+     ✓ seleciona uma tag existente por Enter e cria uma nova sem duplicar envio  710ms
+     ✓ reabre formatação salva, valida nome e preserva formulário após falha  834ms
+
+ Test Files  9 passed (9)
+      Tests  15 passed (15)
+   Start at  16:56:56
+   Duration  13.20s (transform 4.89s, setup 20.29s, import 9.38s, tests 10.10s, environment 52.38s)
+
+JUNIT report written to C:/Faculdade/2026/PMI/workmy/docs/trello/evidencias/2026-09-21-reteste-WM017/frontend.xml

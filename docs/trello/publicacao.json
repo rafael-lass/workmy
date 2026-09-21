@@ -1,0 +1,1758 @@
+{
+  "board_id": "ari:cloud:trello::board/workspace/6ab176544341eb7ee2019a51/6ab17900b518047343cfeb2a",
+  "board_url": "https://trello.com/b/7Xv1gpIY/workmy-desenvolvimento",
+  "workspace_id": "ari:cloud:trello::workspace/6ab176544341eb7ee2019a51",
+  "lists": {
+    "A fazer": {
+      "listId": "ari:cloud:trello::list/workspace/6ab176544341eb7ee2019a51/6ab17ceea4a871c869f215f5",
+      "name": "A fazer",
+      "boardId": "ari:cloud:trello::board/workspace/6ab176544341eb7ee2019a51/6ab17900b518047343cfeb2a",
+      "position": 16384
+    },
+    "Em desenvolvimento": {
+      "listId": "ari:cloud:trello::list/workspace/6ab176544341eb7ee2019a51/6ab17cf0d505537c75ccf46a",
+      "name": "Em desenvolvimento",
+      "boardId": "ari:cloud:trello::board/workspace/6ab176544341eb7ee2019a51/6ab17900b518047343cfeb2a",
+      "position": 32768
+    },
+    "Em teste": {
+      "listId": "ari:cloud:trello::list/workspace/6ab176544341eb7ee2019a51/6ab17cf2b72f92f3fb4ab16d",
+      "name": "Em teste",
+      "boardId": "ari:cloud:trello::board/workspace/6ab176544341eb7ee2019a51/6ab17900b518047343cfeb2a",
+      "position": 49152
+    },
+    "Concluído": {
+      "listId": "ari:cloud:trello::list/workspace/6ab176544341eb7ee2019a51/6ab17cf42f3d2e8965514546",
+      "name": "Concluído",
+      "boardId": "ari:cloud:trello::board/workspace/6ab176544341eb7ee2019a51/6ab17900b518047343cfeb2a",
+      "position": 65536
+    },
+    "Bloqueado": {
+      "listId": "ari:cloud:trello::list/workspace/6ab176544341eb7ee2019a51/6ab17cf6fa4691d9805a28e4",
+      "name": "Bloqueado",
+      "boardId": "ari:cloud:trello::board/workspace/6ab176544341eb7ee2019a51/6ab17900b518047343cfeb2a",
+      "position": 81920
+    }
+  },
+  "cards": {
+    "WM-001": {
+      "id": "ari:cloud:trello::card/workspace/6ab176544341eb7ee2019a51/6ab17d540dd09f241733e5e1",
+      "url": "https://trello.com/c/nB68opj3",
+      "list_id": "ari:cloud:trello::list/workspace/6ab176544341eb7ee2019a51/6ab17cf42f3d2e8965514546",
+      "checklists": [
+        {
+          "id": "ari:cloud:trello::checklist/workspace/6ab176544341eb7ee2019a51/6ab17e5b2bef65088680c70a",
+          "objectId": "6ab17e5b2bef65088680c70a",
+          "name": "Escopo técnico implementado",
+          "position": 140737488355328,
+          "checkItems": [],
+          "key": "implementation",
+          "items": [
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17e6132292a31ab8d9dce",
+              "name": "Cadastrar usuário com username/e-mail únicos e hash bcrypt; autenticar por username ou e-mail.",
+              "state": "COMPLETE",
+              "position": 140737488355328
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17e783320d352323df5b7",
+              "name": "Emitir access token HS256 de 15 minutos e refresh token de sete dias com sub, exp, jti e type.",
+              "state": "COMPLETE",
+              "position": 140737488371712
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17e7b7e50802a0337f0b7",
+              "name": "Armazenar tokens em cookies HTTP-only no BFF; encaminhar Bearer ao FastAPI e renovar access token.",
+              "state": "COMPLETE",
+              "position": 140737488388096
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17e7e98bca51e8e9c9d96",
+              "name": "Recuperar perfil por GET /api/auth/me; limpar cookies no logout e revogar o access token no processo atual.",
+              "state": "COMPLETE",
+              "position": 140737488404480
+            }
+          ]
+        },
+        {
+          "id": "ari:cloud:trello::checklist/workspace/6ab176544341eb7ee2019a51/6ab17e8238a5c16682482c32",
+          "objectId": "6ab17e8238a5c16682482c32",
+          "name": "Critérios de regressão — próxima execução",
+          "position": 140737488371712,
+          "checkItems": [],
+          "key": "acceptance",
+          "items": [
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17e845cc09158ab801956",
+              "name": "Cadastro duplicado e senha incorreta são rejeitados; o perfil corresponde ao token autenticado.",
+              "state": "INCOMPLETE",
+              "position": 140737488355328
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17e863d3de394dbe93e37",
+              "name": "Frontend consulta /auth/me sem depender de dados de sessão em localStorage.",
+              "state": "INCOMPLETE",
+              "position": 140737488371712
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17e8859e16e92875948b1",
+              "name": "O escopo de evidência não inclui os ramos de proxy/renovação do BFF, tratados no WM-020.",
+              "state": "INCOMPLETE",
+              "position": 140737488388096
+            }
+          ]
+        }
+      ]
+    },
+    "WM-002": {
+      "id": "ari:cloud:trello::card/workspace/6ab176544341eb7ee2019a51/6ab17d69da9eb4db91a3e178",
+      "url": "https://trello.com/c/TNUA7Gay",
+      "list_id": "ari:cloud:trello::list/workspace/6ab176544341eb7ee2019a51/6ab17cf42f3d2e8965514546",
+      "checklists": [
+        {
+          "id": "ari:cloud:trello::checklist/workspace/6ab176544341eb7ee2019a51/6ab17e8a2468e2cf9ece25c0",
+          "objectId": "6ab17e8a2468e2cf9ece25c0",
+          "name": "Escopo técnico implementado",
+          "position": 140737488355328,
+          "checkItems": [],
+          "key": "implementation",
+          "items": [
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17e8ca77a3dd7610766a4",
+              "name": "Criar, listar, consultar e editar clientes filtrados por usuario_id.",
+              "state": "COMPLETE",
+              "position": 140737488355328
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17e90a5e7da2c894b162c",
+              "name": "Validar nome e consultar duplicidade no caso de uso antes de gravar.",
+              "state": "COMPLETE",
+              "position": 140737488371712
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17e97aa6cec4b9be663bc",
+              "name": "Bloquear exclusão quando existem projetos não excluídos associados; aplicar soft delete em deletado_em.",
+              "state": "COMPLETE",
+              "position": 140737488388096
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17e9a7e5263d117f8db0c",
+              "name": "Agregar total_acumulado apenas de pagamentos PAGO.",
+              "state": "COMPLETE",
+              "position": 140737488404480
+            }
+          ]
+        },
+        {
+          "id": "ari:cloud:trello::checklist/workspace/6ab176544341eb7ee2019a51/6ab17e9ecfb1068e35520132",
+          "objectId": "6ab17e9ecfb1068e35520132",
+          "name": "Critérios de regressão — próxima execução",
+          "position": 140737488371712,
+          "checkItems": [],
+          "key": "acceptance",
+          "items": [
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17ea00bb07ef0a2667336",
+              "name": "Nome obrigatório; e-mail inválido é sinalizado no formulário antes de chamar a API.",
+              "state": "INCOMPLETE",
+              "position": 140737488355328
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17ea2f82a3004deea6276",
+              "name": "Falha da API mantém o diálogo aberto; CRUD respeita usuario_id.",
+              "state": "INCOMPLETE",
+              "position": 140737488371712
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17ea64f1d90932ece75c7",
+              "name": "Exclusão lógica não remove fisicamente registros e não rompe projetos existentes.",
+              "state": "INCOMPLETE",
+              "position": 140737488388096
+            }
+          ]
+        }
+      ]
+    },
+    "WM-003": {
+      "id": "ari:cloud:trello::card/workspace/6ab176544341eb7ee2019a51/6ab17d6b2ebfb2c6a3a036f6",
+      "url": "https://trello.com/c/KwPq71jB",
+      "list_id": "ari:cloud:trello::list/workspace/6ab176544341eb7ee2019a51/6ab17cf42f3d2e8965514546",
+      "checklists": [
+        {
+          "id": "ari:cloud:trello::checklist/workspace/6ab176544341eb7ee2019a51/6ab17eac2d7693f959d3ec61",
+          "objectId": "6ab17eac2d7693f959d3ec61",
+          "name": "Escopo técnico implementado",
+          "position": 140737488355328,
+          "checkItems": [],
+          "key": "implementation",
+          "items": [
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17eaedc9aa24cefa14b4f",
+              "name": "CRUD por usuário com nome único entre serviços não excluídos.",
+              "state": "COMPLETE",
+              "position": 140737488355328
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17eb36e570b5d62054dbf",
+              "name": "Editor Tiptap com documento JSON versionado, validação no backend e limite de 20 mil caracteres.",
+              "state": "COMPLETE",
+              "position": 140737488371712
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17eb6006ad146b149eaa3",
+              "name": "Upload de PNG/JPEG/WebP até 5 MiB; tags limitadas a dez por serviço.",
+              "state": "COMPLETE",
+              "position": 140737488388096
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17ebba77a175c7d47c49d",
+              "name": "Catálogo privado de tags com normalização de espaços e caixa, e associação N:N em servico_tags.",
+              "state": "COMPLETE",
+              "position": 140737488404480
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17ebfdf5ca0b575c6b107",
+              "name": "Preservar conteúdo do formulário ao falhar uma operação remota.",
+              "state": "COMPLETE",
+              "position": 140737488420864
+            }
+          ]
+        },
+        {
+          "id": "ari:cloud:trello::checklist/workspace/6ab176544341eb7ee2019a51/6ab17ec4006ad146b14a0196",
+          "objectId": "6ab17ec4006ad146b14a0196",
+          "name": "Critérios de regressão — próxima execução",
+          "position": 140737488371712,
+          "checkItems": [],
+          "key": "acceptance",
+          "items": [
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17ecbddce3358597e4dbe",
+              "name": "Descrição e formatação salvas reaparecem ao editar; nós ou links não suportados são rejeitados.",
+              "state": "INCOMPLETE",
+              "position": 140737488355328
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17eccfe974ad8a3b90f73",
+              "name": "Tags não se duplicam por caixa/espaços e não são compartilhadas entre usuários.",
+              "state": "INCOMPLETE",
+              "position": 140737488371712
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17ecee74ee76b91530fc3",
+              "name": "Remover seleção de tag não apaga a tag do catálogo.",
+              "state": "INCOMPLETE",
+              "position": 140737488388096
+            }
+          ]
+        }
+      ]
+    },
+    "WM-004": {
+      "id": "ari:cloud:trello::card/workspace/6ab176544341eb7ee2019a51/6ab17d6d334cd87ac5b90c06",
+      "url": "https://trello.com/c/o7JdNvi9",
+      "list_id": "ari:cloud:trello::list/workspace/6ab176544341eb7ee2019a51/6ab17cf42f3d2e8965514546",
+      "checklists": [
+        {
+          "id": "ari:cloud:trello::checklist/workspace/6ab176544341eb7ee2019a51/6ab17ed04b89c8e14f41ee86",
+          "objectId": "6ab17ed04b89c8e14f41ee86",
+          "name": "Escopo técnico implementado",
+          "position": 140737488355328,
+          "checkItems": [],
+          "key": "implementation",
+          "items": [
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17ed2132c601bcd764558",
+              "name": "POST /api/servicos/{servico_id}/pdf exige autenticação e propriedade.",
+              "state": "COMPLETE",
+              "position": 140737488355328
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17ed8cfb1068e35527183",
+              "name": "Preparar dados com ExportarServicoUseCase e renderizar via ReportLab em run_in_threadpool.",
+              "state": "COMPLETE",
+              "position": 140737488371712
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17edefddda42f21e14585",
+              "name": "Gerar PDF com capa opcional, descrição formatada, links e contatos sem alterar o perfil.",
+              "state": "COMPLETE",
+              "position": 140737488388096
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17ee2633176d8fd2f27a6",
+              "name": "Encaminhar resposta binária application/pdf com Content-Disposition; interface bloqueia download duplicado.",
+              "state": "COMPLETE",
+              "position": 140737488404480
+            }
+          ]
+        },
+        {
+          "id": "ari:cloud:trello::checklist/workspace/6ab176544341eb7ee2019a51/6ab17ee675b684f10e936e9e",
+          "objectId": "6ab17ee675b684f10e936e9e",
+          "name": "Critérios de regressão — próxima execução",
+          "position": 140737488371712,
+          "checkItems": [],
+          "key": "acceptance",
+          "items": [
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17ee8ac4e270add9745ee",
+              "name": "Somente proprietário exporta; sem autenticação retorna 401 e outro proprietário recebe 404.",
+              "state": "INCOMPLETE",
+              "position": 140737488355328
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17eeac2252d228eef007f",
+              "name": "Conteúdo começa com %PDF-, usa fontes incorporadas e suporta textos longos/múltiplas páginas.",
+              "state": "INCOMPLETE",
+              "position": 140737488371712
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17eeba92e873fdc7e6b78",
+              "name": "Falha no download mantém contatos digitados para nova tentativa.",
+              "state": "INCOMPLETE",
+              "position": 140737488388096
+            }
+          ]
+        }
+      ]
+    },
+    "WM-005": {
+      "id": "ari:cloud:trello::card/workspace/6ab176544341eb7ee2019a51/6ab17d6e6b11cd6a789de76a",
+      "url": "https://trello.com/c/kTXSR0GJ",
+      "list_id": "ari:cloud:trello::list/workspace/6ab176544341eb7ee2019a51/6ab17cf42f3d2e8965514546",
+      "checklists": [
+        {
+          "id": "ari:cloud:trello::checklist/workspace/6ab176544341eb7ee2019a51/6ab17eeddc682fb0e403f5c4",
+          "objectId": "6ab17eeddc682fb0e403f5c4",
+          "name": "Escopo técnico implementado",
+          "position": 140737488355328,
+          "checkItems": [],
+          "key": "implementation",
+          "items": [
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17eef0fa73f675e906267",
+              "name": "Criar, listar, consultar, atualizar e excluir logicamente projetos.",
+              "state": "COMPLETE",
+              "position": 140737488355328
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17ef36028074b676efff1",
+              "name": "Validar cliente e serviço pertencentes ao usuário.",
+              "state": "COMPLETE",
+              "position": 140737488371712
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17ef7449e7f9fa1794641",
+              "name": "Bloquear combinação repetida por usuário/cliente/serviço enquanto o projeto não estiver excluído.",
+              "state": "COMPLETE",
+              "position": 140737488388096
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17efb191d72f6d8cb0626",
+              "name": "Índice único protege a combinação; save traduz colisão para regra de negócio.",
+              "state": "COMPLETE",
+              "position": 140737488404480
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17efe2b21e674f2e4e753",
+              "name": "Bloquear exclusão de projetos com quaisquer lançamentos financeiros.",
+              "state": "COMPLETE",
+              "position": 140737488420864
+            }
+          ]
+        },
+        {
+          "id": "ari:cloud:trello::checklist/workspace/6ab176544341eb7ee2019a51/6ab17f0380c7a329573029e9",
+          "objectId": "6ab17f0380c7a329573029e9",
+          "name": "Critérios de regressão — próxima execução",
+          "position": 140737488371712,
+          "checkItems": [],
+          "key": "acceptance",
+          "items": [
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17f05924b56e1183dd2c3",
+              "name": "Projeto válido recebe ID e aparece na consulta; contrato repetido é rejeitado.",
+              "state": "INCOMPLETE",
+              "position": 140737488355328
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17f071b632fddce7e3a4d",
+              "name": "Projetos com histórico não podem ser excluídos; consulta de registro inexistente retorna 404.",
+              "state": "INCOMPLETE",
+              "position": 140737488371712
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17f094b2ade969e62099f",
+              "name": "Etapas e percentuais atuais serão reformulados no WM-013.",
+              "state": "INCOMPLETE",
+              "position": 140737488388096
+            }
+          ]
+        }
+      ]
+    },
+    "WM-006": {
+      "id": "ari:cloud:trello::card/workspace/6ab176544341eb7ee2019a51/6ab17d703a92eecd148512af",
+      "url": "https://trello.com/c/ORb823iu",
+      "list_id": "ari:cloud:trello::list/workspace/6ab176544341eb7ee2019a51/6ab17cf42f3d2e8965514546",
+      "checklists": [
+        {
+          "id": "ari:cloud:trello::checklist/workspace/6ab176544341eb7ee2019a51/6ab17f0c44d5ced6f57ccf08",
+          "objectId": "6ab17f0c44d5ced6f57ccf08",
+          "name": "Escopo técnico implementado",
+          "position": 140737488355328,
+          "checkItems": [],
+          "key": "implementation",
+          "items": [
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17f0df42d0f75e6f32944",
+              "name": "POST /api/faturamento/recorrencias executa geração manual síncrona.",
+              "state": "COMPLETE",
+              "position": 140737488355328
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17f11cf2cb33898441083",
+              "name": "Calcular primeiro vencimento com início da recorrência e dia contratado.",
+              "state": "COMPLETE",
+              "position": 140737488371712
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17f166089bda7b1b7e150",
+              "name": "Criar mensalidades PENDENTE com referencia_mes AAAA-MM.",
+              "state": "COMPLETE",
+              "position": 140737488388096
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17f1ad541f57232bec30e",
+              "name": "Repositório verifica existência e trata colisão da restrição única projeto/referência.",
+              "state": "COMPLETE",
+              "position": 140737488404480
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17f1e64c70a5c72e1ffc4",
+              "name": "Filtrar contratos ativos não concluídos/arquivados e respeitar nova data de retomada.",
+              "state": "COMPLETE",
+              "position": 140737488420864
+            }
+          ]
+        },
+        {
+          "id": "ari:cloud:trello::checklist/workspace/6ab176544341eb7ee2019a51/6ab17f226cbbb8b77734427f",
+          "objectId": "6ab17f226cbbb8b77734427f",
+          "name": "Critérios de regressão — próxima execução",
+          "position": 140737488371712,
+          "checkItems": [],
+          "key": "acceptance",
+          "items": [
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17f245b799e44137b0931",
+              "name": "Repetir a geração não cria lançamentos duplicados.",
+              "state": "INCOMPLETE",
+              "position": 140737488355328
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17f2691b978153eb11821",
+              "name": "Início futuro não gera cobrança antecipada.",
+              "state": "INCOMPLETE",
+              "position": 140737488371712
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17f281a60fb2f5c62d830",
+              "name": "Pausar mantém pendências; retomar não gera referências de meses pausados.",
+              "state": "INCOMPLETE",
+              "position": 140737488388096
+            }
+          ]
+        }
+      ]
+    },
+    "WM-007": {
+      "id": "ari:cloud:trello::card/workspace/6ab176544341eb7ee2019a51/6ab17d73c5c7e827c54b394f",
+      "url": "https://trello.com/c/cyiuZDzG",
+      "list_id": "ari:cloud:trello::list/workspace/6ab176544341eb7ee2019a51/6ab17cf42f3d2e8965514546",
+      "checklists": [
+        {
+          "id": "ari:cloud:trello::checklist/workspace/6ab176544341eb7ee2019a51/6ab17f2b959c814ef9206ab2",
+          "objectId": "6ab17f2b959c814ef9206ab2",
+          "name": "Escopo técnico implementado",
+          "position": 140737488355328,
+          "checkItems": [],
+          "key": "implementation",
+          "items": [
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17f2d1736c2d4eaaf7823",
+              "name": "Avulso manual nasce AVULSO/PAGO; mensalidade gerada nasce MENSAL/PENDENTE.",
+              "state": "COMPLETE",
+              "position": 140737488355328
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17f3236242498c9fd97e3",
+              "name": "Permitir PENDENTE → PAGO/CANCELADO e PAGO → ESTORNADO.",
+              "state": "COMPLETE",
+              "position": 140737488371712
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17f371fbf4248c4e7866b",
+              "name": "Exigir motivo para cancelar/estornar e rejeitar valores não positivos e recebimento futuro.",
+              "state": "COMPLETE",
+              "position": 140737488388096
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17f3bbd062af8ab90dbfe",
+              "name": "Preservar valor original; permitir apenas observação/comprovante na edição de detalhes.",
+              "state": "COMPLETE",
+              "position": 140737488404480
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17f3f65a5a8e2e617e579",
+              "name": "Listar com paginação e filtros por status, tipo, cliente, projeto, vencimento e busca.",
+              "state": "COMPLETE",
+              "position": 140737488420864
+            }
+          ]
+        },
+        {
+          "id": "ari:cloud:trello::checklist/workspace/6ab176544341eb7ee2019a51/6ab17f451c34bf03735f663f",
+          "objectId": "6ab17f451c34bf03735f663f",
+          "name": "Critérios de regressão — próxima execução",
+          "position": 140737488371712,
+          "checkItems": [],
+          "key": "acceptance",
+          "items": [
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17f46f0fdcfbee01e7d75",
+              "name": "Cancelado/estornado são terminais; recebimento avulso não pode ser criado como mensalidade.",
+              "state": "INCOMPLETE",
+              "position": 140737488355328
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17f48f08cc108295b9be4",
+              "name": "Somente PAGO contribui para totais; não há atualização genérica de valores.",
+              "state": "INCOMPLETE",
+              "position": 140737488371712
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17f4ab6aac62bdd663edd",
+              "name": "Interface oferece Receber/Cancelar para pendências e Estornar para pagos.",
+              "state": "INCOMPLETE",
+              "position": 140737488388096
+            }
+          ]
+        }
+      ]
+    },
+    "WM-008": {
+      "id": "ari:cloud:trello::card/workspace/6ab176544341eb7ee2019a51/6ab17d758f89ddf505632595",
+      "url": "https://trello.com/c/Mk0DkHb4",
+      "list_id": "ari:cloud:trello::list/workspace/6ab176544341eb7ee2019a51/6ab17cf42f3d2e8965514546",
+      "checklists": [
+        {
+          "id": "ari:cloud:trello::checklist/workspace/6ab176544341eb7ee2019a51/6ab17f4c507d756d28354cb3",
+          "objectId": "6ab17f4c507d756d28354cb3",
+          "name": "Escopo técnico implementado",
+          "position": 140737488355328,
+          "checkItems": [],
+          "key": "implementation",
+          "items": [
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17f4ef4dc39db68dbd5e5",
+              "name": "GET /api/dashboard/resumo retorna recebido_mes, pendente_total, atrasado_total, previsto_proximo_mes, projetos_ativos e clientes_total.",
+              "state": "COMPLETE",
+              "position": 140737488355328
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17f557bbd730f7b0b6a46",
+              "name": "Agregar série de seis meses e consultar últimos recebimentos.",
+              "state": "COMPLETE",
+              "position": 140737488371712
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17f59ab2e91e03521ccc2",
+              "name": "Somar apenas PAGO no realizado e excluir estornos.",
+              "state": "COMPLETE",
+              "position": 140737488388096
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17f5f1551a0244116dc20",
+              "name": "Usar data de negócio America/Sao_Paulo para atraso e contexto dos indicadores.",
+              "state": "COMPLETE",
+              "position": 140737488404480
+            }
+          ]
+        },
+        {
+          "id": "ari:cloud:trello::checklist/workspace/6ab176544341eb7ee2019a51/6ab17f63b5895b4284561683",
+          "objectId": "6ab17f63b5895b4284561683",
+          "name": "Critérios de regressão — próxima execução",
+          "position": 140737488371712,
+          "checkItems": [],
+          "key": "acceptance",
+          "items": [
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17f65da753f1394535ec2",
+              "name": "Realizado e pendências acompanham recebimento/cancelamento/estorno.",
+              "state": "INCOMPLETE",
+              "position": 140737488355328
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17f6861ab9cbbe8457737",
+              "name": "Consultas filtram usuario_id.",
+              "state": "INCOMPLETE",
+              "position": 140737488371712
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17f69f137db01eff78d4e",
+              "name": "Defeito conhecido da previsão futura é tratado em cartão separado WM-017.",
+              "state": "INCOMPLETE",
+              "position": 140737488388096
+            }
+          ]
+        }
+      ]
+    },
+    "WM-009": {
+      "id": "ari:cloud:trello::card/workspace/6ab176544341eb7ee2019a51/6ab17d7763f8dbde75c54d0d",
+      "url": "https://trello.com/c/BwUJpJqA",
+      "list_id": "ari:cloud:trello::list/workspace/6ab176544341eb7ee2019a51/6ab17cf42f3d2e8965514546",
+      "checklists": [
+        {
+          "id": "ari:cloud:trello::checklist/workspace/6ab176544341eb7ee2019a51/6ab17f6c7d2fa48742be135a",
+          "objectId": "6ab17f6c7d2fa48742be135a",
+          "name": "Escopo técnico implementado",
+          "position": 140737488355328,
+          "checkItems": [],
+          "key": "implementation",
+          "items": [
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17f6e5bbba1a4a4c93ba0",
+              "name": "Baseline 20260905_0001 cria modelo relacional.",
+              "state": "COMPLETE",
+              "position": 140737488355328
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17f7108e808c644851de2",
+              "name": "Migration 20260916_0002 inclui descricao_documento, tags e servico_tags.",
+              "state": "COMPLETE",
+              "position": 140737488371712
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17f763e5f665db0557dad",
+              "name": "Converter descrição antiga em parágrafos do documento versionado.",
+              "state": "COMPLETE",
+              "position": 140737488388096
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17f7aefadf8c4f680dddb",
+              "name": "Normalizar e deduplicar tags por usuário; manter colunas antigas e dados de capa.",
+              "state": "COMPLETE",
+              "position": 140737488404480
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17f7e5db782933a7826e1",
+              "name": "Usar Alembic como fonte de evolução de schema.",
+              "state": "COMPLETE",
+              "position": 140737488420864
+            }
+          ]
+        },
+        {
+          "id": "ari:cloud:trello::checklist/workspace/6ab176544341eb7ee2019a51/6ab17f82e4bd815ab2c7a5d3",
+          "objectId": "6ab17f82e4bd815ab2c7a5d3",
+          "name": "Critérios de regressão — próxima execução",
+          "position": 140737488371712,
+          "checkItems": [],
+          "key": "acceptance",
+          "items": [
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17f84655466539413e9d1",
+              "name": "Migrations aplicam desde baseline; alembic check confirma modelo sem divergência no cenário testado.",
+              "state": "INCOMPLETE",
+              "position": 140737488355328
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17f87f38138f68f99fe29",
+              "name": "Conversão preserva descrição original, conteúdo JSON, ferramentas, repositório e bytes da imagem.",
+              "state": "INCOMPLETE",
+              "position": 140737488371712
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17f88d39f68c188ce67fe",
+              "name": "Dois serviços legados do cenário produzem duas tags e três associações.",
+              "state": "INCOMPLETE",
+              "position": 140737488388096
+            }
+          ]
+        }
+      ]
+    },
+    "WM-010": {
+      "id": "ari:cloud:trello::card/workspace/6ab176544341eb7ee2019a51/6ab17d7a3f0f81e720c55d2a",
+      "url": "https://trello.com/c/KgnsA9TF",
+      "list_id": "ari:cloud:trello::list/workspace/6ab176544341eb7ee2019a51/6ab17cf42f3d2e8965514546",
+      "checklists": [
+        {
+          "id": "ari:cloud:trello::checklist/workspace/6ab176544341eb7ee2019a51/6ab17f8bc1cf2983956ebeb5",
+          "objectId": "6ab17f8bc1cf2983956ebeb5",
+          "name": "Escopo técnico implementado",
+          "position": 140737488355328,
+          "checkItems": [],
+          "key": "implementation",
+          "items": [
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17f8dcb49a1e1fa98ea77",
+              "name": "Compose define postgres, fastapi, bff e frontend em rede interna.",
+              "state": "COMPLETE",
+              "position": 140737488355328
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17f9154cf3fd03f74a071",
+              "name": "PostgreSQL 15 utiliza volume postgres_data; frontend publica porta 5173.",
+              "state": "COMPLETE",
+              "position": 140737488371712
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17f940dc2427ab710c1cd",
+              "name": "Backend Python 3.12 usa uv.lock e aplica alembic upgrade head antes do Uvicorn.",
+              "state": "COMPLETE",
+              "position": 140737488388096
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17f983fdc6d648a14e520",
+              "name": "Build de frontend Node 20 gera artefatos servidos pelo Nginx.",
+              "state": "COMPLETE",
+              "position": 140737488404480
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17f9d61f614120a4c4edf",
+              "name": "Healthchecks e depends_on ordenam prontidão dos serviços.",
+              "state": "COMPLETE",
+              "position": 140737488420864
+            }
+          ]
+        },
+        {
+          "id": "ari:cloud:trello::checklist/workspace/6ab176544341eb7ee2019a51/6ab17fa0ae0e0197eb4ee723",
+          "objectId": "6ab17fa0ae0e0197eb4ee723",
+          "name": "Critérios de regressão — próxima execução",
+          "position": 140737488371712,
+          "checkItems": [],
+          "key": "acceptance",
+          "items": [
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17fa2f317b99be8d361d6",
+              "name": "Arquivos de configuração definem os quatro serviços e volume persistente.",
+              "state": "INCOMPLETE",
+              "position": 140737488355328
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17fa437771863e4ca6c78",
+              "name": "A inicialização da API inclui migrations.",
+              "state": "INCOMPLETE",
+              "position": 140737488371712
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17fa64ef4d999ea6ce51d",
+              "name": "Comprovação da jornada real depende dos cartões WM-018/WM-019; não inferir resultado de CI remoto.",
+              "state": "INCOMPLETE",
+              "position": 140737488388096
+            }
+          ]
+        }
+      ]
+    },
+    "WM-011": {
+      "id": "ari:cloud:trello::card/workspace/6ab176544341eb7ee2019a51/6ab17d7cb0cc42bd52e31e44",
+      "url": "https://trello.com/c/6PtQSOha",
+      "list_id": "ari:cloud:trello::list/workspace/6ab176544341eb7ee2019a51/6ab17cf42f3d2e8965514546",
+      "checklists": [
+        {
+          "id": "ari:cloud:trello::checklist/workspace/6ab176544341eb7ee2019a51/6ab17fa9c87802b6dc2a44cd",
+          "objectId": "6ab17fa9c87802b6dc2a44cd",
+          "name": "Escopo técnico implementado",
+          "position": 140737488355328,
+          "checkItems": [],
+          "key": "implementation",
+          "items": [
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17faa61518d2d1615577e",
+              "name": "pytest cobre domínio, casos de uso, API, PDF e migrations.",
+              "state": "COMPLETE",
+              "position": 140737488355328
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17faec5c65b28406be37a",
+              "name": "Vitest/Testing Library cobrem formulários, sessão, diálogos, downloads e ações por estado.",
+              "state": "COMPLETE",
+              "position": 140737488371712
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17fb114d913c2dad2a187",
+              "name": "CI configura jobs backend, bff, frontend e images.",
+              "state": "COMPLETE",
+              "position": 140737488388096
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17fb7523b5721038e4a4c",
+              "name": "Jobs incluem Alembic, pytest, npm test, lint, build e node --check.",
+              "state": "COMPLETE",
+              "position": 140737488404480
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17fbb2a8b96dbec2e0d44",
+              "name": "Smoke test consulta HTML/CSS servido pelo Nginx.",
+              "state": "COMPLETE",
+              "position": 140737488420864
+            }
+          ]
+        },
+        {
+          "id": "ari:cloud:trello::checklist/workspace/6ab176544341eb7ee2019a51/6ab17fc0d23db04821560c8e",
+          "objectId": "6ab17fc0d23db04821560c8e",
+          "name": "Critérios de regressão — próxima execução",
+          "position": 140737488371712,
+          "checkItems": [],
+          "key": "acceptance",
+          "items": [
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17fc2edb1232be72b7a82",
+              "name": "Suítes locais encerram com código zero e evidências identificam versão/ambiente.",
+              "state": "INCOMPLETE",
+              "position": 140737488355328
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17fc42143dde6315a99b9",
+              "name": "Separar aprovação de testes locais, configuração do CI e execução efetiva do pipeline remoto.",
+              "state": "INCOMPLETE",
+              "position": 140737488371712
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17fc5081cb90adc9538e8",
+              "name": "Não chamar teste de componente com mocks de E2E.",
+              "state": "INCOMPLETE",
+              "position": 140737488388096
+            }
+          ]
+        }
+      ]
+    },
+    "WM-012": {
+      "id": "ari:cloud:trello::card/workspace/6ab176544341eb7ee2019a51/6ab17d8a4346f28242879687",
+      "url": "https://trello.com/c/ZzsAt6eF",
+      "list_id": "ari:cloud:trello::list/workspace/6ab176544341eb7ee2019a51/6ab17cf42f3d2e8965514546",
+      "checklists": [
+        {
+          "id": "ari:cloud:trello::checklist/workspace/6ab176544341eb7ee2019a51/6ab17fc8cdf403eefa2a874b",
+          "objectId": "6ab17fc8cdf403eefa2a874b",
+          "name": "Escopo técnico implementado",
+          "position": 140737488355328,
+          "checkItems": [],
+          "key": "implementation",
+          "items": [
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17fc970d360ed63b122a4",
+              "name": "README descreve configuração, execução, atualização e diagnóstico.",
+              "state": "COMPLETE",
+              "position": 140737488355328
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17fcdf2986d15db206322",
+              "name": "Documentar responsabilidades React/Nginx → Express BFF → FastAPI → PostgreSQL.",
+              "state": "COMPLETE",
+              "position": 140737488371712
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17fd13e45094f3ec8a0c1",
+              "name": "Descrever requisitos funcionais, regras financeiras, editor, PDF e migrations.",
+              "state": "COMPLETE",
+              "position": 140737488388096
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17fd5db608370246ed9bf",
+              "name": "Orientar backup e preservação do volume.",
+              "state": "COMPLETE",
+              "position": 140737488404480
+            }
+          ]
+        },
+        {
+          "id": "ari:cloud:trello::checklist/workspace/6ab176544341eb7ee2019a51/6ab17fd9686d93633293e734",
+          "objectId": "6ab17fd9686d93633293e734",
+          "name": "Critérios de regressão — próxima execução",
+          "position": 140737488371712,
+          "checkItems": [],
+          "key": "acceptance",
+          "items": [
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17fdb9196b685e45fdf5f",
+              "name": "Documentos existentes refletem a arquitetura de quatro serviços.",
+              "state": "INCOMPLETE",
+              "position": 140737488355328
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17fde60860f748464308f",
+              "name": "Comandos e pré-requisitos são encontráveis no README e guia do desenvolvedor.",
+              "state": "INCOMPLETE",
+              "position": 140737488371712
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17fe0a1cd826cb830f0c8",
+              "name": "Alterações de etapas/CSV não são documentadas como já entregues antes da implementação.",
+              "state": "INCOMPLETE",
+              "position": 140737488388096
+            }
+          ]
+        }
+      ]
+    },
+    "WM-013": {
+      "id": "ari:cloud:trello::card/workspace/6ab176544341eb7ee2019a51/6ab17d8c50849e89e88ad831",
+      "url": "https://trello.com/c/YN4Ddzp3",
+      "list_id": "ari:cloud:trello::list/workspace/6ab176544341eb7ee2019a51/6ab17ceea4a871c869f215f5",
+      "checklists": [
+        {
+          "id": "ari:cloud:trello::checklist/workspace/6ab176544341eb7ee2019a51/6ab17fe30b492e286c661b9a",
+          "objectId": "6ab17fe30b492e286c661b9a",
+          "name": "Implementação",
+          "position": 140737488355328,
+          "checkItems": [],
+          "key": "implementation",
+          "items": [
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17fe456a69dae3b04f156",
+              "name": "Exibir Planejamento, Andamento, Revisão e Finalizado preservando códigos DISCOVERY, IN_PROGRESS, REVIEW e COMPLETED.",
+              "state": "INCOMPLETE",
+              "position": 140737488355328
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17fe664e4284e73fb3af3",
+              "name": "Manter Planejamento → Andamento → Revisão → Finalizado e retorno Revisão → Andamento; usar domínio como autoridade.",
+              "state": "INCOMPLETE",
+              "position": 140737488371712
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17fe88283275d555e9acf",
+              "name": "Remover progresso de entidade, casos de uso, DTOs, serialização, tipos e componentes; eliminar ajustes automáticos para 100%.",
+              "state": "INCOMPLETE",
+              "position": 140737488388096
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17fea97474c58d2314088",
+              "name": "Manter coluna legada com valores existentes e default para novos registros, sem leitura/escrita funcional; não reescrever migrations antigas.",
+              "state": "INCOMPLETE",
+              "position": 140737488404480
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17fec12966cd517bd0d2b",
+              "name": "Separar Arquivar do seletor de etapas, com confirmação, pausa da recorrência e preservação do histórico.",
+              "state": "INCOMPLETE",
+              "position": 140737488420864
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17fee986a2e2c21caf4b3",
+              "name": "Oferecer Pausar/Retomar apenas para projetos mensais que não estejam finalizados/arquivados.",
+              "state": "INCOMPLETE",
+              "position": 140737488437248
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17ff0cea10d508290cb41",
+              "name": "Disponibilizar Excluir em desktop/mobile com bloqueio por possui_lancamentos.",
+              "state": "INCOMPLETE",
+              "position": 140737488453632
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17ff32bef65088683ca7e",
+              "name": "Atualizar fixtures e testes que hoje exigem progresso.",
+              "state": "INCOMPLETE",
+              "position": 140737488470016
+            }
+          ]
+        },
+        {
+          "id": "ari:cloud:trello::checklist/workspace/6ab176544341eb7ee2019a51/6ab17ff476820b1e4bb16149",
+          "objectId": "6ab17ff476820b1e4bb16149",
+          "name": "Critérios de aceite",
+          "position": 140737488371712,
+          "checkItems": [],
+          "key": "acceptance",
+          "items": [
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17ff67bc69b95e7972938",
+              "name": "Novo projeto aparece em Planejamento; formulário/lista/detalhe do cliente não exibem percentuais.",
+              "state": "INCOMPLETE",
+              "position": 140737488355328
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17ff809116a4929eb26d1",
+              "name": "Respostas de projeto não incluem progresso; coluna antiga permanece intacta em edição de registros existentes.",
+              "state": "INCOMPLETE",
+              "position": 140737488371712
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17ffa0fdec6c2a35b6050",
+              "name": "Finalizar/arquivar pausa recorrência; API rejeita retomada inválida; pendências permanecem.",
+              "state": "INCOMPLETE",
+              "position": 140737488388096
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab17ffc959c814ef921e0cd",
+              "name": "Mesmo conjunto de ações permitido em 390 e 1440 pixels.",
+              "state": "INCOMPLETE",
+              "position": 140737488404480
+            }
+          ]
+        }
+      ]
+    },
+    "WM-014": {
+      "id": "ari:cloud:trello::card/workspace/6ab176544341eb7ee2019a51/6ab17d8e4212f6dd0dec2d74",
+      "url": "https://trello.com/c/5vXMBWbW",
+      "list_id": "ari:cloud:trello::list/workspace/6ab176544341eb7ee2019a51/6ab17ceea4a871c869f215f5",
+      "checklists": [
+        {
+          "id": "ari:cloud:trello::checklist/workspace/6ab176544341eb7ee2019a51/6ab17ffefb1245800f8bbea8",
+          "objectId": "6ab17ffefb1245800f8bbea8",
+          "name": "Implementação",
+          "position": 140737488355328,
+          "checkItems": [],
+          "key": "implementation",
+          "items": [
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab180001a36c43ad3dab970",
+              "name": "Criar GET /api/pagamentos/exportar.csv com a dependência de autenticação existente.",
+              "state": "INCOMPLETE",
+              "position": 140737488355328
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab18002db075bc1d35676e2",
+              "name": "Compartilhar filtros e ordenação com a listagem: status, tipo_pagamento, cliente_id, projeto_id, data_inicio, data_fim e q.",
+              "state": "INCOMPLETE",
+              "position": 140737488371712
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab180043cfa575b1d8a55ea",
+              "name": "Exportação não aplica page/page_size; validar período invertido e parâmetros como na consulta atual.",
+              "state": "INCOMPLETE",
+              "position": 140737488388096
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab180064eb233da72b98b94",
+              "name": "Consultar apenas projeção necessária, sem comprovante_bytes/Base64.",
+              "state": "INCOMPLETE",
+              "position": 140737488404480
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab18008c071333f05325e5e",
+              "name": "Serializar UTF-8 com BOM, separador ;, aspas/quebras corretas e neutralização de fórmulas em textos.",
+              "state": "INCOMPLETE",
+              "position": 140737488420864
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab1800a42fda780a461ab64",
+              "name": "Colunas: ID do lançamento, ID do projeto, Cliente, Serviço, Tipo, Status, Em atraso, Referência mensal, Vencimento, Pagamento, Valor, Observação e Motivo do ajuste.",
+              "state": "INCOMPLETE",
+              "position": 140737488437248
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab1800cce0b1269c64f7472",
+              "name": "Usar datas dd/mm/aaaa, valores com duas casas/vírgula e campo vazio para opcionais ausentes.",
+              "state": "INCOMPLETE",
+              "position": 140737488453632
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab1800ed680a14bec22311c",
+              "name": "Retornar text/csv com Content-Disposition e nome workmy-financeiro-AAAA-MM-DD.csv; arquivo vazio contém cabeçalhos.",
+              "state": "INCOMPLETE",
+              "position": 140737488470016
+            }
+          ]
+        },
+        {
+          "id": "ari:cloud:trello::checklist/workspace/6ab176544341eb7ee2019a51/6ab18010e722b441ce3920d5",
+          "objectId": "6ab18010e722b441ce3920d5",
+          "name": "Critérios de aceite",
+          "position": 140737488371712,
+          "checkItems": [],
+          "key": "acceptance",
+          "items": [
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab180114b89c8e14f44bd7f",
+              "name": "Todos os resultados dos filtros são exportados, mesmo além da página atual.",
+              "state": "INCOMPLETE",
+              "position": 140737488355328
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab180137be085805f1a2cae",
+              "name": "CSV respeita usuario_id e autorização; sem token não exporta.",
+              "state": "INCOMPLETE",
+              "position": 140737488371712
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab18016913145c8588c5092",
+              "name": "Não carrega comprovantes; valores e IDs correspondem à consulta.",
+              "state": "INCOMPLETE",
+              "position": 140737488388096
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab180173ed12ae943657a1d",
+              "name": "Acentos, separadores, aspas, multilinhas e textos de fórmula não quebram o arquivo.",
+              "state": "INCOMPLETE",
+              "position": 140737488404480
+            }
+          ]
+        }
+      ]
+    },
+    "WM-015": {
+      "id": "ari:cloud:trello::card/workspace/6ab176544341eb7ee2019a51/6ab17d9161394618e9d1dbeb",
+      "url": "https://trello.com/c/yRd6B5Ky",
+      "list_id": "ari:cloud:trello::list/workspace/6ab176544341eb7ee2019a51/6ab17ceea4a871c869f215f5",
+      "checklists": [
+        {
+          "id": "ari:cloud:trello::checklist/workspace/6ab176544341eb7ee2019a51/6ab18019dc682fb0e40693e6",
+          "objectId": "6ab18019dc682fb0e40693e6",
+          "name": "Implementação",
+          "position": 140737488355328,
+          "checkItems": [],
+          "key": "implementation",
+          "items": [
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab1801ba015e7f53cdd33e4",
+              "name": "Adicionar Exportar CSV junto aos filtros do Financeiro.",
+              "state": "INCOMPLETE",
+              "position": 140737488355328
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab1801dd505537c75d23331",
+              "name": "Compartilhar objeto de filtros da tela entre listagem e exportação; excluir page/page_size do download.",
+              "state": "INCOMPLETE",
+              "position": 140737488371712
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab1801fd49ca0553ad3a4bb",
+              "name": "Reutilizar responseType: 'blob' do cliente HTTP e sessão pelo BFF.",
+              "state": "INCOMPLETE",
+              "position": 140737488388096
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab18021c6f8bd032d4d8829",
+              "name": "Baixar como workmy-financeiro-AAAA-MM-DD.csv e revogar URL temporária após uso.",
+              "state": "INCOMPLETE",
+              "position": 140737488404480
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab180239657cdca22dd8541",
+              "name": "Bloquear cliques repetidos durante processamento com estado e trava de envio.",
+              "state": "INCOMPLETE",
+              "position": 140737488420864
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab1802584cce9b46d8150ef",
+              "name": "Falha exibe mensagem, preserva filtros e reabilita tentativa.",
+              "state": "INCOMPLETE",
+              "position": 140737488437248
+            }
+          ]
+        },
+        {
+          "id": "ari:cloud:trello::checklist/workspace/6ab176544341eb7ee2019a51/6ab180274934cec948152abe",
+          "objectId": "6ab180274934cec948152abe",
+          "name": "Critérios de aceite",
+          "position": 140737488371712,
+          "checkItems": [],
+          "key": "acceptance",
+          "items": [
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab180289a650cd3500ffa0d",
+              "name": "Exportar a partir da segunda página baixa todos os resultados filtrados.",
+              "state": "INCOMPLETE",
+              "position": 140737488355328
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab1802a2aded863d766f3fd",
+              "name": "Durante download somente uma requisição fica ativa.",
+              "state": "INCOMPLETE",
+              "position": 140737488371712
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab1802ca3eb2111956807e4",
+              "name": "Erros de autenticação/rede não geram arquivo inválido nem limpam filtros.",
+              "state": "INCOMPLETE",
+              "position": 140737488388096
+            }
+          ]
+        }
+      ]
+    },
+    "WM-016": {
+      "id": "ari:cloud:trello::card/workspace/6ab176544341eb7ee2019a51/6ab17d9309934e1256781392",
+      "url": "https://trello.com/c/pFi025ok",
+      "list_id": "ari:cloud:trello::list/workspace/6ab176544341eb7ee2019a51/6ab17ceea4a871c869f215f5",
+      "checklists": [
+        {
+          "id": "ari:cloud:trello::checklist/workspace/6ab176544341eb7ee2019a51/6ab1802e9ea2edc67ff5ac53",
+          "objectId": "6ab1802e9ea2edc67ff5ac53",
+          "name": "Implementação",
+          "position": 140737488355328,
+          "checkItems": [],
+          "key": "implementation",
+          "items": [
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab1803045e0c2c2b9b7afdf",
+              "name": "Remover Novo projeto da barra superior em AppLayout e imports que ficarem sem uso.",
+              "state": "INCOMPLETE",
+              "position": 140737488355328
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab18032d39ee2bc0fe89d23",
+              "name": "Mover Ações rápidas para depois do título e antes dos indicadores do dashboard.",
+              "state": "INCOMPLETE",
+              "position": 140737488371712
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab1803370366258a5a7bc27",
+              "name": "Incluir Cadastrar cliente, Cadastrar serviço, Novo projeto e Registrar recebimento no bloco.",
+              "state": "INCOMPLETE",
+              "position": 140737488388096
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab1803610722606b22af7f3",
+              "name": "Remover botões equivalentes do PageHeader do dashboard e bloco antigo inferior.",
+              "state": "INCOMPLETE",
+              "position": 140737488404480
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab18037a25fc3938ff214aa",
+              "name": "Retirar botões de criação repetidos nos estados vazios de clientes/serviços/projetos e recebimento repetido no financeiro.",
+              "state": "INCOMPLETE",
+              "position": 140737488420864
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab180390ab209e0b1020484",
+              "name": "Preservar um botão principal por listagem, query params acao e ações vinculadas ao detalhe do cliente.",
+              "state": "INCOMPLETE",
+              "position": 140737488437248
+            }
+          ]
+        },
+        {
+          "id": "ari:cloud:trello::checklist/workspace/6ab176544341eb7ee2019a51/6ab1803b53471881ee81482c",
+          "objectId": "6ab1803b53471881ee81482c",
+          "name": "Critérios de aceite",
+          "position": 140737488371712,
+          "checkItems": [],
+          "key": "acceptance",
+          "items": [
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab1803e61ed2664af623e52",
+              "name": "Os quatro atalhos abrem o formulário canônico na rota correta.",
+              "state": "INCOMPLETE",
+              "position": 140737488355328
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab18040ddb5a93985b787f8",
+              "name": "Navbar não contém Novo projeto.",
+              "state": "INCOMPLETE",
+              "position": 140737488371712
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab18043b1a54259a7dd406f",
+              "name": "Uma única entrada de criação por listagem, inclusive vazia.",
+              "state": "INCOMPLETE",
+              "position": 140737488388096
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab1804602d9f358e0daa3be",
+              "name": "Ações rápidas ficam antes dos indicadores no DOM e na tela desktop/mobile.",
+              "state": "INCOMPLETE",
+              "position": 140737488404480
+            }
+          ]
+        }
+      ]
+    },
+    "WM-017": {
+      "id": "ari:cloud:trello::card/workspace/6ab176544341eb7ee2019a51/6ab17d95ff551ddc652fd86f",
+      "url": "https://trello.com/c/Y1FXVJVZ",
+      "list_id": "ari:cloud:trello::list/workspace/6ab176544341eb7ee2019a51/6ab17cf2b72f92f3fb4ab16d",
+      "checklists": [
+        {
+          "id": "ari:cloud:trello::checklist/workspace/6ab176544341eb7ee2019a51/6ab180484d81c693e54f79c0",
+          "objectId": "6ab180484d81c693e54f79c0",
+          "name": "Implementação",
+          "position": 140737488355328,
+          "checkItems": [],
+          "key": "implementation",
+          "items": [
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab1804a43494ba89ee81cbd",
+              "name": "Considerar somente contratos com ao menos um vencimento elegível dentro do mês seguinte.",
+              "state": "COMPLETE",
+              "position": 140737488355328
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab1804c6a2edeb45e6f0dc6",
+              "name": "Compartilhar cálculo de primeiro vencimento entre faturamento e previsão.",
+              "state": "COMPLETE",
+              "position": 140737488371712
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab1804f952ef03903ed37e2",
+              "name": "Respeitar recorrencia_inicio, dia_vencimento e fallback de criado_em usado no faturamento quando início não estiver preenchido.",
+              "state": "COMPLETE",
+              "position": 140737488388096
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab180513634019005e08342",
+              "name": "Excluir pausados, COMPLETED, ARCHIVED e deletados.",
+              "state": "COMPLETE",
+              "position": 140737488404480
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab18053b6ea8c4c2fcd4b4a",
+              "name": "Preservar campos/resposta do endpoint de dashboard.",
+              "state": "COMPLETE",
+              "position": 140737488420864
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab18055183095a8c3331598",
+              "name": "Adicionar regressão com datas fixas e início antes/depois do vencimento.",
+              "state": "COMPLETE",
+              "position": 140737488437248
+            }
+          ]
+        },
+        {
+          "id": "ari:cloud:trello::checklist/workspace/6ab176544341eb7ee2019a51/6ab18057aa4f375387a6227b",
+          "objectId": "6ab18057aa4f375387a6227b",
+          "name": "Critérios de aceite",
+          "position": 140737488371712,
+          "checkItems": [],
+          "key": "acceptance",
+          "items": [
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab1805aa81c72b3f07a05c2",
+              "name": "Em 21/09/2026, R$ 300 vigente + R$ 900 iniciando 01/11/2026 produz previsão de outubro R$ 300.",
+              "state": "COMPLETE",
+              "position": 140737488355328
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab1805b1facbf24f31b76b9",
+              "name": "Se o contrato de R$ 900 começar em 01/10 e vencer dia 5, previsão de outubro é R$ 1.200.",
+              "state": "COMPLETE",
+              "position": 140737488371712
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab1805dfb7c6c76ea0c154e",
+              "name": "Se começar em 06/10 com vencimento dia 5, primeiro vencimento é novembro e previsão de outubro volta a R$ 300.",
+              "state": "COMPLETE",
+              "position": 140737488388096
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab18da4076e73533ffa2b3f",
+              "name": "Revisão funcional de Tais: executar cenário no produto e registrar evidência (pendente).",
+              "state": "INCOMPLETE"
+            }
+          ]
+        }
+      ]
+    },
+    "WM-018": {
+      "id": "ari:cloud:trello::card/workspace/6ab176544341eb7ee2019a51/6ab17d97828c6073fc603d68",
+      "url": "https://trello.com/c/F8OakQJb",
+      "list_id": "ari:cloud:trello::list/workspace/6ab176544341eb7ee2019a51/6ab17ceea4a871c869f215f5",
+      "checklists": [
+        {
+          "id": "ari:cloud:trello::checklist/workspace/6ab176544341eb7ee2019a51/6ab18060d39ee2bc0fe8e33b",
+          "objectId": "6ab18060d39ee2bc0fe8e33b",
+          "name": "Implementação",
+          "position": 140737488355328,
+          "checkItems": [],
+          "key": "implementation",
+          "items": [
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab180623ce850728b5e8b74",
+              "name": "Adicionar Playwright e configuração E2E contra Compose de teste isolado.",
+              "state": "INCOMPLETE",
+              "position": 140737488355328
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab18064d438e796da6f001b",
+              "name": "Subir frontend, BFF, FastAPI e PostgreSQL sem compartilhar o volume/banco pessoal.",
+              "state": "INCOMPLETE",
+              "position": 140737488371712
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab18066adbdde7ea913bd7c",
+              "name": "Criar usuário e dados únicos em cada execução.",
+              "state": "INCOMPLETE",
+              "position": 140737488388096
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab18068f7b2ccf7873c587e",
+              "name": "Percorrer cadastro/login → cliente → serviço → projeto → cobrança → recebimento → dashboard → CSV → logout.",
+              "state": "INCOMPLETE",
+              "position": 140737488404480
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab1806b21ee33b6ede31fa3",
+              "name": "Atualizar a página após gravações para provar persistência pelo servidor.",
+              "state": "INCOMPLETE",
+              "position": 140737488420864
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab1806dbb443465b1c22207",
+              "name": "Gerar relatório, screenshots/trace de falhas e adicionar etapa ao CI.",
+              "state": "INCOMPLETE",
+              "position": 140737488437248
+            }
+          ]
+        },
+        {
+          "id": "ari:cloud:trello::checklist/workspace/6ab176544341eb7ee2019a51/6ab18070033dac354a7c1174",
+          "objectId": "6ab18070033dac354a7c1174",
+          "name": "Critérios de aceite",
+          "position": 140737488371712,
+          "checkItems": [],
+          "key": "acceptance",
+          "items": [
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab180725a669a78631b4fc3",
+              "name": "Jornada executada sem interceptar APIs de negócio por mocks.",
+              "state": "INCOMPLETE",
+              "position": 140737488355328
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab1807413984cff7cada6d1",
+              "name": "Dados criados persistem, totais estão corretos e CSV contém o lançamento.",
+              "state": "INCOMPLETE",
+              "position": 140737488371712
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab180764a975f6e9eae0a78",
+              "name": "Logout impede acesso privado; relatório da execução é preservado.",
+              "state": "INCOMPLETE",
+              "position": 140737488388096
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab180771400cd88936de9ed",
+              "name": "Limpeza afeta somente recursos do Compose de teste.",
+              "state": "INCOMPLETE",
+              "position": 140737488404480
+            }
+          ]
+        }
+      ]
+    },
+    "WM-019": {
+      "id": "ari:cloud:trello::card/workspace/6ab176544341eb7ee2019a51/6ab17d99eb80da41c3e339c2",
+      "url": "https://trello.com/c/8OFBbXrF",
+      "list_id": "ari:cloud:trello::list/workspace/6ab176544341eb7ee2019a51/6ab17ceea4a871c869f215f5",
+      "checklists": [
+        {
+          "id": "ari:cloud:trello::checklist/workspace/6ab176544341eb7ee2019a51/6ab1807b90071fc230e6093d",
+          "objectId": "6ab1807b90071fc230e6093d",
+          "name": "Implementação",
+          "position": 140737488355328,
+          "checkItems": [],
+          "key": "implementation",
+          "items": [
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab1807deeb552ee512068af",
+              "name": "Adicionar suíte de integração com PostgreSQL 15 descartável e sessões independentes.",
+              "state": "INCOMPLETE",
+              "position": 140737488355328
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab1807e5acae146c99f7124",
+              "name": "Aplicar baseline, inserir amostras legadas e atualizar até head; executar alembic check.",
+              "state": "INCOMPLETE",
+              "position": 140737488371712
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab1808187087878d60e86d1",
+              "name": "Verificar preservação de descrições, imagens e deduplicação de tags.",
+              "state": "INCOMPLETE",
+              "position": 140737488388096
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab18084b7e13d8affd7e8c5",
+              "name": "Disparar duas gerações simultâneas da mesma referência mensal.",
+              "state": "INCOMPLETE",
+              "position": 140737488404480
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab18086f1b9f834a6a6133d",
+              "name": "Disparar criação simultânea da mesma combinação usuário/cliente/serviço.",
+              "state": "INCOMPLETE",
+              "position": 140737488420864
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab180880c890af83c90e53a",
+              "name": "Verificar unicidade e tradução de conflitos sem erro genérico 500.",
+              "state": "INCOMPLETE",
+              "position": 140737488437248
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab1808adf13859ed5bea83e",
+              "name": "Executar em serviço isolado no CI e preservar logs.",
+              "state": "INCOMPLETE",
+              "position": 140737488453632
+            }
+          ]
+        },
+        {
+          "id": "ari:cloud:trello::checklist/workspace/6ab176544341eb7ee2019a51/6ab1808c2c08a862ab9bc9f6",
+          "objectId": "6ab1808c2c08a862ab9bc9f6",
+          "name": "Critérios de aceite",
+          "position": 140737488371712,
+          "checkItems": [],
+          "key": "acceptance",
+          "items": [
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab1808e9aa73fc91c1e3d6b",
+              "name": "Schema atualizado coincide com modelos; migration preserva os dados da amostra.",
+              "state": "INCOMPLETE",
+              "position": 140737488355328
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab18090fca51e89138d2178",
+              "name": "Há exatamente uma mensalidade por projeto/referência sob concorrência.",
+              "state": "INCOMPLETE",
+              "position": 140737488371712
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab180910ee386c9ed1b3120",
+              "name": "Há somente um projeto não excluído por combinação, com conflito tratado.",
+              "state": "INCOMPLETE",
+              "position": 140737488388096
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab180930df5de5a32fd674c",
+              "name": "Testes não apontam para DATABASE_URL de desenvolvimento.",
+              "state": "INCOMPLETE",
+              "position": 140737488404480
+            }
+          ]
+        }
+      ]
+    },
+    "WM-020": {
+      "id": "ari:cloud:trello::card/workspace/6ab176544341eb7ee2019a51/6ab17d9bda0eeeec9acc1caf",
+      "url": "https://trello.com/c/bQ2euiWU",
+      "list_id": "ari:cloud:trello::list/workspace/6ab176544341eb7ee2019a51/6ab17ceea4a871c869f215f5",
+      "checklists": [
+        {
+          "id": "ari:cloud:trello::checklist/workspace/6ab176544341eb7ee2019a51/6ab180950a825ff9cfc0a1f1",
+          "objectId": "6ab180950a825ff9cfc0a1f1",
+          "name": "Implementação",
+          "position": 140737488355328,
+          "checkItems": [],
+          "key": "implementation",
+          "items": [
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab1809779125000f56be7d6",
+              "name": "Separar construção da aplicação Express do listen para permitir teste em porta efêmera.",
+              "state": "INCOMPLETE",
+              "position": 140737488355328
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab180996b11cd6a78a88289",
+              "name": "Usar node:test e upstream HTTP controlado, sem serviços de terceiros.",
+              "state": "INCOMPLETE",
+              "position": 140737488371712
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab1809b28db3b0ba6b702e4",
+              "name": "Verificar login, atributos HTTP-only dos cookies e ausência de tokens no JSON do navegador.",
+              "state": "INCOMPLETE",
+              "position": 140737488388096
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab1809ddab8b73e804908dd",
+              "name": "Testar access ausente/refresh válido e refresh inválido.",
+              "state": "INCOMPLETE",
+              "position": 140737488404480
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab1809f5ec0b7772c5bc206",
+              "name": "Para 401 do upstream, renovar e repetir no máximo uma vez.",
+              "state": "INCOMPLETE",
+              "position": 140737488420864
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab180a196b36d19b80e1e92",
+              "name": "Verificar logout e encaminhamento de PDF/CSV com bytes e cabeçalhos corretos.",
+              "state": "INCOMPLETE",
+              "position": 140737488437248
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab180a328dccf7bb16fbd84",
+              "name": "Incluir npm test do BFF no CI.",
+              "state": "INCOMPLETE",
+              "position": 140737488453632
+            }
+          ]
+        },
+        {
+          "id": "ari:cloud:trello::checklist/workspace/6ab176544341eb7ee2019a51/6ab180a5c53402b65c210c70",
+          "objectId": "6ab180a5c53402b65c210c70",
+          "name": "Critérios de aceite",
+          "position": 140737488371712,
+          "checkItems": [],
+          "key": "acceptance",
+          "items": [
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab180a7465d07eb69ccab00",
+              "name": "Login/renovação não expõem tokens no JSON ao frontend.",
+              "state": "INCOMPLETE",
+              "position": 140737488355328
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab180a9e4bd815ab2c98b82",
+              "name": "Requisição original é repetida apenas uma vez e refresh inválido encerra sessão.",
+              "state": "INCOMPLETE",
+              "position": 140737488371712
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab180ac7cdab199c0976e5a",
+              "name": "Proxy preserva status, MIME, Content-Disposition e corpo binário.",
+              "state": "INCOMPLETE",
+              "position": 140737488388096
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab180ae2b46d90f15bb96e2",
+              "name": "Testes iniciam/encerram seus servidores sem portas fixas ou processos órfãos.",
+              "state": "INCOMPLETE",
+              "position": 140737488404480
+            }
+          ]
+        }
+      ]
+    },
+    "WM-021": {
+      "id": "ari:cloud:trello::card/workspace/6ab176544341eb7ee2019a51/6ab17d9da3eb21119562ff51",
+      "url": "https://trello.com/c/wqRyQMu8",
+      "list_id": "ari:cloud:trello::list/workspace/6ab176544341eb7ee2019a51/6ab17ceea4a871c869f215f5",
+      "checklists": [
+        {
+          "id": "ari:cloud:trello::checklist/workspace/6ab176544341eb7ee2019a51/6ab180b1c235cc8f22d354c3",
+          "objectId": "6ab180b1c235cc8f22d354c3",
+          "name": "Implementação",
+          "position": 140737488355328,
+          "checkItems": [],
+          "key": "implementation",
+          "items": [
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab180b39b6d8a70628b16b1",
+              "name": "Atualizar RF de etapas, arquivamento, CSV e ações rápidas após implementação.",
+              "state": "INCOMPLETE",
+              "position": 140737488355328
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab180b53d71a183fd950b1c",
+              "name": "Documentar RN de transições, propriedade, recorrência, estados financeiros e histórico.",
+              "state": "INCOMPLETE",
+              "position": 140737488371712
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab180b7826fe9eefce881d1",
+              "name": "Definir RNF verificáveis para isolamento, persistência, responsividade, falhas e reprodução Docker; marcar metas ainda não medidas.",
+              "state": "INCOMPLETE",
+              "position": 140737488388096
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab180b94aaeeb65120f31a6",
+              "name": "Registrar stack declarada e versões utilizadas, distinguindo intervalos de dependências de versões resolvidas.",
+              "state": "INCOMPLETE",
+              "position": 140737488404480
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab180bb8bb5b955f2de7b09",
+              "name": "Documentar usuarios, clientes, servicos, projetos, pagamentos, tags e servico_tags com PK/FK/índices, exclusão lógica e progresso legado.",
+              "state": "INCOMPLETE",
+              "position": 140737488420864
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab180bd3f0f81e720cb3632",
+              "name": "Construir matriz RF/RN/RNF → WM → teste → evidência.",
+              "state": "INCOMPLETE",
+              "position": 140737488437248
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab180bf9228d7e875cfffeb",
+              "name": "Diferenciar SQLite, mocks de componentes, testes BFF e E2E/PostgreSQL.",
+              "state": "INCOMPLETE",
+              "position": 140737488453632
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab180c2389784095dadb9ef",
+              "name": "Retirar CSV do fora de escopo somente depois de entregue; manter pendências explícitas.",
+              "state": "INCOMPLETE",
+              "position": 140737488470016
+            }
+          ]
+        },
+        {
+          "id": "ari:cloud:trello::checklist/workspace/6ab176544341eb7ee2019a51/6ab180c4da42e1bd2e9f3270",
+          "objectId": "6ab180c4da42e1bd2e9f3270",
+          "name": "Critérios de aceite",
+          "position": 140737488371712,
+          "checkItems": [],
+          "key": "acceptance",
+          "items": [
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab180c6c2593936ec6cef69",
+              "name": "Cada requisito possui comportamento/qualidade verificável, situação e referência de implementação.",
+              "state": "INCOMPLETE",
+              "position": 140737488355328
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab180c9f3834994a4f1a2ed",
+              "name": "Cada resultado de teste indica ambiente, versão e limite de interpretação.",
+              "state": "INCOMPLETE",
+              "position": 140737488371712
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab180cbedf9bebbe2b7099a",
+              "name": "Outra pessoa encontra comandos de execução, modelos, endpoints e testes.",
+              "state": "INCOMPLETE",
+              "position": 140737488388096
+            },
+            {
+              "id": "ari:cloud:trello::check-item/workspace/6ab176544341eb7ee2019a51/6ab180cdef697d80a499bcfe",
+              "name": "A documentação acompanha a versão sem afirmar que os cartões futuros já foram implementados.",
+              "state": "INCOMPLETE",
+              "position": 140737488404480
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "status": "Publicado e conferido",
+  "verified_at": "2026-09-21T19:10:06.187Z",
+  "verification": {
+    "cards": 21,
+    "completed": 12,
+    "todo": 9,
+    "checklists": 42,
+    "items": 187,
+    "descriptions_match": true,
+    "checklist_text_and_states_match": true
+  },
+  "notes": [
+    "Responsáveis, prioridades e classificações registrados nas descrições; sem atribuição de membros ou etiquetas nativas.",
+    "Evidências de testes armazenadas localmente; não anexadas ao Trello.",
+    "Critérios de regressão dos cartões concluídos reservados à próxima execução; escopo implementado marcado conforme análise de código."
+  ],
+  "wm017_retest": {
+    "status": "Em teste — revisão de Tais pendente",
+    "backend": 55,
+    "frontend": 15,
+    "new_tests": 16,
+    "report": "docs/trello/evidencias/2026-09-21-reteste-WM017/RELATORIO.md",
+    "version": "21274ca + patch local sem commit/push",
+    "remote_verified": true
+  }
+}

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites name="vitest tests" tests="15" failures="0" errors="0" time="12.0696684">
+    <testsuite name="src/pages/DashboardPage.test.tsx" timestamp="2026-09-21T18:22:51.886Z" hostname="Lass-Note" tests="1" failures="0" errors="0" skipped="0" time="1.2890454">
+        <testcase classname="src/pages/DashboardPage.test.tsx" name="ações rápidas do dashboard &gt; leva ao formulário canônico de projeto pela URL" time="1.2863122">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/pages/FinanceiroPage.test.tsx" timestamp="2026-09-21T18:22:51.889Z" hostname="Lass-Note" tests="2" failures="0" errors="0" skipped="0" time="1.0385604">
+        <testcase classname="src/pages/FinanceiroPage.test.tsx" name="ações financeiras por estado &gt; oferece receber/cancelar somente para pendências" time="0.9535389">
+        </testcase>
+        <testcase classname="src/pages/FinanceiroPage.test.tsx" name="ações financeiras por estado &gt; oferece estorno somente para pagamentos confirmados" time="0.0798373">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/lib/http.test.ts" timestamp="2026-09-21T18:22:51.893Z" hostname="Lass-Note" tests="2" failures="0" errors="0" skipped="0" time="0.0350844">
+        <testcase classname="src/lib/http.test.ts" name="downloads binary responses without trying JSON" time="0.0207603">
+        </testcase>
+        <testcase classname="src/lib/http.test.ts" name="preserves JSON authentication errors during downloads" time="0.0060717">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/state/AuthContext.test.tsx" timestamp="2026-09-21T18:22:51.895Z" hostname="Lass-Note" tests="1" failures="0" errors="0" skipped="0" time="0.9973145">
+        <testcase classname="src/state/AuthContext.test.tsx" name="AuthProvider &gt; valida a sessão pelo servidor e não depende de localStorage" time="0.9939388">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/features/clientes/ClienteFormDialog.test.tsx" timestamp="2026-09-21T18:22:51.896Z" hostname="Lass-Note" tests="2" failures="0" errors="0" skipped="0" time="2.2170501">
+        <testcase classname="src/features/clientes/ClienteFormDialog.test.tsx" name="ClienteFormDialog &gt; mostra erros próximos aos campos inválidos sem chamar a API" time="1.9991765">
+        </testcase>
+        <testcase classname="src/features/clientes/ClienteFormDialog.test.tsx" name="ClienteFormDialog &gt; mantém o diálogo aberto quando a API falha" time="0.2139897">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/features/financeiro/FinanceDialogs.test.tsx" timestamp="2026-09-21T18:22:51.898Z" hostname="Lass-Note" tests="1" failures="0" errors="0" skipped="0" time="1.5138217">
+        <testcase classname="src/features/financeiro/FinanceDialogs.test.tsx" name="ManualPaymentDialog &gt; desabilita o envio e impede duplicação por clique repetido" time="1.5113867">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/features/projetos/ProjetoFormDialog.test.tsx" timestamp="2026-09-21T18:22:51.899Z" hostname="Lass-Note" tests="1" failures="0" errors="0" skipped="0" time="1.9595932">
+        <testcase classname="src/features/projetos/ProjetoFormDialog.test.tsx" name="ProjetoFormDialog &gt; exige os campos de recorrência apenas no modelo mensal" time="1.9563985">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/features/servicos/Services.test.tsx" timestamp="2026-09-21T18:22:51.901Z" hostname="Lass-Note" tests="3" failures="0" errors="0" skipped="0" time="1.6421699">
+        <testcase classname="src/features/servicos/Services.test.tsx" name="Serviços &gt; seleciona uma tag existente por Enter e cria uma nova sem duplicar envio" time="0.795651">
+        </testcase>
+        <testcase classname="src/features/servicos/Services.test.tsx" name="Serviços &gt; reabre formatação salva, valida nome e preserva formulário após falha" time="0.7755695">
+        </testcase>
+        <testcase classname="src/features/servicos/Services.test.tsx" name="Serviços &gt; bloqueia exportação duplicada e preserva contatos se a API falha" time="0.0658633">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/shared/ui/Dialog.test.tsx" timestamp="2026-09-21T18:22:51.903Z" hostname="Lass-Note" tests="2" failures="0" errors="0" skipped="0" time="1.3770288">
+        <testcase classname="src/shared/ui/Dialog.test.tsx" name="Dialog &gt; abre com título acessível, fecha por Esc e devolve o foco" time="1.1850037">
+        </testcase>
+        <testcase classname="src/shared/ui/Dialog.test.tsx" name="Dialog &gt; bloqueia fechamento durante o envio" time="0.1717079">
+        </testcase>
+    </testsuite>
+</testsuites>

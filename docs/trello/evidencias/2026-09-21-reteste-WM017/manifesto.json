@@ -1,0 +1,20 @@
+{
+  "base_commit": "21274ca1e45875375ff3e4bd4afb512b6de8daee",
+  "version": "base + alterações locais WM-017; sem commit/push",
+  "files": {
+    "backend-fastapi/src/domain/recorrencia.py": "a1497d5a3b760a73e15ecb86a64724494f9953cfdb6cf83e94cfe74d73d086d4",
+    "backend-fastapi/src/application/usecases/faturar_recorrencias.py": "0d9c2fab1003381a6a95afefd1f4326fea380416683c813358ad3b9c3aaa00f5",
+    "backend-fastapi/src/infrastructure/persistence/repositories/postgres_dashboard_query.py": "d6249599587bd8a8bbe81802a096e0ec955622335752230517515da08cfcec13",
+    "backend-fastapi/tests/domain/test_recorrencia.py": "db862c4afc65a44f55ec858f9c436f1ed2fb74c01e62bb1cb5f4a4e2da2ace6f",
+    "backend-fastapi/tests/integration/test_dashboard_forecast.py": "462085f0cd5a09aa8baf8e668ff652c2b4bf4f2fabb7e39bdc0f4fa59e36f075"
+  },
+  "evidence": {
+    "antes.log": "90faf79911912e98444107a6d11c41d8d56d346a65abad8cb31e4aa510529839",
+    "antes.xml": "72dc806fa9531a14b4e02412d892b48606da48981356f9a4ebd9aeaaa17c1d03",
+    "backend.log": "172e3c1413d13f6cf22864d0a75a2a5c4a703fa4059bd8b6acfb995551cb598e",
+    "backend.xml": "59e3fcdf11c34517daa0e959b8fefab34521165199669bad627eb1cb23af842d",
+    "frontend.log": "413adb96587ba3b2d6e4b1a47274b6a315c289d727cffc88139aa75594d8fffa",
+    "frontend.xml": "cc4da51850fc347c436a3bba96efd50667b25b2eb7f2b20ffd2fb85583647c09",
+    "previsao.log": "b6403b8812cbf5c3d1574c7c1832c19e616b855d40b155f143545d51a9810369"
+  }
+}

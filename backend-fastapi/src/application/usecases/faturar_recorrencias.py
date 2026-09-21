@@ -3,17 +3,7 @@ from datetime import date
 from src.application.ports.outbound.i_pagamento_repository import IPagamentoRepository
 from src.application.ports.outbound.i_projeto_repository import IProjetoRepository
 from src.domain.entities.pagamento import PagamentoEntity
-
-
-def _next_month(value: date, due_day: int) -> date:
-    if value.month == 12:
-        return date(value.year + 1, 1, due_day)
-    return date(value.year, value.month + 1, due_day)
-
-
-def _first_due_date(start: date, due_day: int) -> date:
-    candidate = date(start.year, start.month, due_day)
-    return candidate if candidate >= start else _next_month(candidate, due_day)
+from src.domain.recorrencia import first_due_date, next_month
 
 
 class FaturarRecorrenciasUseCase:
@@ -32,11 +22,9 @@ class FaturarRecorrenciasUseCase:
         for projeto in projetos:
             if projeto.id is None or projeto.valor_mensal is None:
                 continue
-            start = projeto.recorrencia_inicio
-            if start is None:
-                start = projeto.criado_em.date() if projeto.criado_em else hoje
-
-            vencimento = _first_due_date(start, projeto.dia_vencimento)
+            vencimento = first_due_date(
+                projeto.recorrencia_inicio, projeto.dia_vencimento, projeto.criado_em, hoje,
+            )
             while vencimento <= hoje:
                 pagamento = PagamentoEntity(
                     projeto_id=projeto.id,
@@ -53,6 +41,6 @@ class FaturarRecorrenciasUseCase:
                 salvo = await self.pagamento_repo.save_recorrencia(pagamento)
                 if salvo is not None:
                     pagamentos_gerados.append(salvo)
-                vencimento = _next_month(vencimento, projeto.dia_vencimento)
+                vencimento = next_month(vencimento, projeto.dia_vencimento)
 
         return pagamentos_gerados

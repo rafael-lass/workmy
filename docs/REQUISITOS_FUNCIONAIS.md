@@ -1,73 +1,60 @@
-# Requisitos funcionais
+# Requisitos funcionais — WorkMy
 
-## Produto e público
+[Índice](README.md) · [Funcionais](REQUISITOS_FUNCIONAIS.md) · [Não funcionais](REQUISITOS_NAO_FUNCIONAIS.md) · [Regras de negócio](REGRAS_DE_NEGOCIO.md)
 
-O WorkMy atende profissionais autônomos e pequenos prestadores que precisam controlar a entrega e o recebimento dos seus serviços. As áreas públicas do produto são Dashboard, Projetos, Clientes, Serviços e Financeiro.
+**Atualização:** 21/09/2026 · **Base:** `21274ca` + correção local WM-017, ainda sem commit/push.
 
-## Autenticação
+## Objetivo e público
 
-- Login aceita usuário ou e-mail.
-- O BFF mantém access e refresh tokens apenas em cookies HTTP-only.
-- O frontend valida a sessão por `GET /auth/me`; dados privados não são persistidos em `localStorage`.
-- Cadastro valida e mascara telefone brasileiro; telefone é opcional.
+O WorkMy atende profissionais autônomos e pequenos prestadores que precisam organizar clientes, serviços, projetos e recebimentos. Os requisitos funcionais descrevem **o que o sistema permite fazer**.
 
-## Clientes e serviços
+## Funcionalidades implementadas
 
-- Cliente exige nome; empresa, e-mail e telefone são opcionais.
-- Serviço exige nome único por usuário. Imagem aceita PNG, JPEG ou WebP de até 5 MiB.
-- Descrição visual (Tiptap): títulos, negrito, itálico, listas, citações e links HTTP(S)/mailto. Documento JSON versionado, validado no backend, com até 20 mil caracteres. Sem HTML arbitrário ou imagens embutidas.
-- Até 10 tags por serviço, com até 40 caracteres por nome, selecionáveis de um catálogo privado e reutilizável. Espaços e caixa são normalizados para evitar duplicatas. Remover uma seleção não exclui a tag.
-- Visualização completa e apresentação comercial em PDF A4. O profissional revisa nome, e-mail e telefone antes de baixar; estes ajustes não alteram sua conta. O PDF usa somente dados do serviço salvo, capa e contatos informados, sem dados financeiros ou de clientes.
-- Repositório e ferramentas não são expostos; colunas legadas e dados existentes permanecem preservados na migração.
-- Clientes e serviços vinculados a projetos não podem ser excluídos.
-- Total recebido considera somente lançamentos `PAGO`.
+“Implementado” identifica comportamento existente no código; o alcance da validação está nos relatórios de teste.
 
-## Projetos
+| ID | Requisito funcional | Situação |
+| --- | --- | --- |
+| RF-01 | Permitir cadastro, login por usuário ou e-mail, consulta da sessão e logout. | Implementado |
+| RF-02 | Cadastrar, consultar, editar e excluir logicamente clientes. | Implementado |
+| RF-03 | Cadastrar e gerenciar serviços com descrição formatada, capa e tags. | Implementado |
+| RF-04 | Gerar apresentação comercial de um serviço em PDF. | Implementado |
+| RF-05 | Criar projetos vinculados a um cliente e a um serviço, com contratação avulsa ou mensal. | Implementado |
+| RF-06 | Consultar e atualizar projetos, controlar suas etapas e arquivá-los. | Implementado |
+| RF-07 | Configurar, pausar e retomar a recorrência de projetos mensais. | Implementado |
+| RF-08 | Gerar cobranças mensais vencidas por uma ação manual de faturamento. | Implementado |
+| RF-09 | Registrar recebimentos avulsos e confirmar o recebimento de cobranças pendentes. | Implementado |
+| RF-10 | Cancelar cobranças pendentes e estornar recebimentos, informando o motivo. | Implementado |
+| RF-11 | Consultar lançamentos financeiros com filtros e paginação; editar observação e comprovante. | Implementado |
+| RF-12 | Exibir indicadores financeiros, série dos últimos seis meses e recebimentos recentes no dashboard. | Implementado |
 
-- Um projeto vincula um cliente a um serviço e nasce em Descoberta, com progresso 0%.
-- Etapas: `DISCOVERY`, `IN_PROGRESS`, `REVIEW`, `COMPLETED`, `ARCHIVED`.
-- Transições válidas: Descoberta → Em andamento/Arquivado; Em andamento → Revisão/Arquivado; Revisão → Em andamento/Concluído/Arquivado; Concluído → Arquivado.
-- Concluir ou arquivar pausa a recorrência.
-- Um projeto com qualquer histórico financeiro não pode ser excluído; deve ser arquivado.
+## Detalhes dos fluxos
 
-## Modelo financeiro
+- **Autenticação:** telefone brasileiro opcional no cadastro; consulta da sessão pelo servidor.
+- **Clientes:** nome obrigatório; empresa, e-mail e telefone opcionais; consulta do total recebido.
+- **Serviços:** editor Tiptap com títulos, negrito, itálico, listas, citações e links; catálogo privado de tags reutilizáveis; visualização completa e PDF A4.
+- **PDF comercial:** permite revisar nome, e-mail e telefone antes do download sem alterar a conta; usa o serviço salvo e não inclui dados financeiros ou de clientes.
+- **Projetos:** a versão atual começa em Descoberta e ainda possui progresso percentual. As transições permitidas estão em [RN-08](REGRAS_DE_NEGOCIO.md#etapas-atuais-dos-projetos).
+- **Financeiro:** filtros por status, tipo, cliente, projeto, período e busca, com paginação. Não há edição ou exclusão genérica de pagamentos: cada operação respeita seu estado.
+- **Faturamento:** geração acionada manualmente pela interface/API; não é uma rotina automática em segundo plano.
+- **Dashboard:** a previsão do próximo mês já utiliza o primeiro vencimento elegível após a correção local WM-017. Revisão funcional de Tais pendente.
 
-Estados e transições:
+## Evoluções planejadas
 
-```text
-PENDENTE ── receber ──► PAGO ── estornar ──► ESTORNADO
-    └──── cancelar ──► CANCELADO
-```
+| Entrega | Situação | Cartão |
+| --- | --- | --- |
+| Planejamento, Andamento, Revisão e Finalizado; retirada do percentual e separação do arquivamento | A fazer | WM-013 |
+| Exportação CSV autenticada e filtrada no backend | A fazer | WM-014 |
+| Download CSV pela interface financeira | A fazer | WM-015 |
+| Ações rápidas no topo do dashboard e remoção de botões redundantes | A fazer | WM-016 |
 
-- Cancelado e estornado são terminais.
-- Atrasado é calculado: `PENDENTE` com `data_vencimento` anterior à data de negócio em São Paulo.
-- Recebimento avulso manual nasce `PAGO`; mensalidade gerada nasce `PENDENTE`.
-- Não há pagamento parcial. O valor de cada lançamento é integral e imutável.
-- Somente observação e comprovante podem ser alterados depois da criação.
-- Cancelamento e estorno exigem motivo.
-- Comprovante aceita PDF, PNG, JPEG ou WebP de até 5 MB.
-- Dashboard, cliente e projeto somam somente registros `PAGO`; estornos saem do realizado.
+Essas evoluções não são apresentadas como funcionalidades entregues.
 
-## Recorrência
+## Fora do escopo atual
 
-- Alterar valor ou vencimento afeta somente cobranças futuras.
-- Pausar não cancela pendências existentes.
-- Retomar exige valor, vencimento e uma nova data inicial; meses pausados não são gerados.
-- A ação manual de faturamento cria todas as referências vencidas ausentes desde o início/retomada até hoje.
-- A geração é síncrona por HTTP, idempotente e protegida também por restrição única no banco.
+Pagamentos parciais, gateway de pagamentos, emissão fiscal, recuperação de senha, faturamento automático em segundo plano, RabbitMQ, vínculo em massa, indicadores de leads, propostas personalizadas, colaboração em tempo real e funcionalidades completas do Notion. CSV está planejado na próxima versão, conforme a tabela acima.
 
-## Interfaces financeiras
+## Evidências e documentos relacionados
 
-- `GET /pagamentos`: filtros por status, tipo, cliente, projeto, período e busca; resposta paginada.
-- `POST /pagamentos`: recebimento avulso já pago.
-- `PATCH /pagamentos/{id}/receber`: confirma pendência.
-- `PATCH /pagamentos/{id}/cancelar` e `/estornar`: exigem motivo.
-- `PATCH /pagamentos/{id}/detalhes`: altera observação/comprovante.
-- `POST /faturamento/recorrencias`: retorna quantidade, valor total e referências criadas.
-- `GET /dashboard/resumo`: indicadores, série de seis meses e cinco recebimentos recentes.
+[Relatório do reteste WM-017](trello/evidencias/2026-09-21-reteste-WM017/RELATORIO.md) · [Inventário dos 70 testes](trello/evidencias/2026-09-21-reteste-WM017/INVENTARIO.md)
 
-Não há `PUT` ou `DELETE` genérico de pagamentos.
-
-## Fora de escopo
-
-Pagamentos parciais, gateway, emissão fiscal, recuperação de senha, geração automática em segundo plano, RabbitMQ, CSV, vínculo em massa, indicadores de leads, propostas personalizadas, colaboração em tempo real e funcionalidades completas do Notion.
+[Regras de negócio](REGRAS_DE_NEGOCIO.md) · [Arquitetura](ARQUITETURA.md) · [Detalhamento de serviços](SERVICOS.md)
