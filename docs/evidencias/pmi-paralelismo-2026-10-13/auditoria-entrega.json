@@ -1,0 +1,28 @@
+{
+  "objective_items": [
+    "1a",
+    "1b",
+    "1c",
+    "1d",
+    "2a",
+    "2b",
+    "2c",
+    "2d"
+  ],
+  "benchmark_complete": true,
+  "ten_runs_equal": true,
+  "start_finish_recorded": true,
+  "Pool_workers": 4,
+  "tests_passed": 11,
+  "demo_modes_verified": [
+    "sequential",
+    "parallel",
+    "compare"
+  ],
+  "slides": 12,
+  "template": "Simple Light Mode (reference imported)",
+  "final_slide_visual_review": true,
+  "presentation_sha256": "4b195fafc1be2ac040575792fa46cf299956bcb917c9b886972302cb64a897c7",
+  "instructions_delivery": "chat",
+  "native_PowerPoint_open_tested": false
+}

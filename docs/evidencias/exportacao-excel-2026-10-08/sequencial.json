@@ -1,0 +1,289 @@
+{
+  "mode": "sequential",
+  "parallel": "not implemented",
+  "reference": "2026-10-08",
+  "python": "3.12.15",
+  "platform": "Linux-6.6.114.1-microsoft-standard-WSL2-x86_64-with-glibc2.41",
+  "cpu_count": 4,
+  "repeats": 3,
+  "runs": [
+    {
+      "period": "3",
+      "repetition": 1,
+      "timings_seconds": {
+        "consulta_pagamentos": 0.018950240999402013,
+        "consulta_projetos": 0.01075788699927216,
+        "consulta_clientes": 0.008034155999666837,
+        "consulta_servicos": 0.009092426999814052,
+        "resumo": 0.039077981000446016,
+        "xlsx": 0.04536320399984106,
+        "total": 0.13249469800030056
+      },
+      "counts": {
+        "pagamentos": 69,
+        "projetos": 23,
+        "clientes": 23,
+        "servicos": 23
+      },
+      "xlsx_bytes": 19967
+    },
+    {
+      "period": "3",
+      "repetition": 2,
+      "timings_seconds": {
+        "consulta_pagamentos": 0.009458757000174955,
+        "consulta_projetos": 0.008684685999469366,
+        "consulta_clientes": 0.008162144999914744,
+        "consulta_servicos": 0.0069199260005916585,
+        "resumo": 0.0006624950001423713,
+        "xlsx": 0.02786465200006205,
+        "total": 0.06284467400018912
+      },
+      "counts": {
+        "pagamentos": 69,
+        "projetos": 23,
+        "clientes": 23,
+        "servicos": 23
+      },
+      "xlsx_bytes": 19967
+    },
+    {
+      "period": "3",
+      "repetition": 3,
+      "timings_seconds": {
+        "consulta_pagamentos": 0.006190371999764466,
+        "consulta_projetos": 0.006384684000295238,
+        "consulta_clientes": 0.005505813999661768,
+        "consulta_servicos": 0.005787566999970295,
+        "resumo": 0.0005237559998931829,
+        "xlsx": 0.03240685599939752,
+        "total": 0.05778905100032716
+      },
+      "counts": {
+        "pagamentos": 69,
+        "projetos": 23,
+        "clientes": 23,
+        "servicos": 23
+      },
+      "xlsx_bytes": 19967
+    },
+    {
+      "period": "6",
+      "repetition": 1,
+      "timings_seconds": {
+        "consulta_pagamentos": 0.006961025000236987,
+        "consulta_projetos": 0.006830290000834793,
+        "consulta_clientes": 0.005747329999394424,
+        "consulta_servicos": 0.007189130999904592,
+        "resumo": 0.0008658030001242878,
+        "xlsx": 0.037084014999891224,
+        "total": 0.06590760500057513
+      },
+      "counts": {
+        "pagamentos": 138,
+        "projetos": 23,
+        "clientes": 23,
+        "servicos": 23
+      },
+      "xlsx_bytes": 24728
+    },
+    {
+      "period": "6",
+      "repetition": 2,
+      "timings_seconds": {
+        "consulta_pagamentos": 0.00690883099923667,
+        "consulta_projetos": 0.0068235090002417564,
+        "consulta_clientes": 0.005870492999747512,
+        "consulta_servicos": 0.006606361999729415,
+        "resumo": 0.0009363809995193151,
+        "xlsx": 0.03650589500011847,
+        "total": 0.06475677099933819
+      },
+      "counts": {
+        "pagamentos": 138,
+        "projetos": 23,
+        "clientes": 23,
+        "servicos": 23
+      },
+      "xlsx_bytes": 24728
+    },
+    {
+      "period": "6",
+      "repetition": 3,
+      "timings_seconds": {
+        "consulta_pagamentos": 0.1306570369997644,
+        "consulta_projetos": 0.00776126600067073,
+        "consulta_clientes": 0.006927864999852318,
+        "consulta_servicos": 0.008974335000857536,
+        "resumo": 0.0007736630004728795,
+        "xlsx": 0.032823717000610486,
+        "total": 0.18885027099986473
+      },
+      "counts": {
+        "pagamentos": 138,
+        "projetos": 23,
+        "clientes": 23,
+        "servicos": 23
+      },
+      "xlsx_bytes": 24728
+    },
+    {
+      "period": "12",
+      "repetition": 1,
+      "timings_seconds": {
+        "consulta_pagamentos": 0.07561184099995444,
+        "consulta_projetos": 0.006967350000195438,
+        "consulta_clientes": 0.006008770000335062,
+        "consulta_servicos": 0.006874701000015193,
+        "resumo": 0.0011198689999218914,
+        "xlsx": 0.1964027799995165,
+        "total": 0.2941672050001216
+      },
+      "counts": {
+        "pagamentos": 230,
+        "projetos": 23,
+        "clientes": 23,
+        "servicos": 23
+      },
+      "xlsx_bytes": 31018
+    },
+    {
+      "period": "12",
+      "repetition": 2,
+      "timings_seconds": {
+        "consulta_pagamentos": 0.11504912399959721,
+        "consulta_projetos": 0.02324344199951156,
+        "consulta_clientes": 0.007023815999673388,
+        "consulta_servicos": 0.01274431399997411,
+        "resumo": 0.0013064499999018153,
+        "xlsx": 0.056945279000501614,
+        "total": 0.21826415699979407
+      },
+      "counts": {
+        "pagamentos": 230,
+        "projetos": 23,
+        "clientes": 23,
+        "servicos": 23
+      },
+      "xlsx_bytes": 31018
+    },
+    {
+      "period": "12",
+      "repetition": 3,
+      "timings_seconds": {
+        "consulta_pagamentos": 0.06647927999983949,
+        "consulta_projetos": 0.007627632000549056,
+        "consulta_clientes": 0.00892148000002635,
+        "consulta_servicos": 0.006230117999621143,
+        "resumo": 0.0018405870005153702,
+        "xlsx": 0.07591652400060411,
+        "total": 0.16842782599997008
+      },
+      "counts": {
+        "pagamentos": 230,
+        "projetos": 23,
+        "clientes": 23,
+        "servicos": 23
+      },
+      "xlsx_bytes": 31018
+    },
+    {
+      "period": "total",
+      "repetition": 1,
+      "timings_seconds": {
+        "consulta_pagamentos": 3.582606919000682,
+        "consulta_projetos": 0.1716920159997244,
+        "consulta_clientes": 0.0717669420000675,
+        "consulta_servicos": 0.0039028990004226216,
+        "resumo": 0.6700015629994596,
+        "xlsx": 30.44772475100035,
+        "total": 34.94892482100022
+      },
+      "counts": {
+        "pagamentos": 200000,
+        "projetos": 12000,
+        "clientes": 10000,
+        "servicos": 53
+      },
+      "xlsx_bytes": 17915017
+    },
+    {
+      "period": "total",
+      "repetition": 2,
+      "timings_seconds": {
+        "consulta_pagamentos": 3.083696122999754,
+        "consulta_projetos": 0.14605503100028727,
+        "consulta_clientes": 0.14306543099974078,
+        "consulta_servicos": 0.002892700000302284,
+        "resumo": 0.831316985999365,
+        "xlsx": 34.82519431399942,
+        "total": 39.0341744339994
+      },
+      "counts": {
+        "pagamentos": 200000,
+        "projetos": 12000,
+        "clientes": 10000,
+        "servicos": 53
+      },
+      "xlsx_bytes": 17915017
+    },
+    {
+      "period": "total",
+      "repetition": 3,
+      "timings_seconds": {
+        "consulta_pagamentos": 3.388602523999907,
+        "consulta_projetos": 0.1383269059997474,
+        "consulta_clientes": 0.08379058199989231,
+        "consulta_servicos": 0.002801622999868414,
+        "resumo": 0.6545002829998339,
+        "xlsx": 35.887749170999996,
+        "total": 40.15708868299953
+      },
+      "counts": {
+        "pagamentos": 200000,
+        "projetos": 12000,
+        "clientes": 10000,
+        "servicos": 53
+      },
+      "xlsx_bytes": 17915018
+    }
+  ],
+  "medians_seconds": {
+    "3": {
+      "consulta_pagamentos": 0.009458757000174955,
+      "consulta_projetos": 0.008684685999469366,
+      "consulta_clientes": 0.008034155999666837,
+      "consulta_servicos": 0.0069199260005916585,
+      "resumo": 0.0006624950001423713,
+      "xlsx": 0.03240685599939752,
+      "total": 0.06284467400018912
+    },
+    "6": {
+      "consulta_pagamentos": 0.006961025000236987,
+      "consulta_projetos": 0.006830290000834793,
+      "consulta_clientes": 0.005870492999747512,
+      "consulta_servicos": 0.007189130999904592,
+      "resumo": 0.0008658030001242878,
+      "xlsx": 0.03650589500011847,
+      "total": 0.06590760500057513
+    },
+    "12": {
+      "consulta_pagamentos": 0.07561184099995444,
+      "consulta_projetos": 0.007627632000549056,
+      "consulta_clientes": 0.007023815999673388,
+      "consulta_servicos": 0.006874701000015193,
+      "resumo": 0.0013064499999018153,
+      "xlsx": 0.07591652400060411,
+      "total": 0.21826415699979407
+    },
+    "total": {
+      "consulta_pagamentos": 3.388602523999907,
+      "consulta_projetos": 0.14605503100028727,
+      "consulta_clientes": 0.08379058199989231,
+      "consulta_servicos": 0.002892700000302284,
+      "resumo": 0.6700015629994596,
+      "xlsx": 34.82519431399942,
+      "total": 39.0341744339994
+    }
+  }
+}

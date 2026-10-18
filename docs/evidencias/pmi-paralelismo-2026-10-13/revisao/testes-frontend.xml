@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites name="vitest tests" tests="23" failures="0" errors="0" time="5.8345994">
+    <testsuite name="src/lib/http.test.ts" timestamp="2026-10-14T01:39:03.994Z" hostname="Lass-Note" tests="2" failures="0" errors="0" skipped="0" time="0.0084272">
+        <testcase classname="src/lib/http.test.ts" name="downloads binary responses without trying JSON" time="0.0038502">
+        </testcase>
+        <testcase classname="src/lib/http.test.ts" name="preserves JSON authentication errors during downloads" time="0.0026672">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/state/AuthContext.test.tsx" timestamp="2026-10-14T01:39:03.995Z" hostname="Lass-Note" tests="1" failures="0" errors="0" skipped="0" time="0.3251551">
+        <testcase classname="src/state/AuthContext.test.tsx" name="AuthProvider &gt; valida a sessão pelo servidor e não depende de localStorage" time="0.322633">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/pages/DashboardPage.test.tsx" timestamp="2026-10-14T01:39:03.997Z" hostname="Lass-Note" tests="1" failures="0" errors="0" skipped="0" time="0.2627076">
+        <testcase classname="src/pages/DashboardPage.test.tsx" name="ações rápidas do dashboard &gt; leva ao formulário canônico de projeto pela URL" time="0.2612728">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/pages/FinanceiroPage.test.tsx" timestamp="2026-10-14T01:39:03.998Z" hostname="Lass-Note" tests="2" failures="0" errors="0" skipped="0" time="0.3887929">
+        <testcase classname="src/pages/FinanceiroPage.test.tsx" name="ações financeiras por estado &gt; oferece receber/cancelar somente para pendências" time="0.3605758">
+        </testcase>
+        <testcase classname="src/pages/FinanceiroPage.test.tsx" name="ações financeiras por estado &gt; oferece estorno somente para pagamentos confirmados" time="0.0235518">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/pages/ProjetosPage.test.tsx" timestamp="2026-10-14T01:39:03.999Z" hostname="Lass-Note" tests="3" failures="0" errors="0" skipped="0" time="1.0488606">
+        <testcase classname="src/pages/ProjetosPage.test.tsx" name="navbar mantém navegação sem o botão Novo projeto" time="0.2242387">
+        </testcase>
+        <testcase classname="src/pages/ProjetosPage.test.tsx" name="arquiva com confirmação, mantém exclusão nos dois layouts e não retoma finalizados" time="0.488712">
+        </testcase>
+        <testcase classname="src/pages/ProjetosPage.test.tsx" name="reativa arquivado em Planejamento com recorrência pausada e permite excluir sem histórico" time="0.3345774">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/features/dashboard/DashboardExport.test.tsx" timestamp="2026-10-14T01:39:03.999Z" hostname="Lass-Note" tests="2" failures="0" errors="0" skipped="0" time="0.4816257">
+        <testcase classname="src/features/dashboard/DashboardExport.test.tsx" name="envia período sem paginação e bloqueia exportações duplicadas" time="0.3904171">
+        </testcase>
+        <testcase classname="src/features/dashboard/DashboardExport.test.tsx" name="preserva período e libera nova tentativa após falha" time="0.0892692">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/features/projetos/ProjetoFormDialog.test.tsx" timestamp="2026-10-14T01:39:04.000Z" hostname="Lass-Note" tests="2" failures="0" errors="0" skipped="0" time="0.6140285">
+        <testcase classname="src/features/projetos/ProjetoFormDialog.test.tsx" name="ProjetoFormDialog &gt; edita a etapa sem progresso e sem oferecer arquivamento como etapa" time="0.3265541">
+        </testcase>
+        <testcase classname="src/features/projetos/ProjetoFormDialog.test.tsx" name="ProjetoFormDialog &gt; exige os campos de recorrência apenas no modelo mensal" time="0.2848693">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/features/financeiro/FinanceDialogs.test.tsx" timestamp="2026-10-14T01:39:04.000Z" hostname="Lass-Note" tests="3" failures="0" errors="0" skipped="0" time="0.7601445">
+        <testcase classname="src/features/financeiro/FinanceDialogs.test.tsx" name="ManualPaymentDialog &gt; desabilita o envio e impede duplicação por clique repetido" time="0.4785983">
+        </testcase>
+        <testcase classname="src/features/financeiro/FinanceDialogs.test.tsx" name="filtra clientes pelo serviço e limpa a escolha ao trocar o serviço" time="0.2487425">
+        </testcase>
+        <testcase classname="src/features/financeiro/FinanceDialogs.test.tsx" name="preenche serviço e cliente do projeto recebido por contexto" time="0.0285381">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/features/servicos/Services.test.tsx" timestamp="2026-10-14T01:39:04.001Z" hostname="Lass-Note" tests="3" failures="0" errors="0" skipped="0" time="0.9056545">
+        <testcase classname="src/features/servicos/Services.test.tsx" name="Serviços &gt; seleciona uma tag existente por Enter e cria uma nova sem duplicar envio" time="0.3830069">
+        </testcase>
+        <testcase classname="src/features/servicos/Services.test.tsx" name="Serviços &gt; reabre formatação salva, valida nome e preserva formulário após falha" time="0.4918241">
+        </testcase>
+        <testcase classname="src/features/servicos/Services.test.tsx" name="Serviços &gt; bloqueia exportação duplicada e preserva contatos se a API falha" time="0.0294746">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/shared/ui/Dialog.test.tsx" timestamp="2026-10-14T01:39:04.002Z" hostname="Lass-Note" tests="2" failures="0" errors="0" skipped="0" time="0.3887232">
+        <testcase classname="src/shared/ui/Dialog.test.tsx" name="Dialog &gt; abre com título acessível, fecha por Esc e devolve o foco" time="0.3217944">
+        </testcase>
+        <testcase classname="src/shared/ui/Dialog.test.tsx" name="Dialog &gt; bloqueia fechamento durante o envio" time="0.0644764">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/features/clientes/ClienteFormDialog.test.tsx" timestamp="2026-10-14T01:39:04.003Z" hostname="Lass-Note" tests="2" failures="0" errors="0" skipped="0" time="0.6504796">
+        <testcase classname="src/features/clientes/ClienteFormDialog.test.tsx" name="ClienteFormDialog &gt; mostra erros próximos aos campos inválidos sem chamar a API" time="0.5130711">
+        </testcase>
+        <testcase classname="src/features/clientes/ClienteFormDialog.test.tsx" name="ClienteFormDialog &gt; mantém o diálogo aberto quando a API falha" time="0.1356603">
+        </testcase>
+    </testsuite>
+</testsuites>

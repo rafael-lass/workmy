@@ -1,7 +1,6 @@
-import { NavLink, Outlet, useNavigate } from 'react-router-dom'
+import { NavLink, Outlet } from 'react-router-dom'
 import { useState } from 'react'
 import { useAuth } from '../hooks/useAuth'
-import { Button } from '../shared/ui/Button'
 import { Icon } from '../shared/ui/Icon'
 
 const nav = [
@@ -15,7 +14,6 @@ const nav = [
 export function AppLayout() {
   const { user, logout } = useAuth()
   const [open, setOpen] = useState(false)
-  const navigate = useNavigate()
   const initials = user?.username.slice(0, 2).toUpperCase() ?? 'WM'
 
   return <div className="min-h-screen bg-[#f5f7fb]">
@@ -36,7 +34,6 @@ export function AppLayout() {
       <button className="ui-icon-button lg:hidden" onClick={() => setOpen(true)} aria-label="Abrir menu"><Icon name="menu" /></button>
       <div className="hidden lg:block"><span className="text-xs font-semibold uppercase tracking-[.12em] text-slate-400">Área de trabalho</span></div>
       <div className="flex items-center gap-3">
-        <Button size="sm" onClick={() => navigate('/projetos?acao=novo')}><Icon name="plus" />Novo projeto</Button>
         <div className="hidden text-right sm:block"><strong className="block text-sm leading-tight">{user?.username}</strong><span className="block max-w-44 truncate text-xs text-slate-500">{user?.email}</span></div>
         <span className="grid h-9 w-9 place-items-center rounded-xl bg-indigo-50 text-xs font-black text-indigo-700">{initials}</span>
       </div>

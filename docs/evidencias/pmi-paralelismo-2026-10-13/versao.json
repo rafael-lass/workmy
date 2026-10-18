@@ -1,0 +1,11 @@
+{
+  "base_commit": "6a97132e56da6fdc48e0e76894661251fa779639",
+  "alteracoes_locais": true,
+  "sha256": {
+    "backend-fastapi/scripts/benchmark_excel.py": "4cef25bfb531964c16c8f17f1bbbe5a36718797357da69d0283529a186b2e7ac",
+    "backend-fastapi/scripts/demo_paralelismo.ps1": "be2bf285eadf943c28089fcb636483306a36e78d654c8ad28513137669dc6b7a",
+    "backend-fastapi/src/infrastructure/documents/dashboard_excel.py": "fc2254460e8966ff35e7c75155dae3f27477b5036467d4eecde0322cfa06701b",
+    "backend-fastapi/src/infrastructure/documents/excel_rows.py": "fec7b97d758abe6646a986d1a7354e80d85c10671d367b306b684398606bc1a2",
+    "backend-fastapi/src/application/usecases/exportar_dashboard.py": "cdf2df9cdd958e40c9b70879de9d9a170b79955faef5a9e4af81e14031de66cc"
+  }
+}

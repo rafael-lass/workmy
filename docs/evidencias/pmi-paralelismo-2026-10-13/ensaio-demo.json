@@ -1,0 +1,31 @@
+[
+  {
+    "file": "output\\pmi-paralelismo\\demo\\compare-20261013-170632-241.json",
+    "modes": [
+      "sequential",
+      "parallel"
+    ],
+    "seconds": [
+      11.814715385437012,
+      12.615822315216064
+    ]
+  },
+  {
+    "file": "output\\pmi-paralelismo\\demo\\parallel-20261013-171730-407.json",
+    "modes": [
+      "parallel"
+    ],
+    "seconds": [
+      13.051413536071777
+    ]
+  },
+  {
+    "file": "output\\pmi-paralelismo\\demo\\sequential-20261013-171621-276.json",
+    "modes": [
+      "sequential"
+    ],
+    "seconds": [
+      15.303735733032227
+    ]
+  }
+]

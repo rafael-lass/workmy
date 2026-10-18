@@ -1,0 +1,15 @@
+{
+  "data_local": "2026-10-13",
+  "fuso": "America/Sao_Paulo",
+  "escopo": "Revisão de código, evidências e apresentação; sem mudança no código da aplicação",
+  "backend": {"comando": ".venv/Scripts/python.exe -m pytest -q --basetemp=../tmp/pytest-review-authorized-20261013 --junitxml=../docs/evidencias/pmi-paralelismo-2026-10-13/revisao/testes-backend.xml -o faulthandler_timeout=30", "exit_code": 0, "aprovados": 71, "falhas": 0, "erros": 0, "ignorados": 4, "duracao_segundos": 23.69},
+  "frontend": {"comando": "npm run test -- --reporter=default --reporter=junit --outputFile=../docs/evidencias/pmi-paralelismo-2026-10-13/revisao/testes-frontend.xml", "exit_code": 0, "aprovados": 23, "arquivos": 11, "duracao_segundos": 17.12},
+  "lint": {"comando": "npm run lint", "diretorio": "frontend", "exit_code": 0},
+  "build": {"comando": "npm run build", "diretorio": "frontend", "exit_code": 0, "vite": "8.2.2", "modulos_transformados": 116},
+  "tentativas_restritas": {"backend": "Interrompido durante criação de event loop; sem resultado funcional completo", "frontend": "11 suítes falharam na preparação por EPERM em temporário; nenhum caso executado. JUnit preservado separadamente"},
+  "apresentacao": {"slides_revisados": 12, "inspecao": "Deck final refeito e validado; capa conferida visualmente; texto/nome conferidos nas lâminas e notas", "alterada": true, "arquivo": "output/pmi-paralelismo/WorkMy_Paralelismo_PMI_15-10-2026_Leonardo.pptx", "sha256": "24c9555a463dd9d415e5820e6254a86cb8b43b75f809f242fb22c987255b1df8", "powerpoint_nativo": false},
+  "benchmark_novo": false,
+  "teste_saturacao": false,
+  "teste_worker_travado_ou_morte_abrupta": false,
+  "ci_remoto_consultado": false
+}

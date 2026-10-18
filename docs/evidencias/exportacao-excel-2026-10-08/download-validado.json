@@ -1,0 +1,22 @@
+{
+  "counts": {
+    "Pagamentos": 200000,
+    "Clientes": 10000,
+    "Serviços": 53,
+    "Projetos": 12000
+  },
+  "payment_statuses": {
+    "PAGO": 181034,
+    "ESTORNADO": 11947,
+    "CANCELADO": 6990,
+    "PENDENTE": 29
+  },
+  "totals_brl": {
+    "PAGO": "173361593.40",
+    "ESTORNADO": "9824222.98",
+    "CANCELADO": "9209035.48",
+    "PENDENTE": "35250"
+  },
+  "dashboard_reconciled": true,
+  "unique_payment_ids": 200000
+}

@@ -10,7 +10,7 @@ STATUS_TRANSITIONS = {
     "IN_PROGRESS":  {"REVIEW", "ARCHIVED"},
     "REVIEW":       {"IN_PROGRESS", "COMPLETED", "ARCHIVED"},
     "COMPLETED":    {"ARCHIVED"},
-    "ARCHIVED":     set(),
+    "ARCHIVED":     {"DISCOVERY"},
 }
 
 @dataclass
@@ -20,7 +20,6 @@ class ProjetoEntity:
     servico_id: int
     id: int | None = None
     status: str = 'DISCOVERY'
-    progresso: int = 0
     data_entrega: date | None = None
     valor: Decimal | None = None
     valor_mensal: Decimal | None = None
@@ -35,8 +34,6 @@ class ProjetoEntity:
         """Valida as regras de consistência da entidade."""
         if self.valor is not None and self.valor <= 0:
             raise ValidaEntidadeException("O valor do contrato deve ser maior que zero.")
-        if not (0 <= self.progresso <= 100):
-            raise ValidaEntidadeException("O progresso do projeto deve estar entre 0 e 100.")
         if self.status not in VALID_STATUSES:
             raise ValidaEntidadeException(f"Status inválido: {self.status}")
         if self.tipo_recorrencia not in VALID_RECURRENCE_TYPES:
@@ -79,8 +76,6 @@ class ProjetoEntity:
             return
         self.validate_transition(new_status)
         self.status = new_status
-        if new_status == "COMPLETED":
-            self.progresso = 100
         if new_status in {"COMPLETED", "ARCHIVED"}:
             self.recorrencia_ativa = False
 

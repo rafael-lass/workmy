@@ -141,6 +141,36 @@ async def test_fastapi_create_projeto_flow():
         assert float(data["valor_mensal"]) == 500.00
         assert data["dia_vencimento"] == 10
         
+        assert "progresso" not in data
+        path = f"/api/projetos/{data['id']}"
+        async with session_maker_test() as session:
+            model = await session.get(ProjetoModel, data['id'])
+            model.progresso = 37  # Existing legacy data must survive all transitions.
+            await session.commit()
+        for stage in ["IN_PROGRESS", "REVIEW", "IN_PROGRESS", "REVIEW", "COMPLETED"]:
+            changed = await client.patch(path + "/status", headers=headers, json={"status": stage})
+            assert changed.status_code == 200, changed.text
+            assert changed.json()["status"] == stage
+            assert "progresso" not in changed.json()
+        assert changed.json()["ativo"] is False
+        resumed = await client.patch(path + "/recorrencia", headers=headers, json={
+            "ativo": True, "valor_mensal": 500, "dia_vencimento": 10,
+            "recorrencia_inicio": "2026-09-22",
+        })
+        assert resumed.status_code == 400
+        invalid = await client.put(path, headers=headers, json={"progresso": 90})
+        assert invalid.status_code == 422
+        assert (await client.patch(path + "/status", headers=headers, json={"status": "ARCHIVED"})).status_code == 200
+        assert (await client.patch(path + "/status", headers=headers, json={"status": "IN_PROGRESS"})).status_code == 400
+        reactivated = await client.patch(path + "/status", headers=headers, json={"status": "DISCOVERY"})
+        assert reactivated.status_code == 200
+        assert reactivated.json()["ativo"] is False
+        assert reactivated.json()["status"] == "DISCOVERY"
+        assert "progresso" not in (await client.get(path, headers=headers)).json()
+        assert all("progresso" not in item for item in (await client.get("/api/projetos/", headers=headers)).json())
+        async with session_maker_test() as session:
+            assert (await session.get(ProjetoModel, data['id'])).progresso == 37
+
         # 4. Tenta duplicar para forçar erro 400 de Colisão
         dup_response = await client.post("/api/projetos/", json=payload, headers=headers)
         assert dup_response.status_code == 400

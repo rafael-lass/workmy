@@ -10,7 +10,6 @@ class ProjetoView:
     servico_id: int
     servico_nome: str
     status: str
-    progresso: int
     valor: Decimal | None
     tipo_recorrencia: str
     recorrencia_ativa: bool

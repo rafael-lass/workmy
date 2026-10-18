@@ -272,7 +272,7 @@ async def test_faturar_recorrencias_ignora_inicio_futuro_e_projeto_encerrado():
     ))
     await projeto_repo.save(ProjetoEntity(
         id=2, usuario_id=10, cliente_id=1, servico_id=2,
-        status='COMPLETED', progresso=100,
+        status='COMPLETED',
         tipo_recorrencia='MENSAL', recorrencia_ativa=True,
         valor_mensal=Decimal("800.00"), dia_vencimento=5,
     ))
@@ -325,8 +325,8 @@ async def test_atualizar_projeto_limpa_opcional_e_encerra_recorrencia():
     assert projeto.valor is None
 
     await use_case.execute(1, 10, {"status": "REVIEW"})
-    projeto = await use_case.execute(1, 10, {"status": "COMPLETED", "progresso": 40})
-    assert projeto.progresso == 100
+    projeto = await use_case.execute(1, 10, {"status": "COMPLETED"})
+    assert not hasattr(projeto, "progresso")
     assert projeto.recorrencia_ativa is False
 
 

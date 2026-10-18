@@ -23,7 +23,9 @@ export function RichTextEditor({ initialValue, onChange, readOnly = false, disab
   const tool = (label: string, action: () => void, active = false, unavailable = false) => <button type="button" aria-label={label} aria-pressed={active} disabled={disabled || unavailable} onClick={action}>{label}</button>
   return <div className={`rich-editor ${readOnly ? 'rich-editor--readonly' : ''}`}>
     {!readOnly && <div className="rich-editor__toolbar" role="toolbar" aria-label="Formatação da descrição">
+      <span className="rich-editor__group-label">Blocos</span>
       <select aria-label="Estilo do texto" disabled={disabled} value={state.heading} onChange={(event) => { const level = Number(event.target.value); if (level) editor.chain().focus().setHeading({ level: level as 1 | 2 | 3 }).run(); else editor.chain().focus().setParagraph().run() }}><option value={0}>Texto</option><option value={1}>Título 1</option><option value={2}>Título 2</option><option value={3}>Título 3</option></select>
+      <span className="rich-editor__group-label">Texto</span>
       {tool('Negrito', () => editor.chain().focus().toggleBold().run(), state.bold)}
       {tool('Itálico', () => editor.chain().focus().toggleItalic().run(), state.italic)}
       {tool('Lista', () => editor.chain().focus().toggleBulletList().run(), state.bullet)}
@@ -36,6 +38,6 @@ export function RichTextEditor({ initialValue, onChange, readOnly = false, disab
     </div>}
     {!readOnly && linkOpen && <div className="rich-editor__link"><label htmlFor="description-link">Endereço do link</label><input id="description-link" value={url} disabled={disabled} onChange={(event) => setUrl(event.target.value)} placeholder="https://... ou mailto:..." aria-invalid={Boolean(linkError)} /><button type="button" disabled={disabled} onClick={() => { if (!safeUrl(url)) { setLinkError('Informe um link https://, http:// ou mailto: válido.'); return } editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run(); setLinkOpen(false) }}>Aplicar link</button><button type="button" disabled={disabled} onClick={() => { editor.chain().focus().extendMarkRange('link').unsetLink().run(); setLinkOpen(false) }}>Remover link</button>{linkError && <p role="alert">{linkError}</p>}</div>}
     <EditorContent editor={editor} />
-    {!readOnly && <p id="service-description-hint" className={error ? 'text-red-700' : 'text-slate-500'}>{error || `Use os botões ou atalhos como #, ## e **texto**. ${state.count.toLocaleString('pt-BR')}/20.000 caracteres.`}</p>}
+    {!readOnly && <p id="service-description-hint" className={error ? 'text-red-700' : 'text-slate-500'}>{error || <><strong>Editor em blocos:</strong> use <kbd>#</kbd> para título, <kbd>&gt;</kbd> para citação, <kbd>-</kbd> para lista e <kbd>**texto**</kbd> para negrito. {state.count.toLocaleString('pt-BR')}/20.000 caracteres.</>}</p>}
   </div>
 }

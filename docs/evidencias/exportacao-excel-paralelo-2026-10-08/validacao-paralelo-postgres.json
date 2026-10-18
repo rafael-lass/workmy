@@ -1,0 +1,79 @@
+{
+  "mode": "parallel",
+  "reference": "2026-10-08",
+  "python": "3.12.15",
+  "platform": "Linux-6.6.114.1-microsoft-standard-WSL2-x86_64-with-glibc2.41",
+  "cpu_count": 4,
+  "repeats": 1,
+  "runs": [
+    {
+      "mode": "parallel",
+      "period": "total",
+      "repetition": 1,
+      "wall_time_seconds": 2089.0030584335327,
+      "timings_seconds": {
+        "consulta_pagamentos": 3.5210239990001355,
+        "consulta_projetos": 0.28657510800076125,
+        "consulta_clientes": 0.10997677500017744,
+        "consulta_servicos": 0.018272152000463393,
+        "consultas_postgres_total": 3.7030860270006087,
+        "xlsx_pagamentos": 27.20930123800008,
+        "xlsx_clientes": 0.5995357479996528,
+        "xlsx_servicos": 0.03790248000041174,
+        "xlsx_projetos": 1.3761142839994136,
+        "paralelismo_total": 32.02937222199944,
+        "pacote_zip": 0.04447838300075091,
+        "render_total": 32.224001573999885,
+        "total": 35.9300327130004
+      },
+      "counts": {
+        "pagamentos": 200000,
+        "projetos": 12000,
+        "clientes": 10000,
+        "servicos": 53
+      },
+      "file_sizes": {
+        "workmy-pagamentos-total-2026-10-08.xlsx": 16822123,
+        "workmy-clientes-total-2026-10-08.xlsx": 327138,
+        "workmy-servicos-total-2026-10-08.xlsx": 7048,
+        "workmy-projetos-total-2026-10-08.xlsx": 757221,
+        "pacote_zip": 17914156
+      }
+    }
+  ],
+  "results": {
+    "total": {
+      "parallel": {
+        "median_wall_time_seconds": 2089.0030584335327,
+        "median_stages_seconds": {
+          "consulta_pagamentos": 3.5210239990001355,
+          "consulta_projetos": 0.28657510800076125,
+          "consulta_clientes": 0.10997677500017744,
+          "consulta_servicos": 0.018272152000463393,
+          "consultas_postgres_total": 3.7030860270006087,
+          "xlsx_pagamentos": 27.20930123800008,
+          "xlsx_clientes": 0.5995357479996528,
+          "xlsx_servicos": 0.03790248000041174,
+          "xlsx_projetos": 1.3761142839994136,
+          "paralelismo_total": 32.02937222199944,
+          "pacote_zip": 0.04447838300075091,
+          "render_total": 32.224001573999885,
+          "total": 35.9300327130004
+        },
+        "file_sizes": {
+          "workmy-pagamentos-total-2026-10-08.xlsx": 16822123,
+          "workmy-clientes-total-2026-10-08.xlsx": 327138,
+          "workmy-servicos-total-2026-10-08.xlsx": 7048,
+          "workmy-projetos-total-2026-10-08.xlsx": 757221,
+          "pacote_zip": 17914156
+        },
+        "counts": {
+          "pagamentos": 200000,
+          "projetos": 12000,
+          "clientes": 10000,
+          "servicos": 53
+        }
+      }
+    }
+  }
+}

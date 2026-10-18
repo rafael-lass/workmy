@@ -19,7 +19,6 @@ class PostgresProjetoRepository(IProjetoRepository):
             cliente_id=model.cliente_id,
             servico_id=model.servico_id,
             status=model.status,
-            progresso=model.progresso,
             data_entrega=model.data_entrega,
             valor=model.valor,
             valor_mensal=model.valor_mensal,
@@ -63,7 +62,6 @@ class PostgresProjetoRepository(IProjetoRepository):
                 cliente_id=projeto.cliente_id,
                 servico_id=projeto.servico_id,
                 status=projeto.status,
-                progresso=projeto.progresso,
                 data_entrega=projeto.data_entrega,
                 valor=projeto.valor,
                 valor_mensal=projeto.valor_mensal,
@@ -90,7 +88,6 @@ class PostgresProjetoRepository(IProjetoRepository):
             )
             model = result.scalar_one()
             model.status = projeto.status
-            model.progresso = projeto.progresso
             model.data_entrega = projeto.data_entrega
             model.valor = projeto.valor
             model.valor_mensal = projeto.valor_mensal
@@ -142,7 +139,6 @@ class PostgresProjetoRepository(IProjetoRepository):
                 ProjetoModel.servico_id,
                 ServicoModel.nome.label("servico_nome"),
                 ProjetoModel.status,
-                ProjetoModel.progresso,
                 ProjetoModel.valor,
                 ProjetoModel.tipo_recorrencia,
                 ProjetoModel.recorrencia_ativa,

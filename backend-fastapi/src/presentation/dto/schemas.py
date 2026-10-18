@@ -171,8 +171,8 @@ class ProjetoInSchema(BaseModel):
         return self
 
 class ProjetoUpdateSchema(BaseModel):
+    model_config = ConfigDict(extra="forbid")
     status: Optional[ProjectStatus] = None
-    progresso: Optional[int] = Field(None, ge=0, le=100)
     data_entrega: Optional[date] = None
     valor: Optional[Decimal] = None
     tipo_recorrencia: Optional[RecurrenceType] = None
@@ -196,7 +196,6 @@ class ProjetoOutSchema(BaseModel):
     recorrencia_inicio: Optional[str] = None
     criado_em: str
     status: str
-    progresso: int
     total_acumulado: str = "0.00"
     tipo_recorrencia: str
     ativo: bool

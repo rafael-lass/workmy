@@ -46,7 +46,6 @@ def _view_to_dict(view) -> dict:
         "recorrencia_inicio": view.recorrencia_inicio.isoformat() if view.recorrencia_inicio else None,
         "criado_em": view.criado_em.isoformat() if view.criado_em else "",
         "status": view.status,
-        "progresso": view.progresso,
         "total_acumulado": str(view.total_acumulado),
         "possui_lancamentos": view.possui_lancamentos,
         "tipo_recorrencia": view.tipo_recorrencia,

@@ -33,7 +33,8 @@ O WorkMy atende profissionais autônomos e pequenos prestadores que precisam org
 - **Clientes:** nome obrigatório; empresa, e-mail e telefone opcionais; consulta do total recebido.
 - **Serviços:** editor Tiptap com títulos, negrito, itálico, listas, citações e links; catálogo privado de tags reutilizáveis; visualização completa e PDF A4.
 - **PDF comercial:** permite revisar nome, e-mail e telefone antes do download sem alterar a conta; usa o serviço salvo e não inclui dados financeiros ou de clientes.
-- **Projetos:** a versão atual começa em Descoberta e ainda possui progresso percentual. As transições permitidas estão em [RN-08](REGRAS_DE_NEGOCIO.md#etapas-atuais-dos-projetos).
+- **Projetos:** a versão atual começa em Planejamento e segue Andamento, Revisão e Finalizado, sem progresso percentual. Arquivamento é uma ação separada com confirmação. Projetos arquivados podem ser reativados em Planejamento e consultados por um filtro próprio. As transições permitidas estão em [RN-08](REGRAS_DE_NEGOCIO.md#etapas-atuais-dos-projetos).
+- **Recebimento avulso:** escolher serviço e depois cliente com projeto vinculado; clientes de outros serviços e projetos arquivados não aparecem na seleção.
 - **Financeiro:** filtros por status, tipo, cliente, projeto, período e busca, com paginação. Não há edição ou exclusão genérica de pagamentos: cada operação respeita seu estado.
 - **Faturamento:** geração acionada manualmente pela interface/API; não é uma rotina automática em segundo plano.
 - **Dashboard:** a previsão do próximo mês já utiliza o primeiro vencimento elegível após a correção local WM-017. Revisão funcional de Tais pendente.
@@ -42,12 +43,11 @@ O WorkMy atende profissionais autônomos e pequenos prestadores que precisam org
 
 | Entrega | Situação | Cartão |
 | --- | --- | --- |
-| Planejamento, Andamento, Revisão e Finalizado; retirada do percentual e separação do arquivamento | A fazer | WM-013 |
 | Exportação CSV autenticada e filtrada no backend | A fazer | WM-014 |
 | Download CSV pela interface financeira | A fazer | WM-015 |
 | Ações rápidas no topo do dashboard e remoção de botões redundantes | A fazer | WM-016 |
 
-Essas evoluções não são apresentadas como funcionalidades entregues.
+Essas evoluções não são apresentadas como funcionalidades entregues. O botão Novo projeto já foi removido da navbar; permanece disponível nas páginas de Projetos, Dashboard e detalhe do cliente.
 
 ## Fora do escopo atual
 

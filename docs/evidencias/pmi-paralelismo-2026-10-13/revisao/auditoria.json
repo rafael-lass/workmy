@@ -1,0 +1,397 @@
+{
+  "review_date": "2026-10-13",
+  "presentation_sha256": "24c9555a463dd9d415e5820e6254a86cb8b43b75f809f242fb22c987255b1df8",
+  "source_matches_recorded_version": {
+    "backend-fastapi/scripts/benchmark_excel.py": true,
+    "backend-fastapi/scripts/demo_paralelismo.ps1": true,
+    "backend-fastapi/src/infrastructure/documents/dashboard_excel.py": true,
+    "backend-fastapi/src/infrastructure/documents/excel_rows.py": true,
+    "backend-fastapi/src/application/usecases/exportar_dashboard.py": true
+  },
+  "slides": [
+    {
+      "slide": 1,
+      "text": [
+        "WorkMy",
+        "Exportação com",
+        "multiprocessing",
+        "PMI · Análise e Desenvolvimento de Sistemas",
+        "Rafael, Gabriel e Leonardo",
+        "Apresentação em 15/10/2026",
+        "PROCESSAMENTO PARALELO"
+      ]
+    },
+    {
+      "slide": 2,
+      "text": [
+        "2",
+        "A rotina escolhida é a exportação Excel",
+        "O que a função entrega",
+        "O dashboard solicita um ZIP com quatro arquivos: Pagamentos, Clientes, Serviços e Projetos.O teste usa 200.000 pagamentos, 12.000 projetos, 10.000 clientes e 53 serviços.",
+        "Onde fica no projeto",
+        "Repositório já clonado: rafael-lass/workmy.ExportarDashboardUseCase.run() coordena a leitura e chama o gerador.DashboardExcelRenderer.render() organiza os blocos e monta os arquivos."
+      ]
+    },
+    {
+      "slide": 3,
+      "text": [
+        "3",
+        "A divisão por arquivo concentrou o trabalho",
+        "Experimento inicial",
+        "Sequencial: 32,21 s",
+        "Paralelo: 38,03 s",
+        "Abertura de processos e transporte das listas acrescentavam custo.",
+        "Nova distribuição",
+        "8 blocos de pagamentos",
+        "11 tarefas para 4 workers",
+        "Cada job referencia um bloco privado em disco. O worker processa linhas.",
+        "Oportunidade encontrada",
+        "Pagamentos tinha quase todo o custo. Um arquivo por processo deixava os outros workers ociosos. A melhoria divide também o conjunto grande em blocos de 25.000 linhas."
+      ]
+    },
+    {
+      "slide": 4,
+      "text": [
+        "4",
+        "O pool executa blocos independentes",
+        "1. Leitura e preparação",
+        "Quatro consultas no mesmo snapshot do banco.A função divide as linhas e cria entradas privadas para cada bloco.",
+        "3. Montagem e entrega",
+        "O processo principal reúne os fragmentos na ordem original.Monta os quatro XLSX e entrega o ZIP.",
+        "2. Multiprocessing",
+        "Pool com até quatro processos.Cada worker calcula atraso, converte células e grava um fragmento próprio."
+      ]
+    },
+    {
+      "slide": 5,
+      "text": [
+        "def run_sequential(jobs):",
+        "    return [",
+        "        render_rows(job)",
+        "        for job in jobs",
+        "    ]",
+        "5",
+        "O sequencial processa um bloco por vez",
+        "A mesma função nos dois modos",
+        "render_rows(job) calcula campos e serializa as linhas.O sequencial executa todas as tarefas no processo principal.Mesmos blocos, formatos, cálculos e dados usados na versão paralela."
+      ]
+    },
+    {
+      "slide": 6,
+      "text": [
+        "6",
+        "O paralelo usa multiprocessing.Pool",
+        "Quatro workers em uma máquina",
+        "com quatro CPUs visíveis",
+        "Contexto spawn",
+        "from multiprocessing import get_context",
+        "def run_parallel(jobs, workers):",
+        "    if not jobs:",
+        "        return []",
+        "    with get_context(\"spawn\").Pool(",
+        "        processes=min(workers, len(jobs))",
+        "    ) as pool:",
+        "        return pool.map(render_rows, jobs)",
+        "Pool de processos reais",
+        "map distribui as tarefas",
+        "Fragmentos exclusivos",
+        "with encerra o pool"
+      ]
+    },
+    {
+      "slide": 7,
+      "text": [
+        "7",
+        "Início, fim e duração ficam registrados",
+        "Exemplo sequencial de 13/10: início 17:02:11.605, fim 17:02:22.759 (São Paulo).",
+        "Tempo = time.time() no fim − time.time() no início. Cinco repetições por modo.",
+        "Repetição",
+        "Sequencial (s)",
+        "Paralelo (s)",
+        "Economia (s)",
+        "Mais rápido",
+        "1",
+        "11,154",
+        "13,669",
+        "-2,515",
+        "Sequencial",
+        "2",
+        "16,768",
+        "14,539",
+        "2,229",
+        "Paralelo",
+        "3",
+        "14,293",
+        "12,748",
+        "1,545",
+        "Paralelo",
+        "4",
+        "15,575",
+        "12,550",
+        "3,025",
+        "Paralelo",
+        "5",
+        "16,472",
+        "12,535",
+        "3,937",
+        "Paralelo",
+        "Medianas",
+        "15,575",
+        "12,748",
+        "—",
+        "Paralelo"
+      ]
+    },
+    {
+      "slide": 8,
+      "text": [
+        "8",
+        "A mediana paralela reduz o tempo em 18,2%",
+        "15,57 s",
+        "Mediana sequencial",
+        "12,75 s",
+        "Mediana com Pool",
+        "Comparação da mesma implementação",
+        "Economia: 2,83 segundos.Speedup: 1,22×.Cinco execuções em cada modo."
+      ]
+    },
+    {
+      "slide": 9,
+      "text": [
+        "9",
+        "Dificuldades encontradas na implementação",
+        "Distribuição desigual",
+        "Um processo concentrava Pagamentos. Blocos de 25.000 linhas distribuíram o maior conjunto.",
+        "Custo de iniciar processos",
+        "O pool tem custo de abertura. Os jobs carregam caminhos de arquivos privados e metadados pequenos.",
+        "Preservação dos arquivos",
+        "A montagem precisa manter ordem, moeda, datas e texto. Testes e hashes conferem a equivalência.",
+        "Ambiente e cronometragem",
+        "Permissões de temporários e suspensão do sistema afetaram ensaios. Docker e dois relógios ajudam a validar os tempos."
+      ]
+    },
+    {
+      "slide": 10,
+      "text": [
+        "10",
+        "Deadlocks, concorrência e escalabilidade",
+        "Concorrência",
+        "Um diretório por exportação e um fragmento por bloco. Só o processo principal monta XLSX e ZIP.",
+        "Deadlocks",
+        "Nenhum observado. Workers usam arquivos distintos e não compartilham banco ou workbook. Falhas e I/O ainda exigem atenção.",
+        "Ganho limitado",
+        "Leitura, preparação e montagem seguem seriais. Volumes pequenos podem perder tempo ao iniciar processos.",
+        "Escalabilidade",
+        "Até quatro workers. Memória, disco e exportações simultâneas limitam a expansão. Mais workers não garantem ganho linear.",
+        "Os testes mostram o comportamento deste ambiente. O ganho depende do volume e dos recursos disponíveis."
+      ]
+    },
+    {
+      "slide": 11,
+      "text": [
+        "11",
+        "A comparação preservou o conteúdo",
+        "SHA-256 do XML das células, estilos e estrutura em todos os arquivos.",
+        "Integridade",
+        "Blocos se reúnem pelos offsets, preservando a ordem das consultas.",
+        "Ordenação",
+        "Falha de worker impede a entrega parcial e limpa os temporários.",
+        "Tratamento de falhas",
+        "Sem estudo de pico de recursos ou concorrência de várias exportações.",
+        "Limites verificados",
+        "Validação da exportação",
+        "11 testes aprovados.Mesmo conteúdo dos quatro workbooks nas dez execuções da medição.Banco PostgreSQL real no benchmark e SQLite isolado nos testes de API."
+      ]
+    },
+    {
+      "slide": 12,
+      "text": [
+        "O pool distribui o",
+        "trabalho dos pagamentos",
+        "15,57 s sequencial",
+        "12,75 s com multiprocessing",
+        "18,2% menos tempo nesta medição",
+        "WORKMY"
+      ]
+    }
+  ],
+  "tests": {
+    "testes-backend.xml": {
+      "suites": [
+        {
+          "name": "pytest",
+          "errors": "0",
+          "failures": "0",
+          "skipped": "4",
+          "tests": "75",
+          "time": "23.687",
+          "timestamp": "2026-10-13T22:38:28.945431-03:00",
+          "hostname": "Lass-Note"
+        }
+      ],
+      "skipped": [
+        {
+          "name": "test_postgres_full_load_and_account",
+          "reason": {
+            "type": "pytest.skip",
+            "message": "PostgreSQL descartável não configurado"
+          }
+        },
+        {
+          "name": "test_postgres_collision_preserves_existing_account[username]",
+          "reason": {
+            "type": "pytest.skip",
+            "message": "PostgreSQL descartável não configurado"
+          }
+        },
+        {
+          "name": "test_postgres_collision_preserves_existing_account[email]",
+          "reason": {
+            "type": "pytest.skip",
+            "message": "PostgreSQL descartável não configurado"
+          }
+        },
+        {
+          "name": "test_postgres_failure_after_payment_batch_rolls_back",
+          "reason": {
+            "type": "pytest.skip",
+            "message": "PostgreSQL descartável não configurado"
+          }
+        }
+      ]
+    },
+    "testes-frontend.xml": {
+      "suites": [
+        {
+          "name": "src/lib/http.test.ts",
+          "timestamp": "2026-10-14T01:39:03.994Z",
+          "hostname": "Lass-Note",
+          "tests": "2",
+          "failures": "0",
+          "errors": "0",
+          "skipped": "0",
+          "time": "0.0084272"
+        },
+        {
+          "name": "src/state/AuthContext.test.tsx",
+          "timestamp": "2026-10-14T01:39:03.995Z",
+          "hostname": "Lass-Note",
+          "tests": "1",
+          "failures": "0",
+          "errors": "0",
+          "skipped": "0",
+          "time": "0.3251551"
+        },
+        {
+          "name": "src/pages/DashboardPage.test.tsx",
+          "timestamp": "2026-10-14T01:39:03.997Z",
+          "hostname": "Lass-Note",
+          "tests": "1",
+          "failures": "0",
+          "errors": "0",
+          "skipped": "0",
+          "time": "0.2627076"
+        },
+        {
+          "name": "src/pages/FinanceiroPage.test.tsx",
+          "timestamp": "2026-10-14T01:39:03.998Z",
+          "hostname": "Lass-Note",
+          "tests": "2",
+          "failures": "0",
+          "errors": "0",
+          "skipped": "0",
+          "time": "0.3887929"
+        },
+        {
+          "name": "src/pages/ProjetosPage.test.tsx",
+          "timestamp": "2026-10-14T01:39:03.999Z",
+          "hostname": "Lass-Note",
+          "tests": "3",
+          "failures": "0",
+          "errors": "0",
+          "skipped": "0",
+          "time": "1.0488606"
+        },
+        {
+          "name": "src/features/dashboard/DashboardExport.test.tsx",
+          "timestamp": "2026-10-14T01:39:03.999Z",
+          "hostname": "Lass-Note",
+          "tests": "2",
+          "failures": "0",
+          "errors": "0",
+          "skipped": "0",
+          "time": "0.4816257"
+        },
+        {
+          "name": "src/features/projetos/ProjetoFormDialog.test.tsx",
+          "timestamp": "2026-10-14T01:39:04.000Z",
+          "hostname": "Lass-Note",
+          "tests": "2",
+          "failures": "0",
+          "errors": "0",
+          "skipped": "0",
+          "time": "0.6140285"
+        },
+        {
+          "name": "src/features/financeiro/FinanceDialogs.test.tsx",
+          "timestamp": "2026-10-14T01:39:04.000Z",
+          "hostname": "Lass-Note",
+          "tests": "3",
+          "failures": "0",
+          "errors": "0",
+          "skipped": "0",
+          "time": "0.7601445"
+        },
+        {
+          "name": "src/features/servicos/Services.test.tsx",
+          "timestamp": "2026-10-14T01:39:04.001Z",
+          "hostname": "Lass-Note",
+          "tests": "3",
+          "failures": "0",
+          "errors": "0",
+          "skipped": "0",
+          "time": "0.9056545"
+        },
+        {
+          "name": "src/shared/ui/Dialog.test.tsx",
+          "timestamp": "2026-10-14T01:39:04.002Z",
+          "hostname": "Lass-Note",
+          "tests": "2",
+          "failures": "0",
+          "errors": "0",
+          "skipped": "0",
+          "time": "0.3887232"
+        },
+        {
+          "name": "src/features/clientes/ClienteFormDialog.test.tsx",
+          "timestamp": "2026-10-14T01:39:04.003Z",
+          "hostname": "Lass-Note",
+          "tests": "2",
+          "failures": "0",
+          "errors": "0",
+          "skipped": "0",
+          "time": "0.6504796"
+        }
+      ],
+      "skipped": []
+    }
+  },
+  "benchmark_recalculated": {
+    "sequential_median": 15.574833869934082,
+    "parallel_median": 12.747707843780518,
+    "saved_seconds": 2.8271260261535645,
+    "reduction_percent": 18.15188559802937,
+    "speedup": 1.2217752446792143,
+    "sequential_range": [
+      11.154346704483032,
+      16.76751685142517
+    ],
+    "parallel_range": [
+      12.535349130630493,
+      14.538832187652588
+    ],
+    "content_equal_all_runs": true
+  },
+  "performance_rerun_this_review": false,
+  "native_powerpoint_open_verified": false
+}

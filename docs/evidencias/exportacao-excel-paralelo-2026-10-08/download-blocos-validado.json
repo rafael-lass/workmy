@@ -1,0 +1,10 @@
+{
+  "content_matches_benchmark": true,
+  "actual_rows_read_by_openpyxl": {
+    "Pagamentos": 200000,
+    "Clientes": 10000,
+    "Serviços": 53,
+    "Projetos": 12000
+  },
+  "dashboard_absent": true
+}

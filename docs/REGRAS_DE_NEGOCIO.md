@@ -35,17 +35,17 @@ As regras de negócio definem **as condições e restrições** que as funcional
 
 ## Etapas atuais dos projetos
 
-O projeto nasce em **Descoberta**, com progresso de **0%**.
+O projeto nasce em **Planejamento**. Não há percentual de progresso na interface, no domínio ou na API. A coluna legada permanece no banco, sem atualização funcional, para preservar os dados antigos.
 
 | Etapa atual | Código | Próximas etapas permitidas |
 | --- | --- | --- |
-| Descoberta | `DISCOVERY` | Em andamento ou Arquivado |
-| Em andamento | `IN_PROGRESS` | Revisão ou Arquivado |
-| Revisão | `REVIEW` | Em andamento, Concluído ou Arquivado |
-| Concluído | `COMPLETED` | Arquivado |
-| Arquivado | `ARCHIVED` | Nenhuma |
+| Planejamento | `DISCOVERY` | Andamento ou Arquivado |
+| Andamento | `IN_PROGRESS` | Revisão ou Arquivado |
+| Revisão | `REVIEW` | Andamento, Finalizado ou Arquivado |
+| Finalizado | `COMPLETED` | Arquivado |
+| Arquivado | `ARCHIVED` | Planejamento, pela ação Reativar |
 
-Concluir define o progresso em 100%. Concluir ou arquivar pausa a recorrência. A alteração para as quatro novas etapas sem percentual está planejada no WM-013.
+Finalizar ou arquivar pausa a recorrência. Arquivar é uma ação separada com confirmação, não uma opção do seletor de etapas. Projetos finalizados ou arquivados não podem retomar recorrência. Os códigos internos foram preservados, sem migration.
 
 ## Estados financeiros
 
@@ -80,3 +80,9 @@ Concluir define o progresso em 100%. Concluir ou arquivar pausa a recorrência. 
 [Relatório do reteste WM-017](trello/evidencias/2026-09-21-reteste-WM017/RELATORIO.md) · [Inventário dos 70 testes](trello/evidencias/2026-09-21-reteste-WM017/INVENTARIO.md)
 
 A RN-20 passou no reteste automatizado; revisão funcional de Tais pendente. Os testes de integração usam SQLite. A existência de restrições no banco não comprova, por si só, execução concorrente validada em PostgreSQL.
+
+## Reativação e seleção de recebimento
+
+Reativar um projeto arquivado o devolve a Planejamento, preserva seu histórico e mantém a recorrência pausada até uma retomada explícita. Projetos arquivados sem lançamentos podem ser excluídos logicamente; o histórico financeiro continua impedindo exclusão.
+
+Arquivados são consultados pelo filtro Situação do projeto, separado das quatro etapas. No recebimento avulso, seleciona-se primeiro um serviço com projeto não arquivado e depois um cliente vinculado a esse serviço. O lançamento continua associado ao projeto correspondente; mudar o serviço limpa o cliente escolhido.

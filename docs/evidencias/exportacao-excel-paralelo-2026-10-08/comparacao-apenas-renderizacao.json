@@ -1,0 +1,269 @@
+{
+  "mode": "compare",
+  "reference": "2026-10-08",
+  "python": "3.12.15",
+  "platform": "Linux-6.6.114.1-microsoft-standard-WSL2-x86_64-with-glibc2.41",
+  "cpu_count": 4,
+  "repeats": 3,
+  "runs": [
+    {
+      "mode": "sequential",
+      "period": "total",
+      "repetition": 1,
+      "wall_time_seconds": 31.879152536392212,
+      "timings_seconds": {
+        "consulta_pagamentos": 3.147806653999396,
+        "consulta_projetos": 0.1498759579999387,
+        "consulta_clientes": 0.06103876399993169,
+        "consulta_servicos": 0.004346663999967859,
+        "xlsx_pagamentos": 26.51303581800039,
+        "xlsx_clientes": 0.48584896299962566,
+        "xlsx_servicos": 0.011474322000140091,
+        "xlsx_projetos": 1.1881426370000554,
+        "pacote_zip": 0.03646559699973295,
+        "render_total": 28.447679961000176,
+        "total": 31.814052972000354
+      },
+      "counts": {
+        "pagamentos": 200000,
+        "projetos": 12000,
+        "clientes": 10000,
+        "servicos": 53
+      },
+      "file_sizes": {
+        "workmy-pagamentos-total-2026-10-08.xlsx": 16822123,
+        "workmy-clientes-total-2026-10-08.xlsx": 327138,
+        "workmy-servicos-total-2026-10-08.xlsx": 7048,
+        "workmy-projetos-total-2026-10-08.xlsx": 757221,
+        "pacote_zip": 17914156
+      }
+    },
+    {
+      "mode": "parallel",
+      "period": "total",
+      "repetition": 1,
+      "wall_time_seconds": 38.02647924423218,
+      "timings_seconds": {
+        "consulta_pagamentos": 2.7136811620002845,
+        "consulta_projetos": 0.12516161799976544,
+        "consulta_clientes": 0.06083299900001293,
+        "consulta_servicos": 0.002226423000138311,
+        "xlsx_pagamentos": 29.98940480500005,
+        "xlsx_clientes": 1.0472376080006143,
+        "xlsx_servicos": 0.014204271999915363,
+        "xlsx_projetos": 1.2638437340001474,
+        "paralelismo_total": 34.79709873499996,
+        "pacote_zip": 0.07183881899982225,
+        "render_total": 35.034828027,
+        "total": 37.9381233389995
+      },
+      "counts": {
+        "pagamentos": 200000,
+        "projetos": 12000,
+        "clientes": 10000,
+        "servicos": 53
+      },
+      "file_sizes": {
+        "workmy-pagamentos-total-2026-10-08.xlsx": 16822123,
+        "workmy-clientes-total-2026-10-08.xlsx": 327138,
+        "workmy-servicos-total-2026-10-08.xlsx": 7048,
+        "workmy-projetos-total-2026-10-08.xlsx": 757220,
+        "pacote_zip": 17914155
+      }
+    },
+    {
+      "mode": "parallel",
+      "period": "total",
+      "repetition": 2,
+      "wall_time_seconds": 37.45677852630615,
+      "timings_seconds": {
+        "consulta_pagamentos": 3.329282128000159,
+        "consulta_projetos": 0.1654440180000165,
+        "consulta_clientes": 0.05970945799981564,
+        "consulta_servicos": 0.0021964769994156086,
+        "xlsx_pagamentos": 28.52575577599964,
+        "xlsx_clientes": 0.6548589730000458,
+        "xlsx_servicos": 0.03875839400006953,
+        "xlsx_projetos": 1.1887313540000832,
+        "paralelismo_total": 33.5399742059999,
+        "pacote_zip": 0.034879867999734415,
+        "render_total": 33.826968708000095,
+        "total": 37.3859730260001
+      },
+      "counts": {
+        "pagamentos": 200000,
+        "projetos": 12000,
+        "clientes": 10000,
+        "servicos": 53
+      },
+      "file_sizes": {
+        "workmy-pagamentos-total-2026-10-08.xlsx": 16822123,
+        "workmy-clientes-total-2026-10-08.xlsx": 327137,
+        "workmy-servicos-total-2026-10-08.xlsx": 7047,
+        "workmy-projetos-total-2026-10-08.xlsx": 757221,
+        "pacote_zip": 17914154
+      }
+    },
+    {
+      "mode": "sequential",
+      "period": "total",
+      "repetition": 2,
+      "wall_time_seconds": 32.20853590965271,
+      "timings_seconds": {
+        "consulta_pagamentos": 2.842453244000353,
+        "consulta_projetos": 0.16500022400032321,
+        "consulta_clientes": 0.06384964300013962,
+        "consulta_servicos": 0.00227014899974165,
+        "xlsx_pagamentos": 27.171398825000324,
+        "xlsx_clientes": 0.46019584799978475,
+        "xlsx_servicos": 0.007469056999980239,
+        "xlsx_projetos": 1.1870395169999028,
+        "pacote_zip": 0.03410494200034009,
+        "render_total": 29.047299495000516,
+        "total": 32.12194800299949
+      },
+      "counts": {
+        "pagamentos": 200000,
+        "projetos": 12000,
+        "clientes": 10000,
+        "servicos": 53
+      },
+      "file_sizes": {
+        "workmy-pagamentos-total-2026-10-08.xlsx": 16822124,
+        "workmy-clientes-total-2026-10-08.xlsx": 327138,
+        "workmy-servicos-total-2026-10-08.xlsx": 7048,
+        "workmy-projetos-total-2026-10-08.xlsx": 757221,
+        "pacote_zip": 17914157
+      }
+    },
+    {
+      "mode": "sequential",
+      "period": "total",
+      "repetition": 3,
+      "wall_time_seconds": 32.22549080848694,
+      "timings_seconds": {
+        "consulta_pagamentos": 2.7366263699996125,
+        "consulta_projetos": 0.16569481599981373,
+        "consulta_clientes": 0.06988805899982253,
+        "consulta_servicos": 0.002203031999670202,
+        "xlsx_pagamentos": 26.96070819200031,
+        "xlsx_clientes": 0.5927274949999628,
+        "xlsx_servicos": 0.012791985000148998,
+        "xlsx_projetos": 1.4155883880002875,
+        "pacote_zip": 0.031136763999711548,
+        "render_total": 29.1857048819993,
+        "total": 32.16119689599964
+      },
+      "counts": {
+        "pagamentos": 200000,
+        "projetos": 12000,
+        "clientes": 10000,
+        "servicos": 53
+      },
+      "file_sizes": {
+        "workmy-pagamentos-total-2026-10-08.xlsx": 16822123,
+        "workmy-clientes-total-2026-10-08.xlsx": 327138,
+        "workmy-servicos-total-2026-10-08.xlsx": 7048,
+        "workmy-projetos-total-2026-10-08.xlsx": 757220,
+        "pacote_zip": 17914155
+      }
+    },
+    {
+      "mode": "parallel",
+      "period": "total",
+      "repetition": 3,
+      "wall_time_seconds": 40.001320600509644,
+      "timings_seconds": {
+        "consulta_pagamentos": 2.9580033560005177,
+        "consulta_projetos": 0.17186598900025274,
+        "consulta_clientes": 0.06653364799967676,
+        "consulta_servicos": 0.002298617000633385,
+        "xlsx_pagamentos": 31.249641141999746,
+        "xlsx_clientes": 0.834875509000085,
+        "xlsx_servicos": 0.021927974999925937,
+        "xlsx_projetos": 2.393084125000314,
+        "paralelismo_total": 36.37511606600037,
+        "pacote_zip": 0.04699220299971785,
+        "render_total": 36.669962759000555,
+        "total": 39.86947828399934
+      },
+      "counts": {
+        "pagamentos": 200000,
+        "projetos": 12000,
+        "clientes": 10000,
+        "servicos": 53
+      },
+      "file_sizes": {
+        "workmy-pagamentos-total-2026-10-08.xlsx": 16822123,
+        "workmy-clientes-total-2026-10-08.xlsx": 327138,
+        "workmy-servicos-total-2026-10-08.xlsx": 7048,
+        "workmy-projetos-total-2026-10-08.xlsx": 757221,
+        "pacote_zip": 17914156
+      }
+    }
+  ],
+  "results": {
+    "total": {
+      "parallel": {
+        "median_wall_time_seconds": 38.02647924423218,
+        "median_stages_seconds": {
+          "consulta_pagamentos": 2.9580033560005177,
+          "consulta_projetos": 0.1654440180000165,
+          "consulta_clientes": 0.06083299900001293,
+          "consulta_servicos": 0.002226423000138311,
+          "xlsx_pagamentos": 29.98940480500005,
+          "xlsx_clientes": 0.834875509000085,
+          "xlsx_servicos": 0.021927974999925937,
+          "xlsx_projetos": 1.2638437340001474,
+          "pacote_zip": 0.04699220299971785,
+          "render_total": 35.034828027,
+          "total": 37.9381233389995
+        },
+        "file_sizes": {
+          "workmy-pagamentos-total-2026-10-08.xlsx": 16822123,
+          "workmy-clientes-total-2026-10-08.xlsx": 327138,
+          "workmy-servicos-total-2026-10-08.xlsx": 7048,
+          "workmy-projetos-total-2026-10-08.xlsx": 757220,
+          "pacote_zip": 17914155
+        },
+        "counts": {
+          "pagamentos": 200000,
+          "projetos": 12000,
+          "clientes": 10000,
+          "servicos": 53
+        }
+      },
+      "sequential": {
+        "median_wall_time_seconds": 32.20853590965271,
+        "median_stages_seconds": {
+          "consulta_pagamentos": 2.842453244000353,
+          "consulta_projetos": 0.16500022400032321,
+          "consulta_clientes": 0.06384964300013962,
+          "consulta_servicos": 0.00227014899974165,
+          "xlsx_pagamentos": 26.96070819200031,
+          "xlsx_clientes": 0.48584896299962566,
+          "xlsx_servicos": 0.011474322000140091,
+          "xlsx_projetos": 1.1881426370000554,
+          "pacote_zip": 0.03410494200034009,
+          "render_total": 29.047299495000516,
+          "total": 32.12194800299949
+        },
+        "file_sizes": {
+          "workmy-pagamentos-total-2026-10-08.xlsx": 16822123,
+          "workmy-clientes-total-2026-10-08.xlsx": 327138,
+          "workmy-servicos-total-2026-10-08.xlsx": 7048,
+          "workmy-projetos-total-2026-10-08.xlsx": 757221,
+          "pacote_zip": 17914156
+        },
+        "counts": {
+          "pagamentos": 200000,
+          "projetos": 12000,
+          "clientes": 10000,
+          "servicos": 53
+        }
+      },
+      "parallel_speedup": 0.8470028398576519,
+      "parallel_time_saved_seconds": -5.817943334579468
+    }
+  }
+}

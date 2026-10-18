@@ -117,7 +117,9 @@ function callFastApi(path, method, data = null, extraHeaders = {}) {
         });
 
         req.on('error', reject);
-        req.setTimeout(15000, () => req.destroy(new Error('FastAPI não respondeu em 15 segundos.')));
+        const isExcelExport = path.split('?')[0] === '/api/dashboard/exportar.zip';
+        const timeout = isExcelExport ? 300000 : 15000;
+        req.setTimeout(timeout, () => req.destroy(new Error('Tempo limite de resposta do FastAPI excedido.')));
         if (hasBody) {
             req.write(postData);
         }

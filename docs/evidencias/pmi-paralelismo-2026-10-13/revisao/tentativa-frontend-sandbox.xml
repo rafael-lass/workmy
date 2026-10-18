@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites name="vitest tests" tests="11" failures="11" errors="0" time="0">
+    <testsuite name="src/lib/http.test.ts" timestamp="2026-10-14T01:37:53.113Z" hostname="Lass-Note" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/lib/http.test.ts" name="src/lib/http.test.ts" time="0">
+            <failure message="EPERM: operation not permitted, rename &apos;C:\Users\rafae_9y1k772\AppData\Local\Packages\sandbox.{f6730b4b-53d9-4b9d-af7c-28fe4063ca37}\AC\Temp\u8Gv4SReHzFq1H47sQJXU\client\.tmp-1791941872981-69si8d2j3dm&apos; -&gt; &apos;C:\Users\rafae_9y1k772\AppData\Local\Packages\sandbox.{f6730b4b-53d9-4b9d-af7c-28fe4063ca37}\AC\Temp\u8Gv4SReHzFq1H47sQJXU\client\c1f80831dc85ad719e383ee311051cfcb4edecaf&apos;" type="Error">
+Error: EPERM: operation not permitted, rename &apos;C:\Users\rafae_9y1k772\AppData\Local\Packages\sandbox.{f6730b4b-53d9-4b9d-af7c-28fe4063ca37}\AC\Temp\u8Gv4SReHzFq1H47sQJXU\client\.tmp-1791941872981-69si8d2j3dm&apos; -&gt; &apos;C:\Users\rafae_9y1k772\AppData\Local\Packages\sandbox.{f6730b4b-53d9-4b9d-af7c-28fe4063ca37}\AC\Temp\u8Gv4SReHzFq1H47sQJXU\client\c1f80831dc85ad719e383ee311051cfcb4edecaf&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/pages/DashboardPage.test.tsx" timestamp="2026-10-14T01:37:53.116Z" hostname="Lass-Note" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/pages/DashboardPage.test.tsx" name="src/pages/DashboardPage.test.tsx" time="0">
+            <failure message="EPERM: operation not permitted, rename &apos;C:\Users\rafae_9y1k772\AppData\Local\Packages\sandbox.{f6730b4b-53d9-4b9d-af7c-28fe4063ca37}\AC\Temp\u8Gv4SReHzFq1H47sQJXU\client\.tmp-1791941872981-69si8d2j3dm&apos; -&gt; &apos;C:\Users\rafae_9y1k772\AppData\Local\Packages\sandbox.{f6730b4b-53d9-4b9d-af7c-28fe4063ca37}\AC\Temp\u8Gv4SReHzFq1H47sQJXU\client\c1f80831dc85ad719e383ee311051cfcb4edecaf&apos;" type="Error">
+Error: EPERM: operation not permitted, rename &apos;C:\Users\rafae_9y1k772\AppData\Local\Packages\sandbox.{f6730b4b-53d9-4b9d-af7c-28fe4063ca37}\AC\Temp\u8Gv4SReHzFq1H47sQJXU\client\.tmp-1791941872981-69si8d2j3dm&apos; -&gt; &apos;C:\Users\rafae_9y1k772\AppData\Local\Packages\sandbox.{f6730b4b-53d9-4b9d-af7c-28fe4063ca37}\AC\Temp\u8Gv4SReHzFq1H47sQJXU\client\c1f80831dc85ad719e383ee311051cfcb4edecaf&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/pages/FinanceiroPage.test.tsx" timestamp="2026-10-14T01:37:53.117Z" hostname="Lass-Note" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/pages/FinanceiroPage.test.tsx" name="src/pages/FinanceiroPage.test.tsx" time="0">
+            <failure message="EPERM: operation not permitted, rename &apos;C:\Users\rafae_9y1k772\AppData\Local\Packages\sandbox.{f6730b4b-53d9-4b9d-af7c-28fe4063ca37}\AC\Temp\u8Gv4SReHzFq1H47sQJXU\client\.tmp-1791941872981-69si8d2j3dm&apos; -&gt; &apos;C:\Users\rafae_9y1k772\AppData\Local\Packages\sandbox.{f6730b4b-53d9-4b9d-af7c-28fe4063ca37}\AC\Temp\u8Gv4SReHzFq1H47sQJXU\client\c1f80831dc85ad719e383ee311051cfcb4edecaf&apos;" type="Error">
+Error: EPERM: operation not permitted, rename &apos;C:\Users\rafae_9y1k772\AppData\Local\Packages\sandbox.{f6730b4b-53d9-4b9d-af7c-28fe4063ca37}\AC\Temp\u8Gv4SReHzFq1H47sQJXU\client\.tmp-1791941872981-69si8d2j3dm&apos; -&gt; &apos;C:\Users\rafae_9y1k772\AppData\Local\Packages\sandbox.{f6730b4b-53d9-4b9d-af7c-28fe4063ca37}\AC\Temp\u8Gv4SReHzFq1H47sQJXU\client\c1f80831dc85ad719e383ee311051cfcb4edecaf&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/pages/ProjetosPage.test.tsx" timestamp="2026-10-14T01:37:53.118Z" hostname="Lass-Note" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/pages/ProjetosPage.test.tsx" name="src/pages/ProjetosPage.test.tsx" time="0">
+            <failure message="EPERM: operation not permitted, rename &apos;C:\Users\rafae_9y1k772\AppData\Local\Packages\sandbox.{f6730b4b-53d9-4b9d-af7c-28fe4063ca37}\AC\Temp\u8Gv4SReHzFq1H47sQJXU\client\.tmp-1791941872981-69si8d2j3dm&apos; -&gt; &apos;C:\Users\rafae_9y1k772\AppData\Local\Packages\sandbox.{f6730b4b-53d9-4b9d-af7c-28fe4063ca37}\AC\Temp\u8Gv4SReHzFq1H47sQJXU\client\c1f80831dc85ad719e383ee311051cfcb4edecaf&apos;" type="Error">
+Error: EPERM: operation not permitted, rename &apos;C:\Users\rafae_9y1k772\AppData\Local\Packages\sandbox.{f6730b4b-53d9-4b9d-af7c-28fe4063ca37}\AC\Temp\u8Gv4SReHzFq1H47sQJXU\client\.tmp-1791941872981-69si8d2j3dm&apos; -&gt; &apos;C:\Users\rafae_9y1k772\AppData\Local\Packages\sandbox.{f6730b4b-53d9-4b9d-af7c-28fe4063ca37}\AC\Temp\u8Gv4SReHzFq1H47sQJXU\client\c1f80831dc85ad719e383ee311051cfcb4edecaf&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/state/AuthContext.test.tsx" timestamp="2026-10-14T01:37:53.119Z" hostname="Lass-Note" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/state/AuthContext.test.tsx" name="src/state/AuthContext.test.tsx" time="0">
+            <failure message="EPERM: operation not permitted, rename &apos;C:\Users\rafae_9y1k772\AppData\Local\Packages\sandbox.{f6730b4b-53d9-4b9d-af7c-28fe4063ca37}\AC\Temp\u8Gv4SReHzFq1H47sQJXU\client\.tmp-1791941872981-69si8d2j3dm&apos; -&gt; &apos;C:\Users\rafae_9y1k772\AppData\Local\Packages\sandbox.{f6730b4b-53d9-4b9d-af7c-28fe4063ca37}\AC\Temp\u8Gv4SReHzFq1H47sQJXU\client\c1f80831dc85ad719e383ee311051cfcb4edecaf&apos;" type="Error">
+Error: EPERM: operation not permitted, rename &apos;C:\Users\rafae_9y1k772\AppData\Local\Packages\sandbox.{f6730b4b-53d9-4b9d-af7c-28fe4063ca37}\AC\Temp\u8Gv4SReHzFq1H47sQJXU\client\.tmp-1791941872981-69si8d2j3dm&apos; -&gt; &apos;C:\Users\rafae_9y1k772\AppData\Local\Packages\sandbox.{f6730b4b-53d9-4b9d-af7c-28fe4063ca37}\AC\Temp\u8Gv4SReHzFq1H47sQJXU\client\c1f80831dc85ad719e383ee311051cfcb4edecaf&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/features/clientes/ClienteFormDialog.test.tsx" timestamp="2026-10-14T01:37:53.120Z" hostname="Lass-Note" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/features/clientes/ClienteFormDialog.test.tsx" name="src/features/clientes/ClienteFormDialog.test.tsx" time="0">
+            <failure message="EPERM: operation not permitted, rename &apos;C:\Users\rafae_9y1k772\AppData\Local\Packages\sandbox.{f6730b4b-53d9-4b9d-af7c-28fe4063ca37}\AC\Temp\u8Gv4SReHzFq1H47sQJXU\client\.tmp-1791941872981-69si8d2j3dm&apos; -&gt; &apos;C:\Users\rafae_9y1k772\AppData\Local\Packages\sandbox.{f6730b4b-53d9-4b9d-af7c-28fe4063ca37}\AC\Temp\u8Gv4SReHzFq1H47sQJXU\client\c1f80831dc85ad719e383ee311051cfcb4edecaf&apos;" type="Error">
+Error: EPERM: operation not permitted, rename &apos;C:\Users\rafae_9y1k772\AppData\Local\Packages\sandbox.{f6730b4b-53d9-4b9d-af7c-28fe4063ca37}\AC\Temp\u8Gv4SReHzFq1H47sQJXU\client\.tmp-1791941872981-69si8d2j3dm&apos; -&gt; &apos;C:\Users\rafae_9y1k772\AppData\Local\Packages\sandbox.{f6730b4b-53d9-4b9d-af7c-28fe4063ca37}\AC\Temp\u8Gv4SReHzFq1H47sQJXU\client\c1f80831dc85ad719e383ee311051cfcb4edecaf&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/features/dashboard/DashboardExport.test.tsx" timestamp="2026-10-14T01:37:53.120Z" hostname="Lass-Note" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/features/dashboard/DashboardExport.test.tsx" name="src/features/dashboard/DashboardExport.test.tsx" time="0">
+            <failure message="EPERM: operation not permitted, rename &apos;C:\Users\rafae_9y1k772\AppData\Local\Packages\sandbox.{f6730b4b-53d9-4b9d-af7c-28fe4063ca37}\AC\Temp\u8Gv4SReHzFq1H47sQJXU\client\.tmp-1791941872981-69si8d2j3dm&apos; -&gt; &apos;C:\Users\rafae_9y1k772\AppData\Local\Packages\sandbox.{f6730b4b-53d9-4b9d-af7c-28fe4063ca37}\AC\Temp\u8Gv4SReHzFq1H47sQJXU\client\c1f80831dc85ad719e383ee311051cfcb4edecaf&apos;" type="Error">
+Error: EPERM: operation not permitted, rename &apos;C:\Users\rafae_9y1k772\AppData\Local\Packages\sandbox.{f6730b4b-53d9-4b9d-af7c-28fe4063ca37}\AC\Temp\u8Gv4SReHzFq1H47sQJXU\client\.tmp-1791941872981-69si8d2j3dm&apos; -&gt; &apos;C:\Users\rafae_9y1k772\AppData\Local\Packages\sandbox.{f6730b4b-53d9-4b9d-af7c-28fe4063ca37}\AC\Temp\u8Gv4SReHzFq1H47sQJXU\client\c1f80831dc85ad719e383ee311051cfcb4edecaf&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/features/projetos/ProjetoFormDialog.test.tsx" timestamp="2026-10-14T01:37:53.121Z" hostname="Lass-Note" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/features/projetos/ProjetoFormDialog.test.tsx" name="src/features/projetos/ProjetoFormDialog.test.tsx" time="0">
+            <failure message="EPERM: operation not permitted, rename &apos;C:\Users\rafae_9y1k772\AppData\Local\Packages\sandbox.{f6730b4b-53d9-4b9d-af7c-28fe4063ca37}\AC\Temp\u8Gv4SReHzFq1H47sQJXU\client\.tmp-1791941872981-69si8d2j3dm&apos; -&gt; &apos;C:\Users\rafae_9y1k772\AppData\Local\Packages\sandbox.{f6730b4b-53d9-4b9d-af7c-28fe4063ca37}\AC\Temp\u8Gv4SReHzFq1H47sQJXU\client\c1f80831dc85ad719e383ee311051cfcb4edecaf&apos;" type="Error">
+Error: EPERM: operation not permitted, rename &apos;C:\Users\rafae_9y1k772\AppData\Local\Packages\sandbox.{f6730b4b-53d9-4b9d-af7c-28fe4063ca37}\AC\Temp\u8Gv4SReHzFq1H47sQJXU\client\.tmp-1791941872981-69si8d2j3dm&apos; -&gt; &apos;C:\Users\rafae_9y1k772\AppData\Local\Packages\sandbox.{f6730b4b-53d9-4b9d-af7c-28fe4063ca37}\AC\Temp\u8Gv4SReHzFq1H47sQJXU\client\c1f80831dc85ad719e383ee311051cfcb4edecaf&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/features/financeiro/FinanceDialogs.test.tsx" timestamp="2026-10-14T01:37:53.122Z" hostname="Lass-Note" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/features/financeiro/FinanceDialogs.test.tsx" name="src/features/financeiro/FinanceDialogs.test.tsx" time="0">
+            <failure message="EPERM: operation not permitted, rename &apos;C:\Users\rafae_9y1k772\AppData\Local\Packages\sandbox.{f6730b4b-53d9-4b9d-af7c-28fe4063ca37}\AC\Temp\u8Gv4SReHzFq1H47sQJXU\client\.tmp-1791941872981-69si8d2j3dm&apos; -&gt; &apos;C:\Users\rafae_9y1k772\AppData\Local\Packages\sandbox.{f6730b4b-53d9-4b9d-af7c-28fe4063ca37}\AC\Temp\u8Gv4SReHzFq1H47sQJXU\client\c1f80831dc85ad719e383ee311051cfcb4edecaf&apos;" type="Error">
+Error: EPERM: operation not permitted, rename &apos;C:\Users\rafae_9y1k772\AppData\Local\Packages\sandbox.{f6730b4b-53d9-4b9d-af7c-28fe4063ca37}\AC\Temp\u8Gv4SReHzFq1H47sQJXU\client\.tmp-1791941872981-69si8d2j3dm&apos; -&gt; &apos;C:\Users\rafae_9y1k772\AppData\Local\Packages\sandbox.{f6730b4b-53d9-4b9d-af7c-28fe4063ca37}\AC\Temp\u8Gv4SReHzFq1H47sQJXU\client\c1f80831dc85ad719e383ee311051cfcb4edecaf&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/features/servicos/Services.test.tsx" timestamp="2026-10-14T01:37:53.123Z" hostname="Lass-Note" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/features/servicos/Services.test.tsx" name="src/features/servicos/Services.test.tsx" time="0">
+            <failure message="EPERM: operation not permitted, rename &apos;C:\Users\rafae_9y1k772\AppData\Local\Packages\sandbox.{f6730b4b-53d9-4b9d-af7c-28fe4063ca37}\AC\Temp\u8Gv4SReHzFq1H47sQJXU\client\.tmp-1791941872981-69si8d2j3dm&apos; -&gt; &apos;C:\Users\rafae_9y1k772\AppData\Local\Packages\sandbox.{f6730b4b-53d9-4b9d-af7c-28fe4063ca37}\AC\Temp\u8Gv4SReHzFq1H47sQJXU\client\c1f80831dc85ad719e383ee311051cfcb4edecaf&apos;" type="Error">
+Error: EPERM: operation not permitted, rename &apos;C:\Users\rafae_9y1k772\AppData\Local\Packages\sandbox.{f6730b4b-53d9-4b9d-af7c-28fe4063ca37}\AC\Temp\u8Gv4SReHzFq1H47sQJXU\client\.tmp-1791941872981-69si8d2j3dm&apos; -&gt; &apos;C:\Users\rafae_9y1k772\AppData\Local\Packages\sandbox.{f6730b4b-53d9-4b9d-af7c-28fe4063ca37}\AC\Temp\u8Gv4SReHzFq1H47sQJXU\client\c1f80831dc85ad719e383ee311051cfcb4edecaf&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="src/shared/ui/Dialog.test.tsx" timestamp="2026-10-14T01:37:53.123Z" hostname="Lass-Note" tests="1" failures="1" errors="0" skipped="0" time="0">
+        <testcase classname="src/shared/ui/Dialog.test.tsx" name="src/shared/ui/Dialog.test.tsx" time="0">
+            <failure message="EPERM: operation not permitted, rename &apos;C:\Users\rafae_9y1k772\AppData\Local\Packages\sandbox.{f6730b4b-53d9-4b9d-af7c-28fe4063ca37}\AC\Temp\u8Gv4SReHzFq1H47sQJXU\client\.tmp-1791941872981-69si8d2j3dm&apos; -&gt; &apos;C:\Users\rafae_9y1k772\AppData\Local\Packages\sandbox.{f6730b4b-53d9-4b9d-af7c-28fe4063ca37}\AC\Temp\u8Gv4SReHzFq1H47sQJXU\client\c1f80831dc85ad719e383ee311051cfcb4edecaf&apos;" type="Error">
+Error: EPERM: operation not permitted, rename &apos;C:\Users\rafae_9y1k772\AppData\Local\Packages\sandbox.{f6730b4b-53d9-4b9d-af7c-28fe4063ca37}\AC\Temp\u8Gv4SReHzFq1H47sQJXU\client\.tmp-1791941872981-69si8d2j3dm&apos; -&gt; &apos;C:\Users\rafae_9y1k772\AppData\Local\Packages\sandbox.{f6730b4b-53d9-4b9d-af7c-28fe4063ca37}\AC\Temp\u8Gv4SReHzFq1H47sQJXU\client\c1f80831dc85ad719e383ee311051cfcb4edecaf&apos;
+            </failure>
+        </testcase>
+    </testsuite>
+</testsuites>

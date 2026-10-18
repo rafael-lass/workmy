@@ -9,7 +9,6 @@ from src.domain.exceptions.business_exceptions import (
 class AtualizarProjetoUseCase:
     EDITABLE_FIELDS = {
         "status",
-        "progresso",
         "data_entrega",
         "valor",
         "tipo_recorrencia",
@@ -36,11 +35,13 @@ class AtualizarProjetoUseCase:
         if unknown_fields:
             raise ValidaEntidadeException("Há campos não permitidos na atualização do projeto.")
 
+        if changes.get("recorrencia_ativa") and projeto.status in {"COMPLETED", "ARCHIVED"}:
+            raise ValidaEntidadeException("Projetos finalizados ou arquivados não podem retomar a recorrência.")
+
         values = dict(changes)
         new_status = values.pop("status", None)
 
         for required_field in (
-            "progresso",
             "tipo_recorrencia",
             "recorrencia_ativa",
             "dia_vencimento",
@@ -61,8 +62,6 @@ class AtualizarProjetoUseCase:
         if new_status is not None:
             projeto.change_status(new_status)
 
-        if projeto.status == "COMPLETED":
-            projeto.progresso = 100
         if projeto.status in {"COMPLETED", "ARCHIVED"}:
             projeto.recorrencia_ativa = False
 

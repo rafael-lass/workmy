@@ -90,6 +90,7 @@ class ProjetoModel(Base):
     cliente_id: Mapped[int] = mapped_column(Integer, ForeignKey("clientes.id", ondelete="CASCADE"), nullable=False)
     servico_id: Mapped[int] = mapped_column(Integer, ForeignKey("servicos.id", ondelete="CASCADE"), nullable=False)
     status: Mapped[str] = mapped_column(String(20), default="DISCOVERY", nullable=False)
+    # Coluna legada preservada; não participa do domínio, API ou atualizações.
     progresso: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     data_entrega: Mapped[date | None] = mapped_column(Date, nullable=True)
     valor: Mapped[Decimal | None] = mapped_column(Numeric(10, 2), nullable=True)

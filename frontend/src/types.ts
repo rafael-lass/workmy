@@ -46,7 +46,6 @@ export type Projeto = {
   recorrencia_inicio: string | null
   criado_em: string
   status: ProjectStatus
-  progresso: number
   tipo_recorrencia: 'MENSAL' | 'AVULSO'
   valor: string | null
   ativo: boolean

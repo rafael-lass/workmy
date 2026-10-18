@@ -1,0 +1,8 @@
+{
+  "route": "/api/dashboard/exportar.zip?periodo=total",
+  "status": 200,
+  "seconds": 9.6072198,
+  "bytes": 18366101,
+  "mode": "parallel_blocks",
+  "content_type": "application/zip"
+}

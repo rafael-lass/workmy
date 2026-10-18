@@ -1,0 +1,12 @@
+{
+  "base_commit": "6a97132e56da6fdc48e0e76894661251fa779639",
+  "local_changes": true,
+  "file_sha256": {
+    "backend-fastapi/src/application/usecases/exportar_dashboard.py": "cdf2df9cdd958e40c9b70879de9d9a170b79955faef5a9e4af81e14031de66cc",
+    "backend-fastapi/src/infrastructure/persistence/repositories/postgres_excel_query.py": "475774f37e77ba54a051e0540827832b1e4820d72c8fd1ed87f3ca803da1ec2a",
+    "backend-fastapi/src/infrastructure/documents/dashboard_excel.py": "3ef8b82ac11662e42cc16e15674d7309ae25a50ddc068bc021173353e9c28a87",
+    "backend-fastapi/src/infrastructure/documents/excel_rows.py": "fec7b97d758abe6646a986d1a7354e80d85c10671d367b306b684398606bc1a2",
+    "backend-fastapi/scripts/benchmark_excel.py": "f2c710e569c085ae158f357087b3c7b0a2e8375258081c425ec08a6cb2e60588"
+  },
+  "test_python": "3.13.13"
+}
