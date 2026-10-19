@@ -13,6 +13,7 @@ from src.infrastructure.persistence.models import (  # noqa: F401
     UsuarioModel,
 )
 from src.infrastructure.persistence.session import Base, DATABASE_URL
+from src.infrastructure.config import connection_args
 
 config = context.config
 config.set_main_option("sqlalchemy.url", DATABASE_URL.replace("%", "%%"))
@@ -46,6 +47,7 @@ async def run_async_migrations() -> None:
         config.get_section(config.config_ini_section, {}),
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
+        connect_args=connection_args(DATABASE_URL),
     )
     async with connectable.connect() as connection:
         await connection.run_sync(do_run_migrations)

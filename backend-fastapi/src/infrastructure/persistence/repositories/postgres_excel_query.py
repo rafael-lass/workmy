@@ -1,5 +1,5 @@
 from contextlib import asynccontextmanager
-from sqlalchemy import select
+from sqlalchemy import select, func
 from src.infrastructure.persistence.models import ClienteModel as C, ServicoModel as S, ProjetoModel as P, PagamentoModel as M
 
 
@@ -29,6 +29,22 @@ class PostgresExcelQuery:
 
     async def rows(self, query):
         return [dict(row) for row in (await self.session.execute(query)).mappings()]
+
+    async def count_rows(self, user_id, period):
+        """Count before materializing projections, inside the same snapshot."""
+        payments = select(M.id).join(P, P.id == M.projeto_id).join(C, C.id == P.cliente_id).join(S, S.id == P.servico_id).where(
+            P.usuario_id == user_id, C.usuario_id == user_id, S.usuario_id == user_id, *self.payment_filter(period))
+        projects = select(P.id).join(C, C.id == P.cliente_id).join(S, S.id == P.servico_id).where(
+            P.id.in_(self.selected_projects(user_id, period)), C.usuario_id == user_id, S.usuario_id == user_id)
+        clients = select(C.id).where(C.usuario_id == user_id)
+        services = select(S.id).where(S.usuario_id == user_id)
+        if period.start is not None:
+            clients = clients.where(C.id.in_(select(P.cliente_id).where(P.id.in_(self.selected_projects(user_id, period)))))
+            services = services.where(S.id.in_(select(P.servico_id).where(P.id.in_(self.selected_projects(user_id, period)))))
+        total = 0
+        for query in (payments, projects, clients, services):
+            total += (await self.session.execute(select(func.count()).select_from(query.subquery()))).scalar_one()
+        return total
 
     async def payments(self, user_id, period):
         return await self.rows(select(M.id, M.projeto_id, P.cliente_id, C.nome.label('cliente'), P.servico_id,

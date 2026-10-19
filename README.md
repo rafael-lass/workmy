@@ -225,6 +225,7 @@ Este Compose é voltado à execução local/staging. Para produção, configure 
 
 ## Documentação
 
+- [Hospedagem gratuita e CI/CD: Vercel + Render + Supabase](docs/DEPLOY_CLOUD.md)
 - [Requisitos funcionais](docs/REQUISITOS_FUNCIONAIS.md)
 - [Arquitetura das quatro camadas](docs/ARQUITETURA.md)
 - [Guia do desenvolvedor](docs/DEVELOPER_GUIDE.md)

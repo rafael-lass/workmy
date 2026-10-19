@@ -43,7 +43,8 @@ export function DashboardExport() {
           <option value="12">Últimos 12 meses</option><option value="total">Total</option>
         </select></div>
       <Button loading={busy} onClick={() => void download()}>{busy ? 'Gerando planilhas…' : 'Baixar planilhas'}</Button>
-      {busy && <p role="status" className="w-full text-sm text-slate-500">Preparando o arquivo. Históricos grandes podem levar alguns minutos.</p>}
+      {import.meta.env.VITE_CLOUD_DEMO === 'true' && <p className="w-full text-sm text-slate-500">A demonstração permite até 2.000 registros por exportação. Se necessário, reduza o período.</p>}
+      {busy && <p role="status" className="w-full text-sm text-slate-500">Preparando o arquivo. Aguarde a conclusão do download.</p>}
       {error && <div className="w-full"><Alert tone="error">{error}</Alert></div>}
     </div>
   </section>

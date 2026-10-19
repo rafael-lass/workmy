@@ -1,0 +1,48 @@
+name: workmy-cloud-ci
+services:
+  postgres:
+    build:
+      context: .
+      dockerfile: postgres.Dockerfile
+    environment:
+      POSTGRES_USER: workmy_ci
+      POSTGRES_PASSWORD: disposable_ci_only
+      POSTGRES_DB: workmy_ci
+    healthcheck:
+      test: [CMD-SHELL, "pg_isready -U workmy_ci -d workmy_ci"]
+      interval: 2s
+      timeout: 2s
+      retries: 30
+  cloud:
+    build:
+      context: ../..
+      dockerfile: deploy/render/Dockerfile
+    mem_limit: 512m
+    cpus: 1
+    environment:
+      DATABASE_URL: postgresql+asyncpg://workmy_ci:disposable_ci_only@postgres:5432/workmy_ci
+      DATABASE_CA_CERT: ${DATABASE_CA_CERT:?Run certgen.py first}
+      JWT_SECRET_KEY: disposable_ci_secret_at_least_48_characters_only_test
+      APP_PUBLIC_URL: https://localhost:8443
+      CORS_ORIGIN: https://localhost:8443
+      CORS_ORIGINS: https://localhost:8443
+      APP_COMMIT_SHA: ${APP_COMMIT_SHA:-ci}
+      LOG_FORMAT: json
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://127.0.0.1:10000/api/health/ready')"]
+      interval: 3s
+      timeout: 5s
+      retries: 40
+  web:
+    image: nginx:1.27-alpine
+    ports: ["8443:443"]
+    volumes:
+      - ../../frontend/dist:/usr/share/nginx/html:ro
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./certs:/certs:ro
+    depends_on:
+      cloud:
+        condition: service_healthy

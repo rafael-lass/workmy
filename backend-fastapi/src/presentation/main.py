@@ -1,6 +1,8 @@
 import logging
 import os
 import sys
+import asyncio
+from sqlalchemy import text
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse
@@ -125,6 +127,8 @@ async def business_exception_handler(request: Request, exc: BusinessException):
 async def log_incoming_requests(request: Request, call_next):
     logger.info(f"==> FASTAPI RECEBEU: {request.method} {request.url.path}")
     response = await call_next(request)
+    if request.url.path.startswith('/api/'):
+        response.headers['Cache-Control'] = 'no-store'
     logger.info(f"<== FASTAPI RESPONDEU: {request.method} {request.url.path} status={response.status_code}")
     return response
 
@@ -141,11 +145,19 @@ async def health_check():
 
 @app.get("/api/health/ping", tags=["Monitoramento"])
 async def health_ping():
-    """Endpoint de ping de saúde exigido pelo frontend."""
-    return {
-        "status": "healthy",
-        "database": "connected"
-    }
+    return await health_ready()
+
+
+@app.get('/api/health/ready', tags=['Monitoramento'])
+async def health_ready():
+    try:
+        async with asyncio.timeout(3):
+            async with engine.connect() as connection:
+                await connection.execute(text('SELECT 1'))
+        return {'status': 'ready', 'commit': os.getenv('RENDER_GIT_COMMIT', os.getenv('APP_COMMIT_SHA', 'local'))}
+    except Exception:
+        # Never expose driver errors, which can contain connection details.
+        return JSONResponse(status_code=503, content={'status': 'unavailable'}, headers={'Cache-Control': 'no-store'})
 
 # Inclui os roteadores modulares das entidades com prefixo /api
 app.include_router(auth_router, prefix="/api")

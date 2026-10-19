@@ -1,0 +1,16 @@
+{
+  "name": "workmy-cloud-checks",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "playwright test",
+    "test:live": "playwright test live.spec.mjs"
+  },
+  "overrides": {
+    "tar": "7.5.22"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.1",
+    "vercel": "64.5.0"
+  }
+}

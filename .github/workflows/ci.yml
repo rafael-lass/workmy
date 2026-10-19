@@ -4,6 +4,15 @@ on:
   pull_request:
   push:
     branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Never interrupt migrations or a deploy that has already started.
+concurrency:
+  group: ${{ github.event_name == 'pull_request' && github.ref || 'workmy-production' }}
+  cancel-in-progress: false
 
 jobs:
   backend:
@@ -33,11 +42,12 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: npm
           cache-dependency-path: frontend/bff/package-lock.json
       - run: npm ci --omit=dev
       - run: node --check server.js
+      - run: node --test server.test.cjs
 
   frontend:
     runs-on: ubuntu-latest
@@ -48,7 +58,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: npm
           cache-dependency-path: frontend/package-lock.json
       - run: npm ci
@@ -75,3 +85,177 @@ jobs:
       - name: Stop smoke stack
         if: always()
         run: docker compose down -v
+
+  postgres-migrations:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        postgres: ['15', '17']
+    services:
+      postgres:
+        image: postgres:${{ matrix.postgres }}
+        env:
+          POSTGRES_USER: workmy_ci
+          POSTGRES_PASSWORD: disposable_ci_only
+          POSTGRES_DB: workmy_ci
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U workmy_ci -d workmy_ci"
+          --health-interval 2s --health-timeout 2s --health-retries 30
+    defaults:
+      run:
+        working-directory: backend-fastapi
+    env:
+      DATABASE_URL: postgresql+asyncpg://workmy_ci:disposable_ci_only@localhost:5432/workmy_ci
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: uv sync --frozen
+      - name: Upgrade from baseline and validate current schema
+        run: |
+          uv run --frozen alembic upgrade 20260905_0001
+          uv run --frozen alembic upgrade head
+          uv run --frozen alembic check
+          uv run --frozen alembic upgrade head
+
+  cloud-e2e:
+    needs: [backend, bff, frontend]
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      APP_COMMIT_SHA: ${{ github.sha }}
+      VITE_API_BASE_URL: /api
+      VITE_CLOUD_DEMO: 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: |
+            frontend/package-lock.json
+            deploy/ci/package-lock.json
+      - run: npm ci
+        working-directory: frontend
+      - run: npm run build
+        working-directory: frontend
+      - run: npm ci
+        working-directory: deploy/ci
+      - run: npx --no-install playwright install --with-deps chromium
+        working-directory: deploy/ci
+      - name: Start disposable HTTPS cloud stack (512 MiB)
+        run: |
+          uv run --frozen --project backend-fastapi python deploy/ci/certgen.py
+          docker compose --env-file deploy/ci/.env -f deploy/ci/compose.yml up -d --build --wait --wait-timeout 180
+      - name: Browser journey through same-origin HTTPS proxy
+        run: npm test
+        working-directory: deploy/ci
+      - name: Verify persistence across container recreation
+        run: |
+          docker compose --env-file deploy/ci/.env -f deploy/ci/compose.yml up -d --force-recreate cloud --wait --wait-timeout 120
+          NODE_EXTRA_CA_CERTS="$PWD/deploy/ci/certs/web.crt" node deploy/ci/assert-persistence.mjs
+      - name: Verify supervisor shuts down if Node dies
+        run: |
+          docker compose --env-file deploy/ci/.env -f deploy/ci/compose.yml exec -T cloud python - < deploy/ci/kill-node.py
+          container_id=$(docker compose --env-file deploy/ci/.env -f deploy/ci/compose.yml ps -aq cloud)
+          for attempt in $(seq 1 25); do
+            [ "$(docker inspect --format '{{.State.Status}}' "$container_id")" = exited ] && break
+            sleep 1
+          done
+          test "$(docker inspect --format '{{.State.Status}}' "$container_id")" = exited
+          test "$(docker inspect --format '{{.State.ExitCode}}' "$container_id")" = 1
+          docker compose --env-file deploy/ci/.env -f deploy/ci/compose.yml up -d --force-recreate cloud --wait --wait-timeout 120
+      - name: Verify real database outage and recovery
+        run: |
+          docker compose --env-file deploy/ci/.env -f deploy/ci/compose.yml stop postgres
+          test "$(curl --cacert deploy/ci/certs/web.crt -s -o /tmp/ready.json -w '%{http_code}' https://localhost:8443/api/health/ready)" = 503
+          docker compose --env-file deploy/ci/.env -f deploy/ci/compose.yml start postgres
+          curl --cacert deploy/ci/certs/web.crt --retry 30 --retry-delay 2 --retry-all-errors -fsS https://localhost:8443/api/health/ready
+      - name: Test encrypted backup and recovery in disposable database
+        env:
+          BACKUP_DATABASE_URL: postgresql://workmy_ci:disposable_ci_only@postgres:5432/workmy_ci
+          BACKUP_DOCKER_NETWORK: workmy-cloud-ci_default
+          BACKUP_PASSPHRASE: disposable_ci_backup_passphrase_at_least_32
+        run: |
+          export DATABASE_CA_CERT="$(cat deploy/ci/certs/server.crt)"
+          python deploy/backup.py
+          printf '%s' "$BACKUP_PASSPHRASE" | gpg --batch --yes --pinentry-mode loopback --passphrase-fd 0 --output /tmp/workmy-ci.dump --decrypt backup-artifacts/*.dump.gpg
+          docker compose --env-file deploy/ci/.env -f deploy/ci/compose.yml exec -T postgres createdb -U workmy_ci workmy_restore_ci
+          docker compose --env-file deploy/ci/.env -f deploy/ci/compose.yml exec -T postgres pg_restore -U workmy_ci -d workmy_restore_ci --no-owner --no-acl --clean --if-exists --single-transaction --exit-on-error < /tmp/workmy-ci.dump
+          test "$(docker compose --env-file deploy/ci/.env -f deploy/ci/compose.yml exec -T postgres psql -U workmy_ci -d workmy_restore_ci -Atc 'select count(*) from pagamentos')" = 1
+      - name: Save failure diagnostics
+        if: failure()
+        run: docker compose --env-file deploy/ci/.env -f deploy/ci/compose.yml logs --no-color --tail=150
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: cloud-browser-failure
+          path: deploy/ci/test-results
+          retention-days: 3
+      - name: Stop disposable stack
+        if: always()
+        run: docker compose --env-file deploy/ci/.env -f deploy/ci/compose.yml down -v
+
+  deploy:
+    needs: [backend, bff, frontend, images, postgres-migrations, cloud-e2e]
+    if: >-
+      github.ref == 'refs/heads/main' && github.event_name != 'pull_request' &&
+      vars.CLOUD_DEPLOY_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    environment: production
+    env:
+      RENDER_SERVICE_ID: ${{ vars.RENDER_SERVICE_ID }}
+      RENDER_URL: ${{ vars.RENDER_URL }}
+      APP_URL: ${{ vars.APP_URL }}
+      EXPECTED_SHA: ${{ github.sha }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+      VITE_API_BASE_URL: /api
+      VITE_CLOUD_DEMO: 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: deploy/ci/package-lock.json
+      - run: npm ci
+        working-directory: deploy/ci
+      - name: Check canonical origins and set API rewrite
+        run: |
+          node -e "const u=new URL(process.env.APP_URL); if(u.protocol!=='https:' || u.origin!==process.env.APP_URL) throw Error('APP_URL must be an HTTPS origin')"
+          node deploy/configure-vercel.mjs
+      - name: Prepare production frontend before changing the backend
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          deploy/ci/node_modules/.bin/vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
+          deploy/ci/node_modules/.bin/vercel build --prod --token="$VERCEL_TOKEN"
+      - name: Deploy exact tested commit and wait for readiness
+        env:
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+        run: node deploy/render-deploy.mjs
+      - name: Publish prepared frontend
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: deploy/ci/node_modules/.bin/vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN"
+      - name: Verify public proxy and SPA
+        run: node deploy/check-public.mjs
+      - name: Install browser for authenticated smoke
+        run: deploy/ci/node_modules/.bin/playwright install --with-deps chromium
+      - name: Verify session on public HTTPS origin
+        working-directory: deploy/ci
+        env:
+          LIVE_SMOKE: 'true'
+          SMOKE_USERNAME: ${{ secrets.SMOKE_USERNAME }}
+          SMOKE_PASSWORD: ${{ secrets.SMOKE_PASSWORD }}
+        run: |
+          npm run test:live
+          if [ -z "$SMOKE_USERNAME" ] && [ -z "$SMOKE_PASSWORD" ]; then
+            echo 'Bootstrap: teste autenticado ignorado; configure SMOKE_USERNAME e SMOKE_PASSWORD e execute novamente.' >> "$GITHUB_STEP_SUMMARY"
+          fi

@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
+import os
+from threading import BoundedSemaphore
 from typing import Literal
 import logging
 from fastapi.responses import FileResponse
@@ -7,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.infrastructure.persistence.session import get_db_session
 from src.infrastructure.persistence.repositories.postgres_excel_query import PostgresExcelQuery
 from src.infrastructure.documents.dashboard_excel import DashboardExcelRenderer
-from src.application.usecases.exportar_dashboard import ExportarDashboardUseCase
+from src.application.usecases.exportar_dashboard import ExportarDashboardUseCase, ExportBusy, ExportLimitExceeded
 from src.application.dto.excel_export import ExportPeriod
 
 from src.application.ports.outbound.i_dashboard_query import IDashboardQuery
@@ -20,6 +22,15 @@ from src.presentation.rest.pagamentos import pagamento_view_to_dict
 
 
 router = APIRouter(prefix="/dashboard", tags=["Dashboard"])
+_cloud = os.getenv('APP_ENV') == 'cloud'
+EXPORT_MODE = os.getenv('EXCEL_EXPORT_MODE', 'sequential' if _cloud else 'parallel')
+EXPORT_MAX_ROWS = int(os.getenv('EXCEL_EXPORT_MAX_ROWS', '2000' if _cloud else '0'))
+_capacity = int(os.getenv('EXCEL_EXPORT_MAX_CONCURRENT', '1' if _cloud else '0'))
+if EXPORT_MODE not in {'parallel', 'sequential'} or EXPORT_MAX_ROWS < 0 or _capacity < 0:
+    raise ValueError('Configuração de exportação inválida.')
+if _cloud and (EXPORT_MODE != 'sequential' or not 1 <= EXPORT_MAX_ROWS <= 2000 or _capacity != 1):
+    raise ValueError('Cloud gratuito exige modo sequencial, até 2000 registros e concorrência 1.')
+EXPORT_GATE = BoundedSemaphore(_capacity) if _capacity else None
 
 
 @router.get('/exportar.zip')
@@ -28,9 +39,15 @@ async def export_dashboard(
     usuario_id: int = Depends(get_current_user_id),
     session: AsyncSession = Depends(get_db_session),
 ):
-    result = await ExportarDashboardUseCase(PostgresExcelQuery(session), DashboardExcelRenderer()).run(
-        usuario_id, ExportPeriod.create(periodo, business_today()))
-    logging.getLogger(__name__).info('Exportação %s: contagens=%s arquivos=%s tempos=%s', 'paralela',
+    try:
+        result = await ExportarDashboardUseCase(PostgresExcelQuery(session), DashboardExcelRenderer()).run(
+            usuario_id, ExportPeriod.create(periodo, business_today()), EXPORT_MODE,
+            max_rows=EXPORT_MAX_ROWS, gate=EXPORT_GATE)
+    except ExportLimitExceeded as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except ExportBusy as exc:
+        raise HTTPException(status_code=429, detail=str(exc), headers={'Retry-After': '5'}) from exc
+    logging.getLogger(__name__).info('Exportação %s: contagens=%s arquivos=%s tempos=%s', EXPORT_MODE,
         result.counts, result.file_sizes, result.timings)
     return FileResponse(result.path, filename=result.filename,
         media_type='application/zip',

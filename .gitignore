@@ -60,6 +60,16 @@ tmp/pdfs/
 htmlcov/
 .tox/
 .hypothesis/
+.vercel/
+tmp/cloud-tools/
+tmp/pnpm-store/
+tmp/uv-cache/
+deploy/ci/certs/
+deploy/ci/.env
+**/test-results/
+**/playwright-report/
+*.dump.gpg
+backup-artifacts/
 *.cover
 .mypy_cache/
 .dmypy.json

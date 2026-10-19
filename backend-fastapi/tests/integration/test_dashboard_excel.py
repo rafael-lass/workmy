@@ -6,6 +6,7 @@ import httpx
 import openpyxl
 import pytest
 import pytest_asyncio
+from threading import BoundedSemaphore
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from src.application.dto.excel_export import ExportPeriod
 from src.infrastructure.persistence.session import Base, get_db_session
@@ -136,3 +137,23 @@ async def test_total_includes_unrelated_catalog_and_empty_user(api):
         book = openpyxl.load_workbook(BytesIO(archive.read(name)))
         assert book['Pagamentos'].max_row == 1
         book.close()
+
+
+async def test_cloud_count_limit_matches_period_and_user_and_busy_returns_429(api, monkeypatch):
+    monkeypatch.setattr(dashboard, 'EXPORT_MODE', 'sequential')
+    monkeypatch.setattr(dashboard, 'EXPORT_MAX_ROWS', 7)
+    gate = BoundedSemaphore(1)
+    monkeypatch.setattr(dashboard, 'EXPORT_GATE', gate)
+    # Four payments + one related client/service/project = seven rows.
+    assert (await api.get('/api/dashboard/exportar.zip?periodo=3', headers=auth())).status_code == 200
+    # Total includes six payments + two clients/services/projects = twelve rows.
+    assert (await api.get('/api/dashboard/exportar.zip?periodo=total', headers=auth())).status_code == 422
+    # The other user's one payment and three related records fit the same limit.
+    assert (await api.get('/api/dashboard/exportar.zip?periodo=total', headers=auth(2))).status_code == 200
+    gate.acquire()
+    try:
+        response = await api.get('/api/dashboard/exportar.zip?periodo=3', headers=auth())
+        assert response.status_code == 429
+        assert response.headers['retry-after'] == '5'
+    finally:
+        gate.release()

@@ -1,18 +1,17 @@
-import os
+from src.infrastructure.config import database_url, engine_options
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.orm import DeclarativeBase
 
 # URL padrão para SQLite assíncrono caso nenhuma variável esteja configurada
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite+aiosqlite:///./db.sqlite3")
+DATABASE_URL = database_url()
 
 # Configura a Engine do SQLAlchemy assíncrona
 # Desativa pooling de threads para SQLite simples para evitar colisões de threads de testes
-connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
 
 engine = create_async_engine(
     DATABASE_URL,
     echo=False,
-    connect_args=connect_args
+    **engine_options(DATABASE_URL)
 )
 
 # Fabrica sessões assíncronas do banco

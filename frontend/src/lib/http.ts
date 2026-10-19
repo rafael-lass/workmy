@@ -93,12 +93,15 @@ export async function http<T>(
     credentials: 'include', // Envia cookies HTTP-Only automaticamente (gerenciados pelo BFF)
   })
 
+  if (res.headers.get('content-type')?.includes('text/html')) {
+    throw new ApiError('Servidor temporariamente indisponível. Tente novamente.', 503)
+  }
   if (res.ok && options?.responseType === 'blob') return await res.blob() as T
   let data: unknown = null
   try {
     data = await res.json()
   } catch {
-    data = null
+    throw new ApiError('Servidor temporariamente indisponível. Tente novamente.', res.ok ? 503 : res.status)
   }
 
   if (!res.ok) {

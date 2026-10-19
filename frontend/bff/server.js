@@ -8,6 +8,12 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const FASTAPI_URL = process.env.FASTAPI_URL || 'http://127.0.0.1:8000';
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
+const IS_CLOUD = process.env.APP_ENV === 'cloud';
+const PUBLIC_URL = process.env.APP_PUBLIC_URL ? new URL(process.env.APP_PUBLIC_URL) : null;
+const EXPORT_TIMEOUT = Number(process.env.EXCEL_PROXY_TIMEOUT_MS || (IS_CLOUD ? 90000 : 300000));
+if (!Number.isInteger(EXPORT_TIMEOUT) || EXPORT_TIMEOUT < 1 || (IS_CLOUD && EXPORT_TIMEOUT > 90000)) {
+    throw new Error('EXCEL_PROXY_TIMEOUT_MS inválido.');
+}
 
 // ---------------------------------------------------------------------------
 // Extrai hostname, porta e protocolo de FASTAPI_URL uma única vez.
@@ -26,6 +32,11 @@ const FASTAPI_PROTOCOL = _fastapiParsed.protocol === 'https:' ? https : http;
 // ---------------------------------------------------------------------------
 const CORS_ORIGIN = process.env.CORS_ORIGIN || 'http://localhost:5173';
 const ALLOWED_ORIGINS = CORS_ORIGIN.split(',').map(o => o.trim()).filter(Boolean);
+if (IS_CLOUD && (!IS_PRODUCTION || !PUBLIC_URL || PUBLIC_URL.protocol !== 'https:' ||
+    PUBLIC_URL.origin !== process.env.APP_PUBLIC_URL || CORS_ORIGIN !== PUBLIC_URL.origin ||
+    FASTAPI_URL !== 'http://127.0.0.1:8000')) {
+    throw new Error('Cloud exige produção, origem HTTPS exata e FastAPI em http://127.0.0.1:8000.');
+}
 
 // Em desenvolvimento, aceita qualquer origem localhost (qualquer porta do Vite)
 // Em produção, usa apenas a whitelist de CORS_ORIGIN
@@ -34,6 +45,14 @@ const isLocalhostOrigin = (origin) =>
     /^https?:\/\/127\.0\.0\.1(:\d+)?$/.test(origin);
 
 app.use(cookieParser());
+app.use('/api', (req, res, next) => {
+    res.setHeader('Cache-Control', 'no-store');
+    if (req.headers.origin && !ALLOWED_ORIGINS.includes(req.headers.origin) &&
+        (IS_PRODUCTION || !isLocalhostOrigin(req.headers.origin))) {
+        return res.status(403).json({ detail: 'Origem não permitida.' });
+    }
+    next();
+});
 app.use(cors({
     origin: (origin, callback) => {
         // Permite requests sem Origin (ex: curl, Postman, SSR)
@@ -98,6 +117,14 @@ function callFastApi(path, method, data = null, extraHeaders = {}) {
             method,
             headers: { ...extraHeaders }
         };
+        delete options.headers.cookie;
+        delete options.headers.forwarded;
+        delete options.headers['x-forwarded-host'];
+        delete options.headers['x-forwarded-proto'];
+        if (PUBLIC_URL) {
+            options.headers.host = PUBLIC_URL.host;
+            options.headers['x-forwarded-proto'] = PUBLIC_URL.protocol.slice(0, -1);
+        }
 
         if (hasBody) {
             options.headers['Content-Type'] = 'application/json';
@@ -107,6 +134,8 @@ function callFastApi(path, method, data = null, extraHeaders = {}) {
         const req = FASTAPI_PROTOCOL.request(options, (apiRes) => {
             const chunks = [];
             apiRes.on('data', (chunk) => chunks.push(Buffer.from(chunk)));
+            apiRes.on('error', reject);
+            apiRes.on('aborted', () => reject(new Error('Resposta do FastAPI interrompida.')));
             apiRes.on('end', () => {
                 resolve({
                     status: apiRes.statusCode || 502,
@@ -118,7 +147,7 @@ function callFastApi(path, method, data = null, extraHeaders = {}) {
 
         req.on('error', reject);
         const isExcelExport = path.split('?')[0] === '/api/dashboard/exportar.zip';
-        const timeout = isExcelExport ? 300000 : 15000;
+        const timeout = isExcelExport ? EXPORT_TIMEOUT : 15000;
         req.setTimeout(timeout, () => req.destroy(new Error('Tempo limite de resposta do FastAPI excedido.')));
         if (hasBody) {
             req.write(postData);
@@ -134,7 +163,7 @@ function parseJsonResponse(body) {
     try {
         return JSON.parse(text);
     } catch {
-        return text;
+        throw new Error('Resposta JSON inválida do FastAPI.');
     }
 }
 
@@ -156,11 +185,21 @@ function forwardResponseHeaders(res, headers) {
             value === undefined ||
             HOP_BY_HOP_HEADERS.has(normalizedName) ||
             normalizedName === 'set-cookie' ||
+            normalizedName === 'cache-control' ||
             normalizedName.startsWith('access-control-')
         ) {
             continue;
         }
-        res.setHeader(name, value);
+        if (normalizedName === 'location') {
+            const location = new URL(String(value), FASTAPI_URL);
+            if (location.origin === _fastapiParsed.origin || (PUBLIC_URL && location.origin === PUBLIC_URL.origin)) {
+                res.setHeader(name, location.pathname + location.search + location.hash);
+            } else {
+                throw new Error('Redirecionamento inesperado do FastAPI.');
+            }
+        } else {
+            res.setHeader(name, value);
+        }
     }
 }
 
@@ -271,6 +310,9 @@ app.post('/api/auth/logout', async (req, res) => {
     return res.status(200).json({ message: 'Sessão encerrada com sucesso.' });
 });
 
+// Refresh is an internal BFF operation; never return raw tokens to the browser.
+app.all('/api/auth/refresh', (_req, res) => res.status(404).json({ detail: 'Rota não encontrada.' }));
+
 // ============================================================
 // 4. MIDDLEWARE DE SEGURANÇA — PROXY DE ROTAS DE NEGÓCIO /api/*
 // Injeta Bearer JWT nos cookies antes de encaminhar ao FastAPI.
@@ -284,10 +326,7 @@ app.use(async (req, res, next) => {
 
     // Ignora rotas de autenticação locais do BFF e health checks públicos
     if (
-        req.path.startsWith('/api/auth/login') ||
-        req.path.startsWith('/api/auth/register') ||
-        req.path.startsWith('/api/auth/logout') ||
-        req.path.startsWith('/api/health/ping')
+        ['/api/auth/login', '/api/auth/register', '/api/auth/logout', '/api/health/ping', '/api/health/ready'].includes(req.path)
     ) {
         return next();
     }
@@ -368,6 +407,9 @@ app.all(/^\/api\/.*$/, async (req, res) => {
         }
 
         const { status, body: responseBody, headers: responseHeaders } = upstream;
+        if ((responseHeaders['content-type'] || '').includes('text/html')) {
+            return res.status(502).json({ detail: 'Servidor temporariamente indisponível. Tente novamente.' });
+        }
         
         logBffAction('Proxy', `${method} ${urlPath}`, `FastAPI respondeu ${status}`);
         forwardResponseHeaders(res, responseHeaders);
@@ -386,7 +428,7 @@ app.all(/^\/api\/.*$/, async (req, res) => {
 // ============================================================
 // Startup
 // ============================================================
-app.listen(PORT, () => {
+if (require.main === module) app.listen(PORT, '0.0.0.0', () => {
     console.log(`\n\x1b[36m==================================================\x1b[0m`);
     console.log(`\x1b[36m  WORKMY BFF PROXY GATEWAY\x1b[0m`);
     console.log(`\x1b[36m  Porta:    http://localhost:${PORT}\x1b[0m`);
@@ -395,3 +437,5 @@ app.listen(PORT, () => {
     console.log(`\x1b[36m  Ambiente: ${IS_PRODUCTION ? 'PRODUÇÃO' : 'DESENVOLVIMENTO'}\x1b[0m`);
     console.log(`\x1b[36m==================================================\x1b[0m\n`);
 });
+
+module.exports = { app };
