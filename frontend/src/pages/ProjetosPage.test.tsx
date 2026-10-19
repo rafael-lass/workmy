@@ -61,3 +61,30 @@ it('reativa arquivado em Planejamento com recorrência pausada e permite excluir
   await user.click(screen.getByRole('button', { name: 'Excluir projeto' }))
   expect(request).toHaveBeenCalledWith('/projetos/1', { method: 'DELETE' })
 })
+
+it('ativa cobrança mensal de um projeto avulso e permite pausá-la', async () => {
+  const user = userEvent.setup()
+  const project: Projeto = { id: 1, cliente_id: 1, cliente_nome: 'Ana', servico_id: 2, servico_nome: 'Site', valor_mensal: null, dia_vencimento: 5, recorrencia_inicio: null, criado_em: '', status: 'DISCOVERY', tipo_recorrencia: 'AVULSO', valor: '100', ativo: false, total_acumulado: '0', possui_lancamentos: false }
+  let current = project
+  request.mockReset()
+  request.mockImplementation(async (url: string, options?: { body?: { ativo?: boolean } }) => {
+    if (url === '/projetos/') return [current]
+    if (url === '/projetos/1/recorrencia') {
+      current = { ...current, tipo_recorrencia: 'MENSAL', ativo: Boolean(options?.body?.ativo), valor_mensal: '200', possui_lancamentos: true }
+      return current
+    }
+    if (url === '/projetos/1') return current
+    return []
+  })
+  render(<MemoryRouter><ProjetosPage /></MemoryRouter>)
+  await user.click((await screen.findAllByRole('button', { name: 'Ativar mensal' }))[0])
+  await user.type(screen.getByLabelText('Novo valor mensal'), '200')
+  await user.clear(screen.getByLabelText('Início da cobrança mensal'))
+  await user.type(screen.getByLabelText('Início da cobrança mensal'), '2026-04-01')
+  await user.click(within(screen.getByRole('dialog', { name: 'Ativar cobrança mensal' })).getByRole('button', { name: 'Ativar mensal' }))
+  expect(request).toHaveBeenCalledWith('/projetos/1/recorrencia', expect.objectContaining({ body: { ativo: true, valor_mensal: 200, dia_vencimento: 5, recorrencia_inicio: '2026-04-01' } }))
+  await user.click((await screen.findAllByRole('button', { name: 'Pausar' }))[0])
+  await user.click(within(screen.getByRole('dialog', { name: 'Pausar recorrência' })).getByRole('button', { name: 'Pausar' }))
+  expect(request).toHaveBeenCalledWith('/projetos/1/recorrencia', { method: 'PATCH', body: { ativo: false } })
+  expect(await screen.findAllByRole('button', { name: 'Retomar' })).toHaveLength(2)
+})

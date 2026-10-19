@@ -62,9 +62,12 @@ Finalizar ou arquivar pausa a recorrência. Arquivar é uma ação separada com 
 - O dia de vencimento mensal deve estar entre **1 e 28**.
 - O primeiro vencimento ocorre no dia contratado do mês inicial se ainda não passou; caso contrário, no mês seguinte.
 - O início explícito prevalece. Quando ausente, usa-se a data de criação; se ambas estiverem ausentes, usa-se a data de referência.
+- Ao criar um projeto mensal com recorrência ativa, o sistema gera automaticamente as mensalidades com vencimento desde o início informado até hoje, inclusive. Todas nascem como `PENDENTE`, sem data de pagamento; vencimentos anteriores a hoje aparecem como atrasados.
+- Exemplo: criação em 19/10/2026, início em 01/04/2026 e vencimento dia 5 gera abril a outubro (sete cobranças). Com vencimento dia 20, gera abril a setembro (seis cobranças), pois 20/10 ainda não chegou. Se o início for posterior ao vencimento do primeiro mês, a primeira cobrança fica para o mês seguinte.
 - A geração manual cria as referências vencidas e ausentes desde o início ou retomada até a data atual.
 - A combinação `(projeto_id, referencia_mes)` possui restrição única no banco.
 - Retomar exige valor, vencimento e nova data inicial; meses pausados não são gerados.
+- Projetos avulsos existentes podem habilitar cobrança mensal pela ação **Ativar mensal**. A ativação exige valor mensal, dia de vencimento e início, e gera as referências já vencidas desde a data escolhida. **Pausar** desativa novas cobranças e preserva recebimentos e pendências; **Retomar** reativa a cobrança a partir da nova data informada. Projetos finalizados ou arquivados continuam impedidos de ativar recorrência.
 - **Exemplo da RN-20:** em 21/09/2026, um contrato vigente de R$ 300 e outro de R$ 900 iniciado em novembro geram previsão de outubro de **R$ 300**.
 
 ## Validações de serviços e anexos

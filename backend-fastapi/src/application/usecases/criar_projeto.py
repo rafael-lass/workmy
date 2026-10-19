@@ -5,17 +5,22 @@ from src.domain.exceptions.business_exceptions import ColisaoContratoException, 
 from src.application.ports.outbound.i_projeto_repository import IProjetoRepository
 from src.application.ports.outbound.i_cliente_repository import IClienteRepository
 from src.application.ports.outbound.i_servico_repository import IServicoRepository
+from src.application.ports.outbound.i_pagamento_repository import IPagamentoRepository
+from src.application.usecases.faturar_recorrencias import FaturarRecorrenciasUseCase
+from src.domain.time import business_today
 
 class CriarProjetoUseCase:
     def __init__(
         self,
         projeto_repo: IProjetoRepository,
         cliente_repo: IClienteRepository,
-        servico_repo: IServicoRepository
+        servico_repo: IServicoRepository,
+        pagamento_repo: IPagamentoRepository,
     ):
         self.projeto_repo = projeto_repo
         self.cliente_repo = cliente_repo
         self.servico_repo = servico_repo
+        self.faturamento = FaturarRecorrenciasUseCase(projeto_repo, pagamento_repo)
 
     async def execute(
         self,
@@ -29,7 +34,8 @@ class CriarProjetoUseCase:
         recorrencia_ativa: bool = False,
         valor_mensal: Decimal | None = None,
         dia_vencimento: int = 5,
-        recorrencia_inicio: date | None = None
+        recorrencia_inicio: date | None = None,
+        hoje: date | None = None,
     ) -> ProjetoEntity:
         # 1. Verifica se cliente pertence ao usuário
         cliente_existe = await self.cliente_repo.exists_by_id(cliente_id, usuario_id)
@@ -65,5 +71,9 @@ class CriarProjetoUseCase:
 
         # 5. Salva na persistência
         projeto_salvo = await self.projeto_repo.save(projeto)
+
+        # Mesma transação da criação: só o projeto novo recebe seu histórico.
+        # Se o vencimento do mês atual ainda não chegou, ele fica para o próximo faturamento.
+        await self.faturamento.execute_projeto(projeto_salvo, hoje or business_today())
 
         return projeto_salvo

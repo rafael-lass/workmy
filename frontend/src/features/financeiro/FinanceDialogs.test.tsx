@@ -1,10 +1,12 @@
-import { fireEvent, render, screen, within } from '@testing-library/react'
-import { describe, expect, it, vi } from 'vitest'
+import { act, fireEvent, render, screen, within } from '@testing-library/react'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { ManualPaymentDialog } from './FinanceDialogs'
 import type { Projeto } from '../../types'
+import * as image from '../../lib/image'
 
 const request = vi.fn()
 vi.mock('../../hooks/useApi', () => ({ useApi: () => ({ request }) }))
+beforeEach(() => { request.mockReset() })
 
 const project: Projeto = { id: 1, cliente_id: 1, cliente_nome: 'Ana', servico_id: 2, servico_nome: 'Site', valor_mensal: null, dia_vencimento: 5, recorrencia_inicio: null, criado_em: '', status: 'DISCOVERY', tipo_recorrencia: 'AVULSO', valor: '100', ativo: false, total_acumulado: '0', possui_lancamentos: false }
 
@@ -50,4 +52,56 @@ it('preenche serviço e cliente do projeto recebido por contexto', () => {
   render(<ManualPaymentDialog open projetos={[project]} defaultProjectId={1} onClose={vi.fn()} onSaved={vi.fn()} />)
   expect(screen.getByLabelText('Serviço')).toHaveValue('2')
   expect(screen.getByLabelText('Cliente')).toHaveValue('1')
+})
+
+it('explica a falta de projetos disponíveis e oferece o próximo passo', () => {
+  const create = vi.fn()
+  render(<ManualPaymentDialog open projetos={[{ ...project, status: 'ARCHIVED' }]} onCreateProject={create} onClose={vi.fn()} onSaved={vi.fn()} />)
+  expect(screen.getByText(/Nenhum projeto disponível para recebimento/)).toBeVisible()
+  expect(screen.getByLabelText('Serviço')).toBeDisabled()
+  expect(screen.getByRole('button', { name: 'Registrar como pago' })).toBeDisabled()
+  fireEvent.click(screen.getByRole('button', { name: 'Ir para projetos' }))
+  expect(create).toHaveBeenCalledOnce()
+  expect(request).not.toHaveBeenCalled()
+})
+
+it('distingue carregamento de erro e permite tentar novamente dentro do modal', () => {
+  const retry = vi.fn()
+  const props = { open: true, projetos: [project], onRetry: retry, onClose: vi.fn(), onSaved: vi.fn() }
+  const { rerender } = render(<ManualPaymentDialog {...props} loading />)
+  expect(screen.getByText(/Carregando os projetos/)).toBeVisible()
+  expect(screen.getByRole('button', { name: 'Registrar como pago' })).toBeDisabled()
+  rerender(<ManualPaymentDialog {...props} loadError="Falha ao carregar os projetos" />)
+  expect(screen.getByText('Falha ao carregar os projetos')).toBeVisible()
+  fireEvent.click(screen.getByRole('button', { name: 'Tentar novamente' }))
+  expect(retry).toHaveBeenCalledOnce()
+  expect(screen.getByLabelText('Serviço')).toBeDisabled()
+})
+
+it('espera os projetos iniciais e preserva o formulário durante atualização de dados', () => {
+  const props = { open: true, defaultProjectId: 1, onClose: vi.fn(), onSaved: vi.fn() }
+  const { rerender } = render(<ManualPaymentDialog {...props} projetos={[]} loading />)
+  rerender(<ManualPaymentDialog {...props} projetos={[project]} />)
+  expect(screen.getByLabelText('Cliente')).toHaveValue('1')
+  fireEvent.change(screen.getByLabelText('Valor recebido'), { target: { value: '75' } })
+  rerender(<ManualPaymentDialog {...props} projetos={[{ ...project }]} loading />)
+  rerender(<ManualPaymentDialog {...props} projetos={[{ ...project }]} />)
+  expect(screen.getByLabelText('Cliente')).toHaveValue('1')
+  expect(screen.getByLabelText('Valor recebido')).toHaveValue(75)
+})
+
+it('aguarda a leitura do comprovante antes de enviar o recebimento', async () => {
+  let finish!: (value: string) => void
+  vi.spyOn(image, 'readReceiptDataUrl').mockReturnValue(new Promise(resolve => { finish = resolve }))
+  request.mockResolvedValue({ id: 1 })
+  render(<ManualPaymentDialog open projetos={[project]} defaultProjectId={1} onClose={vi.fn()} onSaved={vi.fn()} />)
+  fireEvent.change(screen.getByLabelText('Valor recebido'), { target: { value: '100' } })
+  fireEvent.change(screen.getByLabelText(/Comprovante/), { target: { files: [new File(['test'], 'recibo.pdf', { type: 'application/pdf' })] } })
+  const submit = screen.getByRole('button', { name: 'Registrar como pago' })
+  expect(submit).toBeDisabled()
+  fireEvent.submit(document.getElementById('manual-payment-form')!)
+  expect(request).not.toHaveBeenCalled()
+  await act(async () => finish('data:application/pdf;base64,dGVzdA=='))
+  fireEvent.click(submit)
+  expect(request).toHaveBeenCalledWith('/pagamentos/', expect.objectContaining({ body: expect.objectContaining({ comprovante_base64: 'data:application/pdf;base64,dGVzdA==' }) }))
 })

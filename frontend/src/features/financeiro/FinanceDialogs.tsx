@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
 import { useApi } from '../../hooks/useApi'
 import { formatCurrency, formatDate, todayInput } from '../../lib/format'
@@ -10,23 +10,88 @@ import { Dialog } from '../../shared/ui/Dialog'
 import { Field, fieldA11y } from '../../shared/ui/Field'
 import type { BillingResult, Pagamento, Projeto } from '../../types'
 
-function ReceiptInput({ id, onValue, onError }: { id: string; onValue: (value: string) => void; onError: (value: string) => void }) {
-  return <input id={id} type="file" accept={RECEIPT_ACCEPT} onChange={async (event) => { const file = event.target.files?.[0]; if (!file) return; try { onValue(await readReceiptDataUrl(file)); onError('') } catch (error) { onError(error instanceof Error ? error.message : 'Comprovante inválido.') } }} />
+function ReceiptInput({ id, onValue, onError, onBusyChange }: { id: string; onValue: (value: string) => void; onError: (value: string) => void; onBusyChange: (busy: boolean) => void }) {
+  const [reading, setReading] = useState(false)
+  return <input id={id} type="file" disabled={reading} accept={RECEIPT_ACCEPT} onChange={async (event) => { const file = event.target.files?.[0]; if (!file) return; setReading(true); onBusyChange(true); try { onValue(await readReceiptDataUrl(file)); onError('') } catch (error) { onError(error instanceof Error ? error.message : 'Comprovante inválido.') } finally { setReading(false); onBusyChange(false) } }} />
 }
 
-export function ManualPaymentDialog({ open, projetos, defaultProjectId, onClose, onSaved }: { open: boolean; projetos: Projeto[]; defaultProjectId?: number; onClose: () => void; onSaved: (payment: Pagamento) => void }) {
-  const { request } = useApi(); const [serviceId, setServiceId] = useState(''); const [projectId, setProjectId] = useState(''); const [value, setValue] = useState(''); const [paymentDate, setPaymentDate] = useState(todayInput()); const [note, setNote] = useState(''); const [receipt, setReceipt] = useState(''); const [errors, setErrors] = useState<Record<string, string>>({}); const [apiError, setApiError] = useState(''); const [busy, setBusy] = useState(false)
-  useEffect(() => { if (!open) return; const initial = projetos.find((project) => project.id === defaultProjectId && project.status !== 'ARCHIVED'); setServiceId(initial ? String(initial.servico_id) : ''); setProjectId(initial ? String(initial.id) : ''); setValue(''); setPaymentDate(todayInput()); setNote(''); setReceipt(''); setErrors({}); setApiError(''); setBusy(false) }, [open, defaultProjectId, projetos])
-  const submit = async (event: FormEvent) => { event.preventDefault(); const next: Record<string, string> = {}; if (!serviceId) next.service = 'Selecione um serviço.'; if (!projetos.some((project) => String(project.id) === projectId && String(project.servico_id) === serviceId && project.status !== 'ARCHIVED')) next.project = 'Selecione um cliente deste serviço.'; if (Number(value) <= 0) next.value = 'Informe um valor maior que zero.'; if (!paymentDate) next.date = 'Informe a data do recebimento.'; if (Object.keys(next).length) { setErrors(next); return } setBusy(true); setApiError(''); try { const saved = await request<Pagamento>('/pagamentos/', { method: 'POST', body: { projeto_id: Number(projectId), valor: Number(value), data_pagamento: paymentDate, observacao: note.trim() || null, comprovante_base64: receipt || null } }); onSaved(saved); onClose() } catch (error) { setApiError(error instanceof ApiError ? error.message : 'Não foi possível registrar o recebimento.') } finally { setBusy(false) } }
-  return <Dialog open={open} title="Registrar recebimento" description="Use este formulário somente para valores avulsos que já foram pagos." busy={busy} size="lg" onClose={onClose} footer={<><Button variant="secondary" onClick={onClose}>Cancelar</Button><Button type="submit" form="manual-payment-form" loading={busy}>Registrar como pago</Button></>}><form id="manual-payment-form" className="form-grid" onSubmit={submit} noValidate>{apiError && <div className="form-span-2"><Alert tone="error">{apiError}</Alert></div>}<Field id="payment-service" label="Serviço" error={errors.service} hint="Serviços com projetos não arquivados."><select id="payment-service" data-autofocus value={serviceId} onChange={(event) => { setServiceId(event.target.value); setProjectId(''); setErrors((current) => ({ ...current, service: '', project: '' })) }} {...fieldA11y('payment-service', errors.service)}><option value="">Selecione um serviço</option>{Array.from(new Map(projetos.filter((project) => project.status !== 'ARCHIVED').map((project) => [project.servico_id, project.servico_nome])).entries()).map(([id, name]) => <option key={id} value={id}>{name}</option>)}</select></Field><Field id="payment-client" label="Cliente" error={errors.project} hint={serviceId ? 'Clientes com projeto vinculado ao serviço escolhido.' : 'Escolha primeiro o serviço.'}><select id="payment-client" disabled={!serviceId} value={projectId} onChange={(event) => { setProjectId(event.target.value); setErrors((current) => ({ ...current, project: '' })) }} {...fieldA11y('payment-client', errors.project)}><option value="">Selecione um cliente</option>{projetos.filter((project) => project.status !== 'ARCHIVED' && String(project.servico_id) === serviceId).map((project) => <option key={project.id} value={project.id}>{project.cliente_nome}</option>)}</select></Field><Field id="payment-value" label="Valor recebido" error={errors.value}><input id="payment-value" type="number" min="0.01" step="0.01" value={value} onChange={(event) => setValue(event.target.value)} {...fieldA11y('payment-value', errors.value)} /></Field><Field id="payment-date" label="Data do recebimento" error={errors.date}><input id="payment-date" type="date" max={todayInput()} value={paymentDate} onChange={(event) => setPaymentDate(event.target.value)} {...fieldA11y('payment-date', errors.date)} /></Field><div className="form-span-2"><Field id="payment-note" label="Observação" optional><textarea id="payment-note" value={note} onChange={(event) => setNote(event.target.value)} maxLength={500} /></Field></div><div className="form-span-2"><Field id="payment-receipt" label="Comprovante" optional hint="PDF ou imagem de até 5 MB."><ReceiptInput id="payment-receipt" onValue={setReceipt} onError={setApiError} /></Field></div></form></Dialog>
+export function ManualPaymentDialog({ open, projetos, defaultProjectId, loading = false, loadError = '', onRetry, onCreateProject, onClose, onSaved }: { open: boolean; projetos: Projeto[]; defaultProjectId?: number; loading?: boolean; loadError?: string; onRetry?: () => void; onCreateProject?: () => void; onClose: () => void; onSaved: (payment: Pagamento) => void }) {
+  const { request } = useApi()
+  const [serviceId, setServiceId] = useState('')
+  const [projectId, setProjectId] = useState('')
+  const [value, setValue] = useState('')
+  const [paymentDate, setPaymentDate] = useState(todayInput())
+  const [note, setNote] = useState('')
+  const [receipt, setReceipt] = useState('')
+  const [errors, setErrors] = useState<Record<string, string>>({})
+  const [apiError, setApiError] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [readingReceipt, setReadingReceipt] = useState(false)
+  const initialized = useRef(false)
+  const submitting = useRef(false)
+  const availableProjects = projetos.filter(project => project.status !== 'ARCHIVED')
+  const unavailable = loading || Boolean(loadError) || !availableProjects.length
+  useEffect(() => {
+    if (!open) { initialized.current = false; return }
+    if (loading || loadError || initialized.current) return
+    initialized.current = true
+    const initial = projetos.find(project => project.id === defaultProjectId && project.status !== 'ARCHIVED')
+    setServiceId(initial ? String(initial.servico_id) : '')
+    setProjectId(initial ? String(initial.id) : '')
+    setValue(''); setPaymentDate(todayInput()); setNote(''); setReceipt(''); setErrors({}); setApiError(''); setBusy(false)
+  }, [open, defaultProjectId, projetos, loading, loadError])
+  const submit = async (event: FormEvent) => {
+    event.preventDefault()
+    if (submitting.current || readingReceipt || unavailable) return
+    const next: Record<string, string> = {}
+    if (!serviceId) next.service = 'Selecione um serviço.'
+    if (!availableProjects.some(project => String(project.id) === projectId && String(project.servico_id) === serviceId)) next.project = 'Selecione um cliente deste serviço.'
+    if (!Number.isFinite(Number(value)) || Number(value) <= 0) next.value = 'Informe um valor maior que zero.'
+    if (!paymentDate || paymentDate > todayInput()) next.date = 'Informe uma data até hoje.'
+    if (Object.keys(next).length) { setErrors(next); return }
+    submitting.current = true
+    setBusy(true); setApiError('')
+    try {
+      const saved = await request<Pagamento>('/pagamentos/', { method: 'POST', body: { projeto_id: Number(projectId), valor: Number(value), data_pagamento: paymentDate, observacao: note.trim() || null, comprovante_base64: receipt || null } })
+      onSaved(saved); onClose()
+    } catch (error) { setApiError(error instanceof ApiError ? error.message : 'Não foi possível registrar o recebimento.') }
+    finally { submitting.current = false; setBusy(false) }
+  }
+  return <Dialog open={open} title="Registrar recebimento" description="Use este formulário somente para valores avulsos que já foram pagos." busy={busy || readingReceipt} size="lg" onClose={onClose} footer={<>
+    <Button variant="secondary" disabled={busy || readingReceipt} onClick={onClose}>Cancelar</Button>
+    <Button type="submit" form="manual-payment-form" disabled={unavailable || readingReceipt} loading={busy}>Registrar como pago</Button>
+  </>}>
+    <form id="manual-payment-form" className="form-grid" onSubmit={submit} noValidate>
+      {loading && <div className="form-span-2"><Alert tone="info">Carregando os projetos e serviços disponíveis...</Alert></div>}
+      {loadError && <div className="form-span-2"><Alert tone="error">{loadError}</Alert>{onRetry && <Button type="button" onClick={onRetry} disabled={loading}>Tentar novamente</Button>}</div>}
+      {!loading && !loadError && !availableProjects.length && <div className="form-span-2"><Alert tone="info">Nenhum projeto disponível para recebimento. Cadastre um cliente e um serviço e vincule os dois em um projeto não arquivado.</Alert>{onCreateProject && <Button type="button" onClick={onCreateProject}>Ir para projetos</Button>}</div>}
+      {apiError && <div className="form-span-2"><Alert tone="error">{apiError}</Alert></div>}
+      <Field id="payment-service" label="Serviço" error={errors.service} hint="Aparecem somente serviços vinculados a projetos não arquivados.">
+        <select id="payment-service" data-autofocus disabled={unavailable || busy} value={serviceId} onChange={event => { setServiceId(event.target.value); setProjectId(''); setErrors(current => ({ ...current, service: '', project: '' })) }} {...fieldA11y('payment-service', errors.service, 'hint')}>
+          <option value="">Selecione um serviço</option>
+          {Array.from(new Map(availableProjects.map(project => [project.servico_id, project.servico_nome])).entries()).map(([id, name]) => <option key={id} value={id}>{name}</option>)}
+        </select>
+      </Field>
+      <Field id="payment-client" label="Cliente" error={errors.project} hint={serviceId ? 'Clientes com projeto vinculado ao serviço escolhido.' : 'Escolha primeiro o serviço.'}>
+        <select id="payment-client" disabled={unavailable || busy || !serviceId} value={projectId} onChange={event => { setProjectId(event.target.value); setErrors(current => ({ ...current, project: '' })) }} {...fieldA11y('payment-client', errors.project, 'hint')}>
+          <option value="">Selecione um cliente</option>
+          {availableProjects.filter(project => String(project.servico_id) === serviceId).map(project => <option key={project.id} value={project.id}>{project.cliente_nome}</option>)}
+        </select>
+      </Field>
+      <Field id="payment-value" label="Valor recebido" error={errors.value}><input id="payment-value" type="number" min="0.01" step="0.01" value={value} onChange={event => setValue(event.target.value)} {...fieldA11y('payment-value', errors.value)} /></Field>
+      <Field id="payment-date" label="Data do recebimento" error={errors.date}><input id="payment-date" type="date" max={todayInput()} value={paymentDate} onChange={event => setPaymentDate(event.target.value)} {...fieldA11y('payment-date', errors.date)} /></Field>
+      <div className="form-span-2"><Field id="payment-note" label="Observação" optional><textarea id="payment-note" value={note} onChange={event => setNote(event.target.value)} maxLength={500} /></Field></div>
+      <div className="form-span-2"><Field id="payment-receipt" label="Comprovante" optional hint="PDF ou imagem de até 5 MB."><ReceiptInput id="payment-receipt" onValue={setReceipt} onError={setApiError} onBusyChange={setReadingReceipt} /></Field>{readingReceipt && <p role="status">Preparando comprovante...</p>}</div>
+    </form>
+  </Dialog>
 }
 
 export function ReceivePaymentDialog({ payment, onClose, onSaved }: { payment: Pagamento | null; onClose: () => void; onSaved: (payment: Pagamento) => void }) {
-  const { request } = useApi(); const [date, setDate] = useState(todayInput()); const [note, setNote] = useState(''); const [receipt, setReceipt] = useState(''); const [error, setError] = useState(''); const [busy, setBusy] = useState(false)
+  const [readingReceipt, setReadingReceipt] = useState(false); const { request } = useApi(); const [date, setDate] = useState(todayInput()); const [note, setNote] = useState(''); const [receipt, setReceipt] = useState(''); const [error, setError] = useState(''); const [busy, setBusy] = useState(false)
   useEffect(() => { if (!payment) return; setDate(todayInput()); setNote(payment.observacao ?? ''); setReceipt(''); setError(''); setBusy(false) }, [payment])
   if (!payment) return null
-  const submit = async (event: FormEvent) => { event.preventDefault(); setBusy(true); setError(''); try { const saved = await request<Pagamento>(`/pagamentos/${payment.id}/receber`, { method: 'PATCH', body: { data_pagamento: date, observacao: note.trim() || null, comprovante_base64: receipt || null } }); onSaved(saved); onClose() } catch (err) { setError(err instanceof ApiError ? err.message : 'Não foi possível confirmar o recebimento.') } finally { setBusy(false) } }
-  return <Dialog open title="Marcar como recebido" description={`${payment.projeto_cliente_nome} · ${formatCurrency(payment.valor)}`} busy={busy} size="sm" onClose={onClose} footer={<><Button variant="secondary" onClick={onClose}>Voltar</Button><Button type="submit" form="receive-form" loading={busy}>Confirmar recebimento</Button></>}><form id="receive-form" className="grid gap-4" onSubmit={submit}>{error && <Alert tone="error">{error}</Alert>}<Field id="receive-date" label="Data do recebimento"><input id="receive-date" data-autofocus required type="date" max={todayInput()} value={date} onChange={(event) => setDate(event.target.value)} /></Field><Field id="receive-note" label="Observação" optional><textarea id="receive-note" value={note} onChange={(event) => setNote(event.target.value)} /></Field><Field id="receive-file" label="Comprovante" optional><ReceiptInput id="receive-file" onValue={setReceipt} onError={setError} /></Field></form></Dialog>
+  const submit = async (event: FormEvent) => { event.preventDefault(); if (busy || readingReceipt) return; setBusy(true); setError(''); try { const saved = await request<Pagamento>(`/pagamentos/${payment.id}/receber`, { method: 'PATCH', body: { data_pagamento: date, observacao: note.trim() || null, comprovante_base64: receipt || null } }); onSaved(saved); onClose() } catch (err) { setError(err instanceof ApiError ? err.message : 'Não foi possível confirmar o recebimento.') } finally { setBusy(false) } }
+  return <Dialog open title="Marcar como recebido" description={`${payment.projeto_cliente_nome} · ${formatCurrency(payment.valor)}`} busy={busy || readingReceipt} size="sm" onClose={onClose} footer={<><Button variant="secondary" disabled={busy || readingReceipt} onClick={onClose}>Voltar</Button><Button type="submit" form="receive-form" loading={busy} disabled={readingReceipt}>Confirmar recebimento</Button></>}><form id="receive-form" className="grid gap-4" onSubmit={submit}>{error && <Alert tone="error">{error}</Alert>}<Field id="receive-date" label="Data do recebimento"><input id="receive-date" data-autofocus required type="date" max={todayInput()} value={date} onChange={(event) => setDate(event.target.value)} /></Field><Field id="receive-note" label="Observação" optional><textarea id="receive-note" value={note} onChange={(event) => setNote(event.target.value)} /></Field><Field id="receive-file" label="Comprovante" optional><ReceiptInput id="receive-file" onValue={setReceipt} onError={setError} onBusyChange={setReadingReceipt} /></Field></form></Dialog>
 }
 
 export function ReasonPaymentDialog({ payment, action, onClose, onSaved }: { payment: Pagamento | null; action: 'cancelar' | 'estornar'; onClose: () => void; onSaved: (payment: Pagamento) => void }) {
@@ -38,11 +103,11 @@ export function ReasonPaymentDialog({ payment, action, onClose, onSaved }: { pay
 }
 
 export function PaymentDetailsDialog({ payment, onClose, onSaved }: { payment: Pagamento | null; onClose: () => void; onSaved: (payment: Pagamento) => void }) {
-  const { request } = useApi(); const [note, setNote] = useState(''); const [receipt, setReceipt] = useState<string | null>(null); const [error, setError] = useState(''); const [busy, setBusy] = useState(false)
+  const [readingReceipt, setReadingReceipt] = useState(false); const { request } = useApi(); const [note, setNote] = useState(''); const [receipt, setReceipt] = useState<string | null>(null); const [error, setError] = useState(''); const [busy, setBusy] = useState(false)
   useEffect(() => { if (!payment) return; setNote(payment.observacao ?? ''); setReceipt(null); setError(''); setBusy(false) }, [payment])
   if (!payment) return null
-  const submit = async (event: FormEvent) => { event.preventDefault(); setBusy(true); setError(''); try { const body: Record<string, string | null> = { observacao: note.trim() || null }; if (receipt !== null) body.comprovante_base64 = receipt; const saved = await request<Pagamento>(`/pagamentos/${payment.id}/detalhes`, { method: 'PATCH', body }); onSaved(saved); onClose() } catch (err) { setError(err instanceof ApiError ? err.message : 'Não foi possível atualizar os detalhes.') } finally { setBusy(false) } }
-  return <Dialog open title="Editar detalhes" description="Valor, datas financeiras e vínculos não podem ser alterados." busy={busy} size="sm" onClose={onClose} footer={<><Button variant="secondary" onClick={onClose}>Cancelar</Button><Button type="submit" form="details-form" loading={busy}>Salvar detalhes</Button></>}><form id="details-form" className="grid gap-4" onSubmit={submit}>{error && <Alert tone="error">{error}</Alert>}<Field id="details-note" label="Observação" optional><textarea id="details-note" data-autofocus value={note} onChange={(event) => setNote(event.target.value)} /></Field><Field id="details-file" label="Substituir comprovante" optional><ReceiptInput id="details-file" onValue={setReceipt} onError={setError} /></Field>{payment.comprovante_base64 && <Button type="button" size="sm" variant="ghost" onClick={() => setReceipt('')}>Remover comprovante atual</Button>}</form></Dialog>
+  const submit = async (event: FormEvent) => { event.preventDefault(); if (busy || readingReceipt) return; setBusy(true); setError(''); try { const body: Record<string, string | null> = { observacao: note.trim() || null }; if (receipt !== null) body.comprovante_base64 = receipt; const saved = await request<Pagamento>(`/pagamentos/${payment.id}/detalhes`, { method: 'PATCH', body }); onSaved(saved); onClose() } catch (err) { setError(err instanceof ApiError ? err.message : 'Não foi possível atualizar os detalhes.') } finally { setBusy(false) } }
+  return <Dialog open title="Editar detalhes" description="Valor, datas financeiras e vínculos não podem ser alterados." busy={busy || readingReceipt} size="sm" onClose={onClose} footer={<><Button variant="secondary" disabled={busy || readingReceipt} onClick={onClose}>Cancelar</Button><Button type="submit" form="details-form" loading={busy} disabled={readingReceipt}>Salvar detalhes</Button></>}><form id="details-form" className="grid gap-4" onSubmit={submit}>{error && <Alert tone="error">{error}</Alert>}<Field id="details-note" label="Observação" optional><textarea id="details-note" data-autofocus value={note} onChange={(event) => setNote(event.target.value)} /></Field><Field id="details-file" label="Substituir comprovante" optional><ReceiptInput id="details-file" onValue={setReceipt} onError={setError} onBusyChange={setReadingReceipt} /></Field>{payment.comprovante_base64 && <Button disabled={busy || readingReceipt} type="button" size="sm" variant="ghost" onClick={() => setReceipt('')}>Remover comprovante atual</Button>}</form></Dialog>
 }
 
 export function ReceiptDialog({ payment, onClose }: { payment: Pagamento | null; onClose: () => void }) {

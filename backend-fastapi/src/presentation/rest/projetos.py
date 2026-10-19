@@ -16,6 +16,8 @@ from src.presentation.middleware.auth import get_current_user_id
 from src.application.usecases.criar_projeto import CriarProjetoUseCase
 from src.application.usecases.atualizar_projeto import AtualizarProjetoUseCase
 from src.application.usecases.deletar_projeto import DeletarProjetoUseCase
+from src.application.usecases.faturar_recorrencias import FaturarRecorrenciasUseCase
+from src.domain.time import business_today
 from src.application.ports.outbound.i_projeto_repository import IProjetoRepository
 
 from src.presentation.dependencies import (
@@ -23,6 +25,7 @@ from src.presentation.dependencies import (
     get_atualizar_projeto_usecase,
     get_deletar_projeto_usecase,
     get_projeto_repository,
+    get_faturar_recorrencias_usecase,
 )
 from src.domain.exceptions.business_exceptions import (
     ColisaoContratoException,
@@ -155,6 +158,7 @@ async def configurar_recorrencia(
     usuario_id: int = Depends(get_current_user_id),
     use_case: AtualizarProjetoUseCase = Depends(get_atualizar_projeto_usecase),
     repo: IProjetoRepository = Depends(get_projeto_repository),
+    faturamento: FaturarRecorrenciasUseCase = Depends(get_faturar_recorrencias_usecase),
 ):
     projeto = await repo.get_by_id(projeto_id, usuario_id)
     if not projeto:
@@ -166,6 +170,8 @@ async def configurar_recorrencia(
         if payload.ativo:
             changes["tipo_recorrencia"] = "MENSAL"
         projeto = await use_case.execute(projeto_id, usuario_id, changes)
+        if payload.ativo:
+            await faturamento.execute_projeto(projeto, business_today())
     except ValidaEntidadeException as exc:
         raise HTTPException(status_code=400, detail=str(exc))
 

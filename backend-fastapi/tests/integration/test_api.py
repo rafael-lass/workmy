@@ -14,6 +14,54 @@ from src.infrastructure.security.jwt_service import create_access_token
 pytestmark = pytest.mark.asyncio
 
 
+async def test_ativar_e_desativar_mensal_em_projeto_existente(monkeypatch):
+    monkeypatch.setattr('src.presentation.rest.projetos.business_today', lambda: date(2026, 10, 19))
+    async with session_maker_test() as session:
+        owner = UsuarioModel(username='toggle_monthly', email='toggle@example.com', password_hash='hash')
+        session.add(owner)
+        await session.flush()
+        customer = ClienteModel(usuario_id=owner.id, nome='Cliente mensal')
+        service = ServicoModel(usuario_id=owner.id, nome='Serviço mensal')
+        session.add_all([customer, service])
+        await session.commit()
+        headers = {'Authorization': f"Bearer {create_access_token(owner.id, owner.username, owner.email)}"}
+        payload = {'cliente_id': customer.id, 'servico_id': service.id, 'tipo_recorrencia': 'AVULSO'}
+    async with AsyncClient(transport=httpx.ASGITransport(app=app), base_url='http://test') as client:
+        created = await client.post('/api/projetos/', headers=headers, json=payload)
+        assert created.status_code == 201
+        path = f"/api/projetos/{created.json()['id']}"
+        manual = await client.post('/api/pagamentos/', headers=headers, json={
+            'projeto_id': created.json()['id'], 'valor': '50', 'data_pagamento': '2026-04-01',
+        })
+        assert manual.status_code == 201
+        invalid = await client.patch(path + '/recorrencia', headers=headers, json={'ativo': True})
+        assert invalid.status_code == 422
+        activation = {'ativo': True, 'valor_mensal': '300', 'dia_vencimento': 5, 'recorrencia_inicio': '2026-04-01'}
+        active = await client.patch(path + '/recorrencia', headers=headers, json=activation)
+        assert active.status_code == 200
+        assert active.json()['tipo_recorrencia'] == 'MENSAL'
+        assert active.json()['ativo'] is True
+        payments = (await client.get('/api/pagamentos/', headers=headers)).json()
+        assert payments['total'] == 8
+        monthly = [p for p in payments['items'] if p['tipo_pagamento'] == 'MENSAL']
+        assert len(monthly) == 7
+        assert all(p['status'] == 'PENDENTE' for p in monthly)
+        assert (await client.patch(path + '/recorrencia', headers=headers, json=activation)).status_code == 200
+        assert (await client.get('/api/pagamentos/', headers=headers)).json()['total'] == 8
+        paused = await client.patch(path + '/recorrencia', headers=headers, json={'ativo': False})
+        assert paused.status_code == 200
+        assert paused.json()['ativo'] is False
+        assert (await client.post('/api/faturamento/recorrencias', headers=headers, json={})).json()['pagamentos_gerados'] == 0
+        assert (await client.get('/api/pagamentos/', headers=headers)).json() == payments
+        resumed = await client.patch(path + '/recorrencia', headers=headers, json={
+            **activation, 'recorrencia_inicio': '2026-11-01',
+        })
+        assert resumed.status_code == 200
+        assert resumed.json()['ativo'] is True
+        assert (await client.get('/api/pagamentos/', headers=headers)).json() == payments
+        assert (await client.get(path, headers=headers)).json()['total_acumulado'] == '50.00'
+
+
 async def test_services_documents_tags_and_pdf_contract():
     async with AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://test") as client:
         async def register(name):
@@ -360,6 +408,11 @@ async def test_payment_and_recurring_billing_contract():
         assert projeto_response.status_code == 201
         projeto_id = projeto_response.json()["id"]
 
+        initial_payments = await client.get('/api/pagamentos/', headers=headers)
+        assert initial_payments.json()['total'] == 3
+        assert all(p['status'] == 'PENDENTE' and p['gerado_automaticamente']
+                   for p in initial_payments.json()['items'])
+
         invalid_manual = await client.post(
             "/api/pagamentos/",
             headers=headers,
@@ -416,8 +469,8 @@ async def test_payment_and_recurring_billing_contract():
             json={"data_referencia": today.isoformat()},
         )
         assert first_billing.status_code == 200
-        assert first_billing.json()["pagamentos_gerados"] == 3
-        assert first_billing.json()["valor_total"] == "900.00"
+        assert first_billing.json()["pagamentos_gerados"] == 0
+        assert first_billing.json()["valor_total"] == "0.00"
 
         repeated_billing = await client.post(
             "/api/faturamento/recorrencias",

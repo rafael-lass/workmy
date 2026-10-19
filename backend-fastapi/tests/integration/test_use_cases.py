@@ -171,6 +171,58 @@ class InMemoryPagamentoRepository(IPagamentoRepository):
 # --- TESTES ---
 
 @pytest.mark.asyncio
+@pytest.mark.parametrize('inicio,dia,hoje,esperadas', [
+    (date(2026, 4, 1), 5, date(2026, 10, 19), [f'2026-{m:02d}' for m in range(4, 11)]),
+    (date(2026, 4, 1), 20, date(2026, 10, 19), [f'2026-{m:02d}' for m in range(4, 10)]),
+    (date(2026, 4, 1), 19, date(2026, 10, 19), [f'2026-{m:02d}' for m in range(4, 11)]),
+    (date(2026, 4, 10), 5, date(2026, 10, 19), [f'2026-{m:02d}' for m in range(5, 11)]),
+    (date(2026, 11, 1), 5, date(2026, 10, 19), []),
+    (date(2026, 10, 19), 20, date(2026, 10, 19), []),
+    (date(2026, 10, 19), 19, date(2026, 10, 19), ['2026-10']),
+    (date(2025, 12, 1), 28, date(2026, 2, 28), ['2025-12', '2026-01', '2026-02']),
+])
+async def test_criar_projeto_gera_mensalidades_ate_vencimento_atual(inicio, dia, hoje, esperadas):
+    clientes = InMemoryClienteRepository()
+    servicos = InMemoryServicoRepository()
+    projetos = InMemoryProjetoRepository()
+    pagamentos = InMemoryPagamentoRepository()
+    await clientes.save(ClienteEntity(id=1, usuario_id=10, nome='Cliente'))
+    await servicos.save(ServicoEntity(id=1, usuario_id=10, nome='Serviço'))
+    # Criar outro projeto não deve faturar os contratos anteriores do usuário.
+    await projetos.save(ProjetoEntity(id=10, usuario_id=10, cliente_id=2, servico_id=2,
+        tipo_recorrencia='MENSAL', recorrencia_ativa=True, valor_mensal=Decimal('99'),
+        recorrencia_inicio=date(2025, 1, 1)))
+    novo = await CriarProjetoUseCase(projetos, clientes, servicos, pagamentos).execute(
+        usuario_id=10, cliente_id=1, servico_id=1, tipo_recorrencia='MENSAL',
+        recorrencia_ativa=True, valor_mensal=Decimal('300'), dia_vencimento=dia,
+        recorrencia_inicio=inicio, hoje=hoje,
+    )
+    assert [p.referencia_mes for p in pagamentos.pagamentos] == esperadas
+    assert all(p.projeto_id == novo.id and p.status == 'PENDENTE' and
+        p.tipo_pagamento == 'MENSAL' and p.gerado_automaticamente and
+        p.valor == Decimal('300') and p.data_pagamento is None and
+        p.data_vencimento.day == dia and inicio <= p.data_vencimento <= hoje
+        for p in pagamentos.pagamentos)
+    assert await FaturarRecorrenciasUseCase(projetos, pagamentos).execute_projeto(novo, hoje) == []
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize('mensal,ativa', [(False, False), (True, False)])
+async def test_criar_projeto_nao_fatura_avulso_ou_recorrencia_pausada(mensal, ativa):
+    clientes = InMemoryClienteRepository()
+    servicos = InMemoryServicoRepository()
+    pagamentos = InMemoryPagamentoRepository()
+    await clientes.save(ClienteEntity(id=1, usuario_id=10, nome='Cliente'))
+    await servicos.save(ServicoEntity(id=1, usuario_id=10, nome='Serviço'))
+    await CriarProjetoUseCase(InMemoryProjetoRepository(), clientes, servicos, pagamentos).execute(
+        usuario_id=10, cliente_id=1, servico_id=1,
+        tipo_recorrencia='MENSAL' if mensal else 'AVULSO', recorrencia_ativa=ativa,
+        valor_mensal=Decimal('300') if mensal else None,
+        recorrencia_inicio=date(2026, 4, 1), hoje=date(2026, 10, 19),
+    )
+    assert pagamentos.pagamentos == []
+
+@pytest.mark.asyncio
 async def test_criar_projeto_use_case_success():
     cliente_repo = InMemoryClienteRepository()
     servico_repo = InMemoryServicoRepository()
@@ -180,7 +232,7 @@ async def test_criar_projeto_use_case_success():
     await cliente_repo.save(ClienteEntity(id=1, usuario_id=10, nome="Cliente A"))
     await servico_repo.save(ServicoEntity(id=2, usuario_id=10, nome="Servico B"))
 
-    use_case = CriarProjetoUseCase(projeto_repo, cliente_repo, servico_repo)
+    use_case = CriarProjetoUseCase(projeto_repo, cliente_repo, servico_repo, InMemoryPagamentoRepository())
 
     projeto = await use_case.execute(
         usuario_id=10,
@@ -212,7 +264,7 @@ async def test_criar_projeto_use_case_colisao():
     # Salva projeto ativo anterior
     await projeto_repo.save(ProjetoEntity(usuario_id=10, cliente_id=1, servico_id=2))
 
-    use_case = CriarProjetoUseCase(projeto_repo, cliente_repo, servico_repo)
+    use_case = CriarProjetoUseCase(projeto_repo, cliente_repo, servico_repo, InMemoryPagamentoRepository())
 
     with pytest.raises(ColisaoContratoException):
         await use_case.execute(

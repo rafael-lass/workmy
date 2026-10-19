@@ -19,6 +19,11 @@ test('HTTPS proxy: register, cookies, financial flow, files, refresh and logout'
     expect(cookie).toMatchObject({ secure: true, httpOnly: true, sameSite: 'Strict', domain: 'localhost' });
   }
   expect(await page.evaluate(() => document.cookie)).not.toContain('workmy_');
+  await page.goto('/financeiro?acao=recebimento');
+  const emptyDialog = page.getByRole('dialog', { name: 'Registrar recebimento' });
+  await expect(emptyDialog.getByText(/Nenhum projeto disponível para recebimento/)).toBeVisible();
+  await expect(emptyDialog.getByRole('button', { name: 'Registrar como pago' })).toBeDisabled();
+  await emptyDialog.getByRole('button', { name: 'Cancelar', exact: true }).click();
   const api = context.request;
   async function post(path, data) {
     const response = await api.post('/api' + path, { data });
@@ -33,7 +38,17 @@ test('HTTPS proxy: register, cookies, financial flow, files, refresh and logout'
   // Remove the synthetic upload before PDF rendering, which requires a real image.
   const plainService = await post('/servicos/', { nome: 'Serviço PDF CI' });
   const project = await post('/projetos/', { cliente_id: client.id, servico_id: service.id, valor: '100' });
-  await post('/pagamentos/', { projeto_id: project.id, valor: '100', data_pagamento: '2026-01-01' });
+  await page.goto('/financeiro?acao=recebimento');
+  const paymentDialog = page.getByRole('dialog', { name: 'Registrar recebimento' });
+  await expect(paymentDialog.getByLabel('Serviço', { exact: true })).toBeEnabled();
+  await paymentDialog.getByLabel('Serviço', { exact: true }).selectOption(String(service.id));
+  await paymentDialog.getByLabel('Cliente', { exact: true }).selectOption(String(project.id));
+  await paymentDialog.getByLabel('Valor recebido').fill('100');
+  await paymentDialog.getByLabel('Data do recebimento').fill('2026-01-01');
+  const paymentResponse = page.waitForResponse(response => response.url().endsWith('/api/pagamentos/') && response.request().method() === 'POST');
+  await paymentDialog.getByRole('button', { name: 'Registrar como pago' }).click();
+  expect((await paymentResponse).status()).toBe(201);
+  await expect(paymentDialog).not.toBeVisible();
   const redirect = await api.get('/api/clientes', { maxRedirects: 0 });
   expect(redirect.status()).toBe(307);
   expect(redirect.headers().location).toBe('/api/clientes/');

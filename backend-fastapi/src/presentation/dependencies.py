@@ -80,7 +80,8 @@ def get_criar_projeto_usecase(session: AsyncSession = Depends(get_db_session)) -
     return CriarProjetoUseCase(
         projeto_repo=PostgresProjetoRepository(session),
         cliente_repo=PostgresClienteRepository(session),
-        servico_repo=PostgresServicoRepository(session)
+        servico_repo=PostgresServicoRepository(session),
+        pagamento_repo=PostgresPagamentoRepository(session),
     )
 
 def get_atualizar_projeto_usecase(session: AsyncSession = Depends(get_db_session)) -> AtualizarProjetoUseCase:
