@@ -49,6 +49,11 @@ test('ready is public but business APIs require cookies', async () => {
   assert.equal((await fetch(base + '/api/clientes/')).status, 401);
   assert.equal((await fetch(base + '/api/auth/refresh', { method: 'POST' })).status, 404);
 });
+
+test('all protected API routes reject unauthenticated probes with and without trailing slash', async () => {
+  const { checkProtectedApiRouting } = await import('../../deploy/api-proxy-checks.mjs');
+  await checkProtectedApiRouting(base);
+});
 test('refresh works with absent or expired access cookie', async () => {
   for (const cookie of ['workmy_refresh=refresh', 'workmy_access=expired; workmy_refresh=refresh']) {
     const response = await fetch(base + '/api/clientes/', { headers: { Cookie: cookie } });
