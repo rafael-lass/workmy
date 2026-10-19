@@ -1,5 +1,6 @@
 import { appendFile } from 'node:fs/promises';
 import { setTimeout as delay } from 'node:timers/promises';
+import { checkProtectedApiRouting } from './api-proxy-checks.mjs';
 
 const { APP_URL: origin, EXPECTED_SHA: sha } = process.env;
 const url = new URL(origin);
@@ -15,7 +16,9 @@ for (let attempt = 0; attempt < 12; attempt++) {
   await delay(2000);
 }
 if (!ready) throw new Error('A URL pública não confirmou o proxy /api e o SHA esperado.');
-for (const path of ['/login', '/dashboard', '/financeiro']) {
+await checkProtectedApiRouting(origin);
+for (const path of ['/', '/login', '/register', '/dashboard', '/clientes', '/clientes/2147483647',
+  '/servicos', '/servicos/2147483647', '/projetos', '/financeiro', '/pagamentos']) {
   const response = await fetch(origin + path, { signal: AbortSignal.timeout(15_000) });
   if (!response.ok || !(await response.text()).includes('<div id="root"></div>')) throw new Error(`SPA inválida em ${path}`);
 }
